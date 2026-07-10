@@ -4,6 +4,7 @@ import Hero from './components/Hero'
 import Sobre from './components/Sobre'
 import Servicios from './components/Servicios'
 import Barberos from './components/Barberos'
+import Galeria from './components/Galeria'
 import ReservaModal from './components/ReservaModal'
 import Ubicacion from './components/Ubicacion'
 import Footer from './components/Footer'
@@ -32,6 +33,8 @@ export default function App() {
         <Servicios onReservar={abrirReserva} />
         <Separador />
         <Barberos onReservar={abrirReserva} />
+        <Separador />
+        <Galeria />
         <Separador />
         <Ubicacion />
       </main>
