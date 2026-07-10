@@ -117,16 +117,22 @@ section {
   align-items: center;
 }
 
-.nav a {
+.nav a,
+.nav button {
   color: var(--hueso-tenue);
   text-decoration: none;
+  font-family: var(--font-cuerpo);
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  background: none;
+  border: none;
+  cursor: pointer;
   transition: color 0.2s;
 }
 
-.nav a:hover {
+.nav a:hover,
+.nav button:hover {
   color: var(--bronce);
 }
 
@@ -491,6 +497,147 @@ section {
   border-color: var(--rojo-claro);
   background: rgba(184, 48, 59, 0.1);
   color: var(--hueso);
+}
+
+/* ---------- Modal de reserva ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(10, 8, 6, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  animation: modal-fade 0.25s ease both;
+}
+
+@keyframes modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  max-height: calc(100vh - 2.5rem);
+  overflow-y: auto;
+  background: var(--carbon-2);
+  border: 1px solid rgba(168, 130, 60, 0.35);
+  padding: 2.5rem 2rem 2rem;
+  animation: modal-corte 0.5s cubic-bezier(0.77, 0, 0.18, 1) both;
+}
+
+/* filo superior: rojo sangre → bronce */
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(100deg, var(--rojo-claro) 0%, var(--rojo-claro) 35%, var(--bronce) 65%, var(--bronce) 100%);
+}
+
+@keyframes modal-corte {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+    clip-path: polygon(0 0, 0 0, -30% 100%, -30% 100%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    clip-path: polygon(0 0, 130% 0, 100% 100%, -30% 100%);
+  }
+}
+
+.modal .section-title {
+  font-size: clamp(1.9rem, 4vw, 2.5rem);
+  margin-bottom: 1.75rem;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  background: none;
+  border: 1px solid transparent;
+  color: var(--hueso-tenue);
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0.2rem 0.55rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--bronce);
+  border-color: var(--acero);
+}
+
+.modal .reserva-form {
+  max-width: none;
+}
+
+/* Confirmación de turno */
+.modal-exito {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding: 1.5rem 0 0.5rem;
+}
+
+.modal-exito .section-title {
+  margin-bottom: 0.25rem;
+}
+
+.exito-icono {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--bronce);
+  color: var(--bronce);
+  font-size: 1.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exito-texto {
+  font-size: 1.05rem;
+}
+
+.exito-nota {
+  font-family: var(--font-detalle);
+  font-style: italic;
+  color: var(--hueso-tenue);
+  font-size: 0.92rem;
+  margin-bottom: 0.75rem;
+}
+
+/* En el celular, el modal sube desde abajo tipo hoja */
+@media (max-width: 520px) {
+  .modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: none;
+    max-height: 94vh;
+    padding: 2.25rem 1.25rem 1.5rem;
+    animation: modal-sube 0.4s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  @keyframes modal-sube {
+    from { transform: translateY(100%); }
+    to { transform: none; }
+  }
 }
 
 /* ---------- Ubicación ---------- */

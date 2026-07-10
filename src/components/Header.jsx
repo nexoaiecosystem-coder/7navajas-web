@@ -1,4 +1,4 @@
-export default function Header() {
+export default function Header({ onReservar }) {
   return (
     <header className="header">
       <div className="header-inner">
@@ -9,9 +9,9 @@ export default function Header() {
           <a href="#servicios">Servicios</a>
           <a href="#barberos">Barberos</a>
           <a href="#ubicacion">Ubicación</a>
-          <a href="#reserva" className="nav-cta">
+          <button className="nav-cta" onClick={() => onReservar()}>
             Reservar
-          </a>
+          </button>
         </nav>
       </div>
     </header>

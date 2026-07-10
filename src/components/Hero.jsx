@@ -1,4 +1,4 @@
-export default function Hero() {
+export default function Hero({ onReservar }) {
   return (
     <section className="hero">
       <div className="container hero-content">
@@ -11,9 +11,9 @@ export default function Hero() {
           venite sin esperas.
         </p>
         <div className="hero-actions">
-          <a href="#reserva" className="btn btn-primary">
+          <button className="btn btn-primary" onClick={() => onReservar()}>
             Reservar turno
-          </a>
+          </button>
           <a href="#servicios" className="btn btn-outline">
             Ver servicios
           </a>
