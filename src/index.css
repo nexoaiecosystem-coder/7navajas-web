@@ -1,0 +1,572 @@
+:root {
+  --carbon: #15120f;
+  --carbon-2: #1c1815;
+  --hueso: #ece7dd;
+  --hueso-tenue: #b8b1a3;
+  --rojo: #8c1f28;
+  --rojo-claro: #b8303b;
+  --bronce: #a8823c;
+  --acero: #3a4750;
+
+  --font-display: 'Big Shoulders Display', sans-serif;
+  --font-detalle: 'Fraunces', serif;
+  --font-cuerpo: 'Work Sans', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--carbon);
+  color: var(--hueso);
+  font-family: var(--font-cuerpo);
+  font-weight: 300;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+section {
+  padding: 5rem 0;
+}
+
+.section-tag {
+  font-family: var(--font-detalle);
+  font-style: italic;
+  color: var(--bronce);
+  font-size: 1.05rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  margin-bottom: 2.5rem;
+}
+
+/* ---------- Separador "7 navajas" ---------- */
+.separador {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding: 0.5rem 0;
+}
+
+.separador span {
+  display: block;
+  width: 2px;
+  height: 34px;
+  background: linear-gradient(to bottom, transparent, var(--bronce), transparent);
+  transform: rotate(24deg);
+}
+
+/* ---------- Header ---------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(21, 18, 15, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(168, 130, 60, 0.25);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--hueso);
+  text-decoration: none;
+}
+
+.logo em {
+  font-style: normal;
+  color: var(--rojo-claro);
+}
+
+.nav {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.nav a {
+  color: var(--hueso-tenue);
+  text-decoration: none;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.2s;
+}
+
+.nav a:hover {
+  color: var(--bronce);
+}
+
+.nav .nav-cta {
+  color: var(--carbon);
+  background: var(--bronce);
+  padding: 0.5rem 1.1rem;
+  font-weight: 600;
+}
+
+.nav .nav-cta:hover {
+  color: var(--carbon);
+  background: var(--hueso);
+}
+
+@media (max-width: 640px) {
+  .nav a:not(.nav-cta) {
+    display: none;
+  }
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  min-height: 88vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 70% 20%, rgba(140, 31, 40, 0.18), transparent 55%),
+    radial-gradient(ellipse at 20% 80%, rgba(58, 71, 80, 0.25), transparent 60%),
+    var(--carbon);
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    115deg,
+    transparent 0px,
+    transparent 180px,
+    rgba(168, 130, 60, 0.05) 180px,
+    rgba(168, 130, 60, 0.05) 182px
+  );
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-tag {
+  font-family: var(--font-detalle);
+  font-style: italic;
+  color: var(--bronce);
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(3.5rem, 12vw, 8rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  animation: corte-navaja 1.1s cubic-bezier(0.77, 0, 0.18, 1) both;
+}
+
+.hero-title .num {
+  color: var(--rojo-claro);
+}
+
+@keyframes corte-navaja {
+  from {
+    clip-path: polygon(0 0, 0 0, -30% 100%, -30% 100%);
+    opacity: 0.4;
+  }
+  to {
+    clip-path: polygon(0 0, 130% 0, 100% 100%, -30% 100%);
+    opacity: 1;
+  }
+}
+
+.hero-sub {
+  color: var(--hueso-tenue);
+  max-width: 420px;
+  margin: 1.5rem 0 2.5rem;
+  font-size: 1.05rem;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ---------- Botones ---------- */
+.btn {
+  display: inline-block;
+  font-family: var(--font-cuerpo);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.85rem 1.8rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--rojo);
+  color: var(--hueso);
+}
+
+.btn-primary:hover {
+  background: var(--rojo-claro);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--hueso);
+  border: 1px solid var(--acero);
+}
+
+.btn-outline:hover {
+  border-color: var(--bronce);
+  color: var(--bronce);
+}
+
+.btn-small {
+  padding: 0.55rem 1.2rem;
+  font-size: 0.78rem;
+}
+
+/* ---------- Sobre ---------- */
+.sobre {
+  background: var(--carbon-2);
+}
+
+.sobre-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.sobre-texto p {
+  color: var(--hueso-tenue);
+  margin-bottom: 1rem;
+}
+
+.sobre-datos {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.dato {
+  border-left: 2px solid var(--bronce);
+  padding-left: 1.25rem;
+}
+
+.dato strong {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  display: block;
+  line-height: 1.1;
+}
+
+.dato span {
+  color: var(--hueso-tenue);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .sobre-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Servicios ---------- */
+.servicios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.servicio-card {
+  background: var(--carbon-2);
+  border: 1px solid rgba(58, 71, 80, 0.4);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.servicio-card:hover {
+  border-color: var(--bronce);
+  transform: translateY(-3px);
+}
+
+.servicio-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.servicio-nombre {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.servicio-precio {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: var(--bronce);
+  white-space: nowrap;
+}
+
+.servicio-nota {
+  font-family: var(--font-detalle);
+  font-style: italic;
+  color: var(--hueso-tenue);
+  font-size: 0.9rem;
+}
+
+.servicio-card .btn {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+/* ---------- Barberos ---------- */
+.barberos {
+  background: var(--carbon-2);
+}
+
+.barberos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.barbero-card {
+  background: var(--carbon);
+  border: 1px solid rgba(58, 71, 80, 0.4);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.barbero-card:hover {
+  border-color: var(--rojo-claro);
+}
+
+.barbero-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  margin: 0 auto 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.8rem;
+  color: var(--hueso);
+  background: linear-gradient(135deg, var(--acero), var(--carbon-2));
+  border: 2px solid var(--bronce);
+}
+
+.barbero-nombre {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+}
+
+.barbero-apodo {
+  font-family: var(--font-detalle);
+  font-style: italic;
+  color: var(--bronce);
+  margin-bottom: 1.25rem;
+}
+
+/* ---------- Reserva ---------- */
+.reserva-form {
+  max-width: 560px;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.campo {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.campo label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--hueso-tenue);
+}
+
+.campo input,
+.campo select {
+  background: var(--carbon-2);
+  border: 1px solid var(--acero);
+  color: var(--hueso);
+  font-family: var(--font-cuerpo);
+  font-size: 1rem;
+  padding: 0.75rem 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.campo input:focus,
+.campo select:focus {
+  border-color: var(--bronce);
+}
+
+.campo select option {
+  background: var(--carbon-2);
+}
+
+.campos-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem;
+}
+
+@media (max-width: 520px) {
+  .campos-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reserva-msg {
+  padding: 0.9rem 1.1rem;
+  font-size: 0.95rem;
+  border-left: 3px solid;
+}
+
+.reserva-msg.ok {
+  border-color: var(--bronce);
+  background: rgba(168, 130, 60, 0.1);
+  color: var(--hueso);
+}
+
+.reserva-msg.error {
+  border-color: var(--rojo-claro);
+  background: rgba(184, 48, 59, 0.1);
+  color: var(--hueso);
+}
+
+/* ---------- Ubicación ---------- */
+.ubicacion {
+  background: var(--carbon-2);
+}
+
+.ubicacion-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+
+@media (max-width: 760px) {
+  .ubicacion-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ubicacion-bloque h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  color: var(--bronce);
+}
+
+.ubicacion-bloque p,
+.horarios-tabla {
+  color: var(--hueso-tenue);
+}
+
+.horarios-tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.horarios-tabla td {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(58, 71, 80, 0.35);
+}
+
+.horarios-tabla td:last-child {
+  text-align: right;
+  color: var(--hueso);
+}
+
+.ubicacion-bloque .btn {
+  margin-top: 1.25rem;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  padding: 2.5rem 0;
+  border-top: 1px solid rgba(168, 130, 60, 0.2);
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer p {
+  color: var(--hueso-tenue);
+  font-size: 0.85rem;
+}
+
+.footer a {
+  color: var(--bronce);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
