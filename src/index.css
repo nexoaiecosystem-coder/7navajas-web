@@ -11,6 +11,11 @@
   --font-display: 'Big Shoulders Display', sans-serif;
   --font-detalle: 'Fraunces', serif;
   --font-cuerpo: 'Work Sans', sans-serif;
+
+  /* escala de bordes redondeados */
+  --radio-s: 8px;
+  --radio-m: 14px;
+  --radio-l: 20px;
 }
 
 * {
@@ -982,5 +987,43 @@ section {
 
   .turno-cancelar {
     margin-left: auto;
+  }
+}
+
+/* ---------- Bordes redondeados ---------- */
+.btn,
+.nav .nav-cta,
+.campo input,
+.campo select,
+.panel-fecha input,
+.reserva-msg,
+.modal-close,
+.turno-cancelar {
+  border-radius: var(--radio-s);
+}
+
+.servicio-card,
+.barbero-card,
+.galeria-item,
+.turno {
+  border-radius: var(--radio-m);
+}
+
+.galeria-item {
+  overflow: hidden;
+}
+
+.modal {
+  border-radius: var(--radio-l);
+}
+
+.panel-tabs button {
+  border-radius: 999px;
+}
+
+@media (max-width: 520px) {
+  /* en el celular el modal es una hoja: redondear solo arriba */
+  .modal {
+    border-radius: var(--radio-l) var(--radio-l) 0 0;
   }
 }
