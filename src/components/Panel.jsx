@@ -299,22 +299,21 @@ export default function Panel({ usuario, onCuenta }) {
   return (
     <div className="panel">
       <div className="container">
+        <div className="panel-barra">
+          <a className="panel-volver" href="#">
+            ← Volver a la web
+          </a>
+          <button className="panel-salir" onClick={salir}>
+            Cerrar sesión
+          </button>
+        </div>
+
         <header className="panel-head">
-          <div>
-            <span className="section-tag">Panel · 7 Navajas</span>
-            <h1 className="section-title">
-              Hola, {esAdmin ? nombreBarbero(acceso.barbero) : nombreBarbero(acceso.barbero)}
-            </h1>
-            <p className="panel-rol">{esAdmin ? 'Dueño · ves todo el negocio' : 'Tus turnos y tus números'}</p>
-          </div>
-          <div className="panel-head-acciones">
-            <button className="panel-salir" onClick={salir}>
-              Cerrar sesión
-            </button>
-            <a className="panel-volver" href="#">
-              ← Volver a la web
-            </a>
-          </div>
+          <span className="section-tag">Panel · 7 Navajas</span>
+          <h1 className="section-title">Hola, {nombreBarbero(acceso.barbero)}</h1>
+          <p className="panel-rol">
+            {esAdmin ? 'Dueño · ves todo el negocio' : 'Tus turnos y tus números'}
+          </p>
         </header>
 
         {esAdmin && (

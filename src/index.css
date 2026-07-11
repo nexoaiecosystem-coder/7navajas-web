@@ -1583,6 +1583,18 @@ section {
   border-color: var(--bronce);
 }
 
+.panel-barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.panel-barra .panel-volver {
+  margin-top: 0;
+}
+
 .panel-rol {
   color: var(--hueso-tenue);
   font-family: var(--font-detalle);
@@ -1885,7 +1897,16 @@ section {
 .panel-tabs {
   display: flex;
   gap: 0.4rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  margin-top: 0.5rem;
+}
+
+.panel-tabs button {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .panel-tabs button {
