@@ -926,6 +926,115 @@ section {
   }
 }
 
+/* ---------- Cuenta de clientes ---------- */
+.cuenta-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.cuenta-tabs button {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(201, 162, 74, 0.25);
+  border-radius: 999px;
+  color: var(--hueso-tenue);
+  font-family: var(--font-cuerpo);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cuenta-tabs button.activo {
+  background: var(--grad-oro);
+  border-color: transparent;
+  color: var(--carbon);
+  font-weight: 600;
+}
+
+.cuenta-nota {
+  font-family: var(--font-detalle);
+  font-style: italic;
+  color: var(--hueso-tenue);
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+}
+
+.cuenta-email {
+  color: var(--hueso-tenue);
+  font-size: 0.92rem;
+  margin: -1rem 0 1.25rem;
+}
+
+.cuenta-acciones {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cuenta-sep {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 1.25rem 0;
+  color: var(--hueso-tenue);
+  font-size: 0.85rem;
+}
+
+.cuenta-sep::before,
+.cuenta-sep::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(201, 162, 74, 0.2);
+}
+
+.btn-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: var(--hueso);
+  color: #1a1a1a;
+  border: none;
+  border-radius: var(--radio-s);
+  font-family: var(--font-cuerpo);
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  box-shadow: var(--sombra-1);
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.btn-google:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.reserva-como {
+  background: rgba(201, 162, 74, 0.08);
+  border: 1px solid rgba(201, 162, 74, 0.25);
+  border-radius: var(--radio-s);
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: var(--hueso-tenue);
+}
+
+.reserva-como strong {
+  color: var(--hueso);
+}
+
+.icono-btn.activo {
+  color: var(--bronce);
+  border-color: var(--bronce);
+  background: rgba(201, 162, 74, 0.1);
+}
+
 /* ---------- Modal de reserva ---------- */
 .modal-backdrop {
   position: fixed;

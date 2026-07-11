@@ -28,15 +28,25 @@ const FORM_VACIO = {
   hora: '',
 }
 
-export default function ReservaModal({ abierto, preseleccion, onCerrar }) {
+export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar }) {
   const [form, setForm] = useState(FORM_VACIO)
   const [estado, setEstado] = useState({ tipo: null, texto: '' })
   const [enviando, setEnviando] = useState(false)
 
-  // Al abrir: precargar servicio/barbero, limpiar estado, bloquear scroll, cerrar con Esc
+  // Con sesión iniciada, nombre y teléfono vienen solos de la cuenta
+  const datosDeCuenta = Boolean(
+    usuario && usuario.user_metadata?.nombre && usuario.user_metadata?.telefono,
+  )
+
+  // Al abrir: precargar servicio/barbero (y datos de la cuenta), limpiar estado
   useEffect(() => {
     if (!abierto) return
-    setForm({ ...FORM_VACIO, ...(preseleccion || {}) })
+    setForm({
+      ...FORM_VACIO,
+      nombre: usuario?.user_metadata?.nombre || '',
+      telefono: usuario?.user_metadata?.telefono || '',
+      ...(preseleccion || {}),
+    })
     setEstado({ tipo: null, texto: '' })
     document.body.style.overflow = 'hidden'
     const onKey = (e) => {
@@ -47,7 +57,7 @@ export default function ReservaModal({ abierto, preseleccion, onCerrar }) {
       document.body.style.overflow = ''
       window.removeEventListener('keydown', onKey)
     }
-  }, [abierto, preseleccion, onCerrar])
+  }, [abierto, preseleccion, usuario, onCerrar])
 
   if (!abierto) return null
 
@@ -158,30 +168,36 @@ export default function ReservaModal({ abierto, preseleccion, onCerrar }) {
             <span className="section-tag">Turnos online</span>
             <h2 className="section-title">Reservá tu turno</h2>
             <form className="reserva-form" onSubmit={enviar}>
-              <div className="campos-row">
-                <div className="campo">
-                  <label htmlFor="r-nombre">Nombre</label>
-                  <input
-                    id="r-nombre"
-                    type="text"
-                    required
-                    value={form.nombre}
-                    onChange={set('nombre')}
-                    placeholder="Tu nombre"
-                  />
+              {datosDeCuenta ? (
+                <p className="reserva-como">
+                  Reservando como <strong>{form.nombre}</strong> · {form.telefono}
+                </p>
+              ) : (
+                <div className="campos-row">
+                  <div className="campo">
+                    <label htmlFor="r-nombre">Nombre</label>
+                    <input
+                      id="r-nombre"
+                      type="text"
+                      required
+                      value={form.nombre}
+                      onChange={set('nombre')}
+                      placeholder="Tu nombre"
+                    />
+                  </div>
+                  <div className="campo">
+                    <label htmlFor="r-telefono">Teléfono</label>
+                    <input
+                      id="r-telefono"
+                      type="tel"
+                      required
+                      value={form.telefono}
+                      onChange={set('telefono')}
+                      placeholder="099 123 456"
+                    />
+                  </div>
                 </div>
-                <div className="campo">
-                  <label htmlFor="r-telefono">Teléfono</label>
-                  <input
-                    id="r-telefono"
-                    type="tel"
-                    required
-                    value={form.telefono}
-                    onChange={set('telefono')}
-                    placeholder="099 123 456"
-                  />
-                </div>
-              </div>
+              )}
 
               <div className="campos-row">
                 <div className="campo">

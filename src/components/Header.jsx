@@ -10,7 +10,7 @@ const SECCIONES = [
   { href: '#ubicacion', label: 'Ubicación y horarios' },
 ]
 
-export default function Header({ onReservar }) {
+export default function Header({ onReservar, onCuenta, usuario }) {
   const [menuAbierto, setMenuAbierto] = useState(false)
 
   useEffect(() => {
@@ -39,17 +39,17 @@ export default function Header({ onReservar }) {
             </span>
           </a>
           <div className="header-acciones">
-            <a
-              className="icono-btn"
-              href="#panel"
-              aria-label="Ingresar a tu usuario"
-              title="Ingresar a tu usuario"
+            <button
+              className={usuario ? 'icono-btn activo' : 'icono-btn'}
+              onClick={onCuenta}
+              aria-label={usuario ? 'Tu cuenta' : 'Ingresar a tu cuenta'}
+              title={usuario ? 'Tu cuenta' : 'Ingresar a tu cuenta'}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5" />
               </svg>
-            </a>
+            </button>
             <button
               className="icono-btn"
               aria-label="Abrir menú"
@@ -100,8 +100,17 @@ export default function Header({ onReservar }) {
             >
               Reservar turno
             </button>
+            <button
+              className="btn btn-outline drawer-reservar"
+              onClick={() => {
+                cerrar()
+                onCuenta()
+              }}
+            >
+              {usuario ? 'Tu cuenta' : 'Ingresar / Crear cuenta'}
+            </button>
             <a className="drawer-pie" href="#panel" onClick={cerrar}>
-              Ingresar a tu usuario (barberos)
+              Acceso barberos
             </a>
           </nav>
         </div>

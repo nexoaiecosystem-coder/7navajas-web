@@ -19,7 +19,7 @@ function fechaLinda(fechaStr) {
   })
 }
 
-export default function CancelarModal({ abierto, onCerrar }) {
+export default function CancelarModal({ abierto, usuario, onCerrar }) {
   const [telefono, setTelefono] = useState('')
   const [turnos, setTurnos] = useState(null) // null = todavía no se buscó
   const [buscando, setBuscando] = useState(false)
@@ -27,7 +27,8 @@ export default function CancelarModal({ abierto, onCerrar }) {
 
   useEffect(() => {
     if (!abierto) return
-    setTelefono('')
+    // con sesión iniciada, el teléfono viene solo de la cuenta
+    setTelefono(usuario?.user_metadata?.telefono || '')
     setTurnos(null)
     setMsg(null)
     document.body.style.overflow = 'hidden'
@@ -39,7 +40,7 @@ export default function CancelarModal({ abierto, onCerrar }) {
       document.body.style.overflow = ''
       window.removeEventListener('keydown', onKey)
     }
-  }, [abierto, onCerrar])
+  }, [abierto, usuario, onCerrar])
 
   if (!abierto) return null
 
