@@ -85,6 +85,17 @@ export default function Panel({ usuario, onCuenta }) {
   const [cargando, setCargando] = useState(false)
   const [compAbierta, setCompAbierta] = useState(false)
   const [diasGrafica, setDiasGrafica] = useState(14)
+
+  // en pantalla chica la gráfica usa un lienzo compacto (sin scroll lateral)
+  const [compacto, setCompacto] = useState(
+    () => window.matchMedia('(max-width: 640px)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    const alCambiar = (e) => setCompacto(e.matches)
+    mq.addEventListener('change', alCambiar)
+    return () => mq.removeEventListener('change', alCambiar)
+  }, [])
   const [error, setError] = useState('')
   const [refresco, setRefresco] = useState(0)
 
@@ -280,8 +291,12 @@ export default function Panel({ usuario, onCuenta }) {
   )
   const serie = diasSerie.map((f) => resumen(filasFiltradas.filter((t) => t.fecha === f)).total)
   const maxSerie = Math.max(...serie, 1)
-  const slot = 560 / diasGrafica
-  const barAncho = Math.round(slot * 0.7)
+  const anchoVB = compacto ? 340 : 560
+  const slot = anchoVB / diasGrafica
+  const barAncho = Math.max(3, Math.round(slot * 0.7))
+  // qué mostrar según el espacio disponible
+  const conMontos = diasGrafica === 7 || (diasGrafica === 14 && !compacto)
+  const cadaCuanto = diasGrafica === 30 ? (compacto ? 5 : 3) : diasGrafica === 14 && compacto ? 2 : 1
 
   // el mes por barbero (vista del dueño: siempre todos)
   const mesFilas = statsFilas.filter((t) => t.fecha.slice(0, 7) === mesClave)
@@ -438,75 +453,74 @@ export default function Panel({ usuario, onCuenta }) {
                     </button>
                   ))}
                 </div>
-                <div className="grafica-scroll">
-                  <svg
-                    className="grafica"
-                    viewBox="0 0 560 175"
-                    role="img"
-                    aria-label={`Ingresos de los últimos ${diasGrafica} días`}
-                  >
-                    <line x1="0" y1="142" x2="560" y2="142" stroke="rgba(201,162,74,0.25)" strokeWidth="1" />
-                    {serie.map((v, i) => {
-                      const alto = Math.round((v / maxSerie) * 100)
-                      const x = Math.round(i * slot + (slot - barAncho) / 2)
-                      const centro = Math.round(i * slot + slot / 2)
-                      const esHoy = diasSerie[i] === hoy()
-                      const d = new Date(diasSerie[i] + 'T12:00:00')
-                      const conDetalle = diasGrafica <= 14
-                      return (
-                        <g key={diasSerie[i]}>
-                          {v > 0 && conDetalle && (
-                            <text x={centro} y={136 - alto} textAnchor="middle" fontSize="9.5" fill="#e3c57e">
-                              {v.toLocaleString('es-UY')}
-                            </text>
-                          )}
-                          <rect
-                            x={x}
-                            y={142 - Math.max(alto, v > 0 ? 4 : 0)}
-                            width={barAncho}
-                            height={Math.max(alto, v > 0 ? 4 : 0)}
-                            rx="3"
-                            fill={esHoy ? '#e3c57e' : '#c9a24a'}
-                            opacity={v > 0 ? 0.95 : 0}
-                          />
-                          {v === 0 && (
-                            <rect x={x} y={140} width={barAncho} height={2} rx="1" fill="rgba(201,162,74,0.18)" />
-                          )}
-                          {conDetalle ? (
-                            <>
-                              <text
-                                x={centro}
-                                y={158}
-                                textAnchor="middle"
-                                fontSize="9.5"
-                                fontWeight={esHoy ? '700' : '400'}
-                                fill={esHoy ? '#e3c57e' : '#b8b1a3'}
-                              >
-                                {LETRA_DIA[d.getDay()]}
-                              </text>
-                              <text x={centro} y={169} textAnchor="middle" fontSize="9" fill="#8a857b">
-                                {diasSerie[i].slice(8, 10)}
-                              </text>
-                            </>
-                          ) : (
-                            (i % 3 === 0 || esHoy) && (
-                              <text
-                                x={centro}
-                                y={158}
-                                textAnchor="middle"
-                                fontSize="9"
-                                fontWeight={esHoy ? '700' : '400'}
-                                fill={esHoy ? '#e3c57e' : '#8a857b'}
-                              >
-                                {diasSerie[i].slice(8, 10)}
-                              </text>
-                            )
-                          )}
-                        </g>
-                      )
-                    })}
-                  </svg>
-                </div>
+                <svg
+                  className="grafica"
+                  viewBox={`0 0 ${anchoVB} 175`}
+                  role="img"
+                  aria-label={`Ingresos de los últimos ${diasGrafica} días`}
+                >
+                  <line x1="0" y1="142" x2={anchoVB} y2="142" stroke="rgba(201,162,74,0.25)" strokeWidth="1" />
+                  {serie.map((v, i) => {
+                    const alto = Math.round((v / maxSerie) * 100)
+                    const x = Math.round(i * slot + (slot - barAncho) / 2)
+                    const centro = Math.round(i * slot + slot / 2)
+                    const esHoy = diasSerie[i] === hoy()
+                    const d = new Date(diasSerie[i] + 'T12:00:00')
+                    const conLetra = diasGrafica <= 14 && !(diasGrafica === 14 && compacto)
+                    const conFecha = i % cadaCuanto === 0 || esHoy
+                    return (
+                      <g key={diasSerie[i]}>
+                        {v > 0 && conMontos && (
+                          <text
+                            x={centro}
+                            y={136 - alto}
+                            textAnchor="middle"
+                            fontSize={compacto ? 10 : 9.5}
+                            fill="#e3c57e"
+                          >
+                            {v.toLocaleString('es-UY')}
+                          </text>
+                        )}
+                        <rect
+                          x={x}
+                          y={142 - Math.max(alto, v > 0 ? 4 : 0)}
+                          width={barAncho}
+                          height={Math.max(alto, v > 0 ? 4 : 0)}
+                          rx="3"
+                          fill={esHoy ? '#e3c57e' : '#c9a24a'}
+                          opacity={v > 0 ? 0.95 : 0}
+                        />
+                        {v === 0 && (
+                          <rect x={x} y={140} width={barAncho} height={2} rx="1" fill="rgba(201,162,74,0.18)" />
+                        )}
+                        {conLetra && (
+                          <text
+                            x={centro}
+                            y={158}
+                            textAnchor="middle"
+                            fontSize={compacto ? 10 : 9.5}
+                            fontWeight={esHoy ? '700' : '400'}
+                            fill={esHoy ? '#e3c57e' : '#b8b1a3'}
+                          >
+                            {LETRA_DIA[d.getDay()]}
+                          </text>
+                        )}
+                        {conFecha && (
+                          <text
+                            x={centro}
+                            y={conLetra ? 169 : 158}
+                            textAnchor="middle"
+                            fontSize={compacto ? 9.5 : 9}
+                            fontWeight={esHoy ? '700' : '400'}
+                            fill={esHoy ? '#e3c57e' : '#8a857b'}
+                          >
+                            {diasSerie[i].slice(8, 10)}
+                          </text>
+                        )}
+                      </g>
+                    )
+                  })}
+                </svg>
               </div>
 
               <div className="admin-grid">

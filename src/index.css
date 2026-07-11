@@ -1809,13 +1809,6 @@ section {
   font-weight: 600;
 }
 
-.grafica-scroll {
-  overflow-x: auto;
-}
-
-.grafica-scroll .grafica {
-  min-width: 540px;
-}
 
 .fila-barbero {
   padding: 0.5rem 0;
