@@ -51,6 +51,12 @@ function fechaLinda(fechaStr) {
 
 const LETRA_DIA = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
+// "Mathias Fonseca" → "M. Fonseca" (para que las pestañas entren sin scroll)
+const abreviar = (nombre) => {
+  const partes = nombre.split(' ')
+  return partes.length > 1 ? `${partes[0][0]}. ${partes.slice(1).join(' ')}` : nombre
+}
+
 // variación porcentual contra el período anterior (null si no hay base)
 function variacion(actual, anterior) {
   if (!anterior) return null
@@ -327,7 +333,7 @@ export default function Panel({ usuario, onCuenta }) {
                 className={tab === b.id ? 'activo' : ''}
                 onClick={() => setTab(b.id)}
               >
-                {b.apodo || b.nombre}
+                {b.apodo || abreviar(b.nombre)}
               </button>
             ))}
           </div>

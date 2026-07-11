@@ -1941,16 +1941,13 @@ section {
 .panel-tabs {
   display: flex;
   gap: 0.4rem;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
+  flex-wrap: wrap;
   margin-top: 0.5rem;
 }
 
 .panel-tabs button {
   white-space: nowrap;
-  flex-shrink: 0;
+  flex: 1 1 auto;
 }
 
 .panel-tabs button {
