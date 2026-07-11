@@ -64,7 +64,7 @@ function variacion(actual, anterior) {
 }
 
 function Delta({ valor }) {
-  if (valor === null) return null
+  if (valor === null) return <span className="stat-delta">sin datos previos</span>
   const sube = valor >= 0
   return (
     <span className={sube ? 'stat-delta pos' : 'stat-delta neg'}>
@@ -362,7 +362,6 @@ export default function Panel({ usuario, onCuenta }) {
               <strong>{plata(statSemana.total)}</strong>
               <span className="stat-detalle">
                 {statSemana.cantidad} {statSemana.cantidad === 1 ? 'turno' : 'turnos'}
-                <Delta valor={variacion(statSemana.total, statSemanaAnt.total)} />
               </span>
             </div>
             <div className="stat">
@@ -370,8 +369,25 @@ export default function Panel({ usuario, onCuenta }) {
               <strong>{plata(statMes.total)}</strong>
               <span className="stat-detalle">
                 {statMes.cantidad} {statMes.cantidad === 1 ? 'turno' : 'turnos'}
-                <Delta valor={variacion(statMes.total, statMesAnt.total)} />
               </span>
+            </div>
+          </div>
+
+          <div className="tabla-marco comparativa">
+            <h3>Cómo venís contra el período anterior</h3>
+            <div className="comp-fila">
+              <span className="comp-nombre">Semana</span>
+              <span className="comp-valores">
+                {plata(statSemanaAnt.total)} → <strong>{plata(statSemana.total)}</strong>
+              </span>
+              <Delta valor={variacion(statSemana.total, statSemanaAnt.total)} />
+            </div>
+            <div className="comp-fila">
+              <span className="comp-nombre">Mes</span>
+              <span className="comp-valores">
+                {plata(statMesAnt.total)} → <strong>{plata(statMes.total)}</strong>
+              </span>
+              <Delta valor={variacion(statMes.total, statMesAnt.total)} />
             </div>
           </div>
 

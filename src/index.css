@@ -1689,6 +1689,47 @@ section {
   background: rgba(184, 48, 59, 0.14);
 }
 
+.comparativa {
+  margin: 1rem 0;
+}
+
+.comp-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(201, 162, 74, 0.1);
+}
+
+.comp-fila:last-child {
+  border-bottom: none;
+}
+
+.comp-nombre {
+  color: var(--hueso);
+  font-size: 0.95rem;
+}
+
+.comp-valores {
+  color: var(--hueso-tenue);
+  font-size: 0.9rem;
+  flex: 1;
+  text-align: right;
+}
+
+.comp-valores strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--bronce);
+  font-size: 1.05rem;
+}
+
+.stat-delta {
+  color: var(--hueso-tenue);
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .grafica-scroll {
   overflow-x: auto;
 }
