@@ -1782,6 +1782,33 @@ section {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.grafica-rangos {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.grafica-rangos button {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(201, 162, 74, 0.25);
+  border-radius: 999px;
+  color: var(--hueso-tenue);
+  font-family: var(--font-cuerpo);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grafica-rangos button.activo {
+  background: var(--grad-oro);
+  border-color: transparent;
+  color: var(--carbon);
+  font-weight: 600;
+}
+
 .grafica-scroll {
   overflow-x: auto;
 }

@@ -84,6 +84,7 @@ export default function Panel({ usuario, onCuenta }) {
   const [historial, setHistorial] = useState([])
   const [cargando, setCargando] = useState(false)
   const [compAbierta, setCompAbierta] = useState(false)
+  const [diasGrafica, setDiasGrafica] = useState(14)
   const [error, setError] = useState('')
   const [refresco, setRefresco] = useState(0)
 
@@ -146,7 +147,7 @@ export default function Panel({ usuario, onCuenta }) {
     let vigente = true
     const [, semFin] = rangoSemana(fecha)
     const finMes = rangoSemana(fecha) && fecha.slice(0, 8) + '31'
-    const desde = [primeroMesAnterior(fecha), moverDia(hoy(), -13)].sort()[0]
+    const desde = [primeroMesAnterior(fecha), moverDia(hoy(), -29)].sort()[0]
     const hasta = [semFin, finMes, hoy()].sort().slice(-1)[0]
     supabase
       .from('turnos')
@@ -273,10 +274,14 @@ export default function Panel({ usuario, onCuenta }) {
   const statMes = resumen(filasFiltradas.filter((t) => t.fecha.slice(0, 7) === mesClave))
   const statMesAnt = resumen(filasFiltradas.filter((t) => t.fecha.slice(0, 7) === mesAntClave))
 
-  // gráfica: ingresos por día, últimos 14 días
-  const dias14 = Array.from({ length: 14 }, (_, i) => moverDia(hoy(), i - 13))
-  const serie = dias14.map((f) => resumen(filasFiltradas.filter((t) => t.fecha === f)).total)
+  // gráfica: ingresos por día en el rango elegido (7, 14 o 30 días)
+  const diasSerie = Array.from({ length: diasGrafica }, (_, i) =>
+    moverDia(hoy(), i - (diasGrafica - 1)),
+  )
+  const serie = diasSerie.map((f) => resumen(filasFiltradas.filter((t) => t.fecha === f)).total)
   const maxSerie = Math.max(...serie, 1)
+  const slot = 560 / diasGrafica
+  const barAncho = Math.round(slot * 0.7)
 
   // el mes por barbero (vista del dueño: siempre todos)
   const mesFilas = statsFilas.filter((t) => t.fecha.slice(0, 7) === mesClave)
@@ -419,52 +424,84 @@ export default function Panel({ usuario, onCuenta }) {
             <>
               <div className="grafica-marco">
                 <div className="grafica-titulo">
-                  <span>Ingresos · últimos 14 días</span>
+                  <span>Ingresos · últimos {diasGrafica} días</span>
                   <strong>{plata(serie.reduce((a, b) => a + b, 0))}</strong>
+                </div>
+                <div className="grafica-rangos">
+                  {[7, 14, 30].map((n) => (
+                    <button
+                      key={n}
+                      className={diasGrafica === n ? 'activo' : ''}
+                      onClick={() => setDiasGrafica(n)}
+                    >
+                      {n} días
+                    </button>
+                  ))}
                 </div>
                 <div className="grafica-scroll">
                   <svg
                     className="grafica"
                     viewBox="0 0 560 175"
                     role="img"
-                    aria-label="Ingresos de los últimos 14 días"
+                    aria-label={`Ingresos de los últimos ${diasGrafica} días`}
                   >
                     <line x1="0" y1="142" x2="560" y2="142" stroke="rgba(201,162,74,0.25)" strokeWidth="1" />
                     {serie.map((v, i) => {
                       const alto = Math.round((v / maxSerie) * 100)
-                      const x = i * 40 + 6
-                      const esHoy = dias14[i] === hoy()
-                      const d = new Date(dias14[i] + 'T12:00:00')
+                      const x = Math.round(i * slot + (slot - barAncho) / 2)
+                      const centro = Math.round(i * slot + slot / 2)
+                      const esHoy = diasSerie[i] === hoy()
+                      const d = new Date(diasSerie[i] + 'T12:00:00')
+                      const conDetalle = diasGrafica <= 14
                       return (
-                        <g key={dias14[i]}>
-                          {v > 0 && (
-                            <text x={x + 14} y={136 - alto} textAnchor="middle" fontSize="9.5" fill="#e3c57e">
+                        <g key={diasSerie[i]}>
+                          {v > 0 && conDetalle && (
+                            <text x={centro} y={136 - alto} textAnchor="middle" fontSize="9.5" fill="#e3c57e">
                               {v.toLocaleString('es-UY')}
                             </text>
                           )}
                           <rect
                             x={x}
                             y={142 - Math.max(alto, v > 0 ? 4 : 0)}
-                            width={28}
+                            width={barAncho}
                             height={Math.max(alto, v > 0 ? 4 : 0)}
                             rx="3"
                             fill={esHoy ? '#e3c57e' : '#c9a24a'}
                             opacity={v > 0 ? 0.95 : 0}
                           />
-                          {v === 0 && <rect x={x} y={140} width={28} height={2} rx="1" fill="rgba(201,162,74,0.18)" />}
-                          <text
-                            x={x + 14}
-                            y={158}
-                            textAnchor="middle"
-                            fontSize="9.5"
-                            fontWeight={esHoy ? '700' : '400'}
-                            fill={esHoy ? '#e3c57e' : '#b8b1a3'}
-                          >
-                            {LETRA_DIA[d.getDay()]}
-                          </text>
-                          <text x={x + 14} y={169} textAnchor="middle" fontSize="9" fill="#8a857b">
-                            {dias14[i].slice(8, 10)}
-                          </text>
+                          {v === 0 && (
+                            <rect x={x} y={140} width={barAncho} height={2} rx="1" fill="rgba(201,162,74,0.18)" />
+                          )}
+                          {conDetalle ? (
+                            <>
+                              <text
+                                x={centro}
+                                y={158}
+                                textAnchor="middle"
+                                fontSize="9.5"
+                                fontWeight={esHoy ? '700' : '400'}
+                                fill={esHoy ? '#e3c57e' : '#b8b1a3'}
+                              >
+                                {LETRA_DIA[d.getDay()]}
+                              </text>
+                              <text x={centro} y={169} textAnchor="middle" fontSize="9" fill="#8a857b">
+                                {diasSerie[i].slice(8, 10)}
+                              </text>
+                            </>
+                          ) : (
+                            (i % 3 === 0 || esHoy) && (
+                              <text
+                                x={centro}
+                                y={158}
+                                textAnchor="middle"
+                                fontSize="9"
+                                fontWeight={esHoy ? '700' : '400'}
+                                fill={esHoy ? '#e3c57e' : '#8a857b'}
+                              >
+                                {diasSerie[i].slice(8, 10)}
+                              </text>
+                            )
+                          )}
                         </g>
                       )
                     })}
