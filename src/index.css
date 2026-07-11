@@ -3,9 +3,13 @@
   --carbon-2: #1c1815;
   --hueso: #ece7dd;
   --hueso-tenue: #b8b1a3;
+  /* el rojo queda solo para errores y acciones destructivas */
   --rojo: #8c1f28;
   --rojo-claro: #b8303b;
-  --bronce: #a8823c;
+  /* dorados tomados del logo */
+  --bronce: #c9a24a;
+  --bronce-claro: #e3c57e;
+  --bronce-oscuro: #8a6d2f;
   --acero: #3a4750;
 
   --font-display: 'Big Shoulders Display', sans-serif;
@@ -123,7 +127,7 @@ section {
 
 .logo em {
   font-style: normal;
-  color: var(--rojo-claro);
+  color: var(--bronce);
 }
 
 .nav {
@@ -177,7 +181,7 @@ section {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 70% 20%, rgba(140, 31, 40, 0.18), transparent 55%),
+    radial-gradient(ellipse at 70% 20%, rgba(201, 162, 74, 0.12), transparent 55%),
     radial-gradient(ellipse at 20% 80%, rgba(58, 71, 80, 0.25), transparent 60%),
     var(--carbon);
 }
@@ -220,7 +224,7 @@ section {
 }
 
 .hero-title .num {
-  color: var(--rojo-claro);
+  color: var(--bronce);
 }
 
 @keyframes corte-navaja {
@@ -263,12 +267,12 @@ section {
 }
 
 .btn-primary {
-  background: var(--rojo);
-  color: var(--hueso);
+  background: var(--bronce);
+  color: var(--carbon);
 }
 
 .btn-primary:hover {
-  background: var(--rojo-claro);
+  background: var(--bronce-claro);
 }
 
 .btn-outline {
@@ -410,7 +414,7 @@ section {
 }
 
 .barbero-card:hover {
-  border-color: var(--rojo-claro);
+  border-color: var(--bronce);
 }
 
 .barbero-avatar {
@@ -606,7 +610,7 @@ section {
   animation: modal-corte 0.5s cubic-bezier(0.77, 0, 0.18, 1) both;
 }
 
-/* filo superior: rojo sangre → bronce */
+/* filo superior dorado, como el borde del logo */
 .modal::before {
   content: '';
   position: absolute;
@@ -614,7 +618,7 @@ section {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(100deg, var(--rojo-claro) 0%, var(--rojo-claro) 35%, var(--bronce) 65%, var(--bronce) 100%);
+  background: linear-gradient(100deg, var(--bronce-oscuro) 0%, var(--bronce-claro) 50%, var(--bronce-oscuro) 100%);
 }
 
 @keyframes modal-corte {
