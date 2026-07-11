@@ -1550,6 +1550,162 @@ section {
   margin-bottom: 1.5rem;
 }
 
+.panel-texto {
+  color: var(--hueso-tenue);
+  margin-bottom: 1.5rem;
+}
+
+.panel-texto strong {
+  color: var(--hueso);
+}
+
+.panel-head-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.panel-salir {
+  background: none;
+  border: 1px solid rgba(201, 162, 74, 0.3);
+  border-radius: var(--radio-s);
+  color: var(--hueso-tenue);
+  font-family: var(--font-cuerpo);
+  font-size: 0.8rem;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.panel-salir:hover {
+  color: var(--bronce);
+  border-color: var(--bronce);
+}
+
+.panel-bloque {
+  margin-top: 2.5rem;
+  padding: 0;
+}
+
+.panel-sub {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bronce);
+  margin-bottom: 1rem;
+}
+
+/* gráfica de ingresos (solo dueño) */
+.grafica-marco {
+  background: var(--grad-tarjeta);
+  border: var(--borde-tarjeta);
+  border-top-color: rgba(255, 255, 255, 0.09);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-1);
+  padding: 1.1rem 1.2rem 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.grafica-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.grafica-titulo span {
+  color: var(--hueso-tenue);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.grafica-titulo strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: var(--bronce);
+}
+
+.grafica {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tabla-marco {
+  background: var(--grad-tarjeta);
+  border: var(--borde-tarjeta);
+  border-top-color: rgba(255, 255, 255, 0.09);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-1);
+  padding: 1.1rem 1.2rem;
+}
+
+.tabla-marco h3 {
+  font-family: var(--font-cuerpo);
+  font-weight: 500;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--hueso-tenue);
+  margin-bottom: 0.6rem;
+}
+
+.tabla-mes {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-mes td {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(201, 162, 74, 0.12);
+  color: var(--hueso);
+  font-size: 0.95rem;
+}
+
+.tabla-mes tr:last-child td {
+  border-bottom: none;
+}
+
+.tabla-mes .tabla-total {
+  text-align: right;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--bronce);
+}
+
+/* historial de trabajos */
+.turno.historial .turno-hora {
+  display: grid;
+  line-height: 1.1;
+  font-size: 1.05rem;
+}
+
+.turno.historial .turno-hora em {
+  font-style: normal;
+  font-family: var(--font-cuerpo);
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--hueso-tenue);
+}
+
 .panel-volver {
   display: inline-block;
   margin-top: 1.5rem;

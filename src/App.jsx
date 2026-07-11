@@ -48,9 +48,18 @@ export default function App() {
     setModal({ abierto: false, preseleccion: null })
   }
 
-  // Ruta privada de los barberos
+  // Ruta privada de los barberos: se entra con la cuenta, como los clientes
   if (ruta === '#panel') {
-    return <Panel />
+    return (
+      <>
+        <Panel usuario={usuario} onCuenta={() => setCuentaAbierta(true)} />
+        <CuentaModal
+          abierto={cuentaAbierta}
+          usuario={usuario}
+          onCerrar={() => setCuentaAbierta(false)}
+        />
+      </>
+    )
   }
 
   return (
