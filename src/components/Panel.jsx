@@ -83,6 +83,7 @@ export default function Panel({ usuario, onCuenta }) {
   const [statsFilas, setStatsFilas] = useState([])
   const [historial, setHistorial] = useState([])
   const [cargando, setCargando] = useState(false)
+  const [compAbierta, setCompAbierta] = useState(false)
   const [error, setError] = useState('')
   const [refresco, setRefresco] = useState(0)
 
@@ -374,20 +375,43 @@ export default function Panel({ usuario, onCuenta }) {
           </div>
 
           <div className="tabla-marco comparativa">
-            <h3>Cómo venís contra el período anterior</h3>
-            <div className="comp-fila">
-              <span className="comp-nombre">Semana</span>
-              <span className="comp-valores">
-                {plata(statSemanaAnt.total)} → <strong>{plata(statSemana.total)}</strong>
-              </span>
-              <Delta valor={variacion(statSemana.total, statSemanaAnt.total)} />
-            </div>
-            <div className="comp-fila">
-              <span className="comp-nombre">Mes</span>
-              <span className="comp-valores">
-                {plata(statMesAnt.total)} → <strong>{plata(statMes.total)}</strong>
-              </span>
-              <Delta valor={variacion(statMes.total, statMesAnt.total)} />
+            <button
+              className="comp-toggle"
+              onClick={() => setCompAbierta((a) => !a)}
+              aria-expanded={compAbierta}
+            >
+              <span>Cómo venís contra el período anterior</span>
+              <svg
+                className={compAbierta ? 'chevron girado' : 'chevron'}
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            <div className={compAbierta ? 'comp-despliegue abierto' : 'comp-despliegue'}>
+              <div className="comp-inner">
+                <div className="comp-fila">
+                  <span className="comp-nombre">Semana</span>
+                  <span className="comp-valores">
+                    {plata(statSemanaAnt.total)} → <strong>{plata(statSemana.total)}</strong>
+                  </span>
+                  <Delta valor={variacion(statSemana.total, statSemanaAnt.total)} />
+                </div>
+                <div className="comp-fila">
+                  <span className="comp-nombre">Mes</span>
+                  <span className="comp-valores">
+                    {plata(statMesAnt.total)} → <strong>{plata(statMes.total)}</strong>
+                  </span>
+                  <Delta valor={variacion(statMes.total, statMesAnt.total)} />
+                </div>
+              </div>
             </div>
           </div>
 
