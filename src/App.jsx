@@ -12,6 +12,7 @@ import CancelarModal from './components/CancelarModal'
 import CuentaModal from './components/CuentaModal'
 import { supabase } from './lib/supabase'
 import Ubicacion from './components/Ubicacion'
+import Contacto from './components/Contacto'
 import Footer from './components/Footer'
 import Separador from './components/Separador'
 
@@ -73,6 +74,8 @@ export default function App() {
         <Resenias />
         <Separador />
         <Ubicacion />
+        <Separador />
+        <Contacto onReservar={abrirReserva} onCancelar={() => setCancelarAbierto(true)} />
       </main>
       <Footer onCancelar={() => setCancelarAbierto(true)} />
       <ReservaModal

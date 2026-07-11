@@ -8,6 +8,7 @@ const SECCIONES = [
   { href: '#galeria', label: 'Galería' },
   { href: '#resenias', label: 'Reseñas' },
   { href: '#ubicacion', label: 'Ubicación y horarios' },
+  { href: '#contacto', label: 'Contacto' },
 ]
 
 export default function Header({ onReservar, onCuenta, usuario }) {

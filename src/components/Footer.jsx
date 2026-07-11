@@ -20,6 +20,7 @@ export default function Footer({ onCancelar }) {
             <a href="#barberos">Barberos</a>
             <a href="#galeria">Galería</a>
             <a href="#ubicacion">Ubicación</a>
+            <a href="#contacto">Contacto</a>
           </nav>
 
           <div className="footer-columna">
