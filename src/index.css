@@ -548,11 +548,6 @@ section {
   flex: 1;
 }
 
-.servicio-icono {
-  color: var(--bronce);
-  opacity: 0.8;
-  flex-shrink: 0;
-}
 
 .servicio-nombre {
   font-family: var(--font-display);
