@@ -41,11 +41,11 @@ export default function App() {
       <main>
         <Hero onReservar={abrirReserva} />
         <Separador />
-        <Sobre />
-        <Separador />
         <Servicios onReservar={abrirReserva} />
         <Separador />
         <Barberos onReservar={abrirReserva} />
+        <Separador />
+        <Sobre />
         <Separador />
         <Galeria />
         <Separador />
