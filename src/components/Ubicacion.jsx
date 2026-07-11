@@ -10,14 +10,6 @@ export default function Ubicacion() {
           <div className="ubicacion-bloque">
             <h3>Dirección</h3>
             <p>{NEGOCIO.direccion}</p>
-            <a
-              className="btn btn-outline btn-small"
-              href={NEGOCIO.mapsUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Cómo llegar
-            </a>
           </div>
           <div className="ubicacion-bloque">
             <h3>Horarios</h3>
@@ -33,14 +25,24 @@ export default function Ubicacion() {
             </table>
           </div>
         </div>
-        <iframe
-          className="mapa"
-          title="Mapa: 7 Navajas Barber"
-          src="https://www.google.com/maps?q=Wilson%20Ferreira%20Aldunate%2051%2C%20Paso%20Carrasco%2C%20Canelones%2C%20Uruguay&output=embed"
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          allowFullScreen
-        />
+        <div className="mapa-marco">
+          <iframe
+            className="mapa"
+            title="Mapa: 7 Navajas Barber"
+            src="https://www.google.com/maps?q=Wilson%20Ferreira%20Aldunate%2051%2C%20Paso%20Carrasco%2C%20Canelones%2C%20Uruguay&output=embed"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+          />
+          <a
+            className="btn btn-primary btn-small mapa-boton"
+            href={NEGOCIO.mapsUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Cómo llegar
+          </a>
+        </div>
       </div>
     </section>
   )

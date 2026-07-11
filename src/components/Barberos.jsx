@@ -32,7 +32,7 @@ export default function Barberos({ onReservar }) {
             >
               <div className="barbero-avatar">{iniciales(b.nombre)}</div>
               <h3 className="barbero-nombre">{b.nombre}</h3>
-              <p className="barbero-apodo">{b.apodo ? `"${b.apodo}"` : ' '}</p>
+              <p className="barbero-apodo">{b.apodo ? `"${b.apodo}"` : 'Barbero'}</p>
               <span className="card-reservar">Reservar con {b.apodo || b.nombre} →</span>
             </article>
           ))}
