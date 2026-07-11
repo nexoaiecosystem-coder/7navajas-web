@@ -97,10 +97,11 @@ export default function ReservaModal({ abierto, preseleccion, onCerrar }) {
       }
 
       const { error: errorInsert } = await supabase.from('turnos').insert({
-        nombre: form.nombre,
-        telefono: form.telefono,
+        cliente_nombre: form.nombre,
+        cliente_telefono: form.telefono,
         barbero: form.barbero,
         servicio: form.servicio,
+        precio: SERVICIOS.find((s) => s.id === form.servicio)?.precio ?? 0,
         fecha: form.fecha,
         hora: form.hora,
       })

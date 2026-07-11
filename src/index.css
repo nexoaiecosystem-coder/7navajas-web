@@ -787,3 +787,200 @@ section {
 .footer a:hover {
   text-decoration: underline;
 }
+
+.footer .footer-panel {
+  color: var(--hueso-tenue);
+}
+
+/* ---------- Panel de barberos ---------- */
+.panel {
+  min-height: 100vh;
+  padding: 3rem 0 4rem;
+}
+
+.panel-login {
+  max-width: 380px;
+  margin: 12vh auto 0;
+  padding: 0 1.25rem;
+}
+
+.panel-login .section-title {
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.panel-volver {
+  display: inline-block;
+  margin-top: 1.5rem;
+  color: var(--hueso-tenue);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.panel-volver:hover {
+  color: var(--bronce);
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.panel-head .section-title {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  margin-bottom: 1.5rem;
+}
+
+.panel-head .panel-volver {
+  margin-top: 0.5rem;
+}
+
+.panel-controles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.panel-fecha {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.panel-fecha input {
+  background: var(--carbon-2);
+  border: 1px solid var(--acero);
+  color: var(--hueso);
+  font-family: var(--font-cuerpo);
+  padding: 0.4rem 0.7rem;
+}
+
+.panel-tabs {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.panel-tabs button {
+  background: var(--carbon-2);
+  border: 1px solid var(--acero);
+  color: var(--hueso-tenue);
+  font-family: var(--font-cuerpo);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.panel-tabs button.activo {
+  background: var(--bronce);
+  border-color: var(--bronce);
+  color: var(--carbon);
+  font-weight: 600;
+}
+
+.panel-vacio {
+  color: var(--hueso-tenue);
+  font-family: var(--font-detalle);
+  font-style: italic;
+  padding: 2rem 0;
+}
+
+.panel-lista {
+  list-style: none;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.turno {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: var(--carbon-2);
+  border: 1px solid rgba(58, 71, 80, 0.4);
+  border-left: 3px solid var(--bronce);
+  padding: 0.9rem 1.1rem;
+}
+
+.turno-hora {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.6rem;
+  color: var(--bronce);
+  min-width: 4.2rem;
+}
+
+.turno-datos {
+  display: grid;
+  gap: 0.1rem;
+  flex: 1;
+}
+
+.turno-datos span {
+  color: var(--hueso-tenue);
+  font-size: 0.92rem;
+}
+
+.turno-datos a {
+  color: var(--bronce);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.turno-datos a:hover {
+  text-decoration: underline;
+}
+
+.turno-precio {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--bronce);
+}
+
+.panel-total {
+  color: var(--hueso-tenue);
+  margin-bottom: 1rem;
+}
+
+.panel-total strong {
+  color: var(--bronce);
+}
+
+.turno-cancelar {
+  background: none;
+  border: 1px solid rgba(184, 48, 59, 0.5);
+  color: var(--rojo-claro);
+  font-family: var(--font-cuerpo);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.turno-cancelar:hover {
+  background: var(--rojo);
+  border-color: var(--rojo);
+  color: var(--hueso);
+}
+
+@media (max-width: 520px) {
+  .turno {
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+
+  .turno-cancelar {
+    margin-left: auto;
+  }
+}

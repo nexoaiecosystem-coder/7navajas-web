@@ -11,6 +11,10 @@ export default function Footer() {
           <a href={NEGOCIO.instagramUrl} target="_blank" rel="noreferrer">
             @{NEGOCIO.instagram}
           </a>
+          {' · '}
+          <a href="#panel" className="footer-panel">
+            Acceso barberos
+          </a>
         </p>
       </div>
     </footer>

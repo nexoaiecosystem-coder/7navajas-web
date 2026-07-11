@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from './components/Header'
+import Panel from './components/Panel'
 import Hero from './components/Hero'
 import Sobre from './components/Sobre'
 import Servicios from './components/Servicios'
@@ -12,6 +13,13 @@ import Separador from './components/Separador'
 
 export default function App() {
   const [modal, setModal] = useState({ abierto: false, preseleccion: null })
+  const [ruta, setRuta] = useState(window.location.hash)
+
+  useEffect(() => {
+    const alCambiar = () => setRuta(window.location.hash)
+    window.addEventListener('hashchange', alCambiar)
+    return () => window.removeEventListener('hashchange', alCambiar)
+  }, [])
 
   // Los botones "reservar" abren el modal, opcionalmente con servicio/barbero precargado
   function abrirReserva(datos = null) {
@@ -20,6 +28,11 @@ export default function App() {
 
   function cerrarReserva() {
     setModal({ abierto: false, preseleccion: null })
+  }
+
+  // Ruta privada de los barberos
+  if (ruta === '#panel') {
+    return <Panel />
   }
 
   return (

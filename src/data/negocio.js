@@ -1,3 +1,6 @@
+// Clave del panel de barberos (cambiar por la que quieran usar)
+export const PANEL_CLAVE = '7777'
+
 export const NEGOCIO = {
   nombre: '7 Navajas Barber',
   instagram: '7navajas.barber',
