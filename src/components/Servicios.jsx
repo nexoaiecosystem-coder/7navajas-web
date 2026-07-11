@@ -29,7 +29,6 @@ export default function Servicios({ onReservar }) {
                 <span className="servicio-precio">${s.precio}</span>
               </div>
               {s.nota && <p className="servicio-nota">{s.nota}</p>}
-              <span className="card-reservar">Reservar →</span>
             </article>
           ))}
         </div>

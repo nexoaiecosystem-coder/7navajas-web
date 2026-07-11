@@ -39,9 +39,6 @@ export default function Header({ onReservar }) {
             </span>
           </a>
           <div className="header-acciones">
-            <button className="nav-cta" onClick={() => onReservar()}>
-              Reservar
-            </button>
             <a
               className="icono-btn"
               href="#panel"
