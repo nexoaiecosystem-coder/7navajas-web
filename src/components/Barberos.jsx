@@ -8,6 +8,8 @@ const iniciales = (nombre) =>
     .toUpperCase()
 
 export default function Barberos({ onReservar }) {
+  const reservar = (id) => onReservar({ barbero: id })
+
   return (
     <section className="barberos" id="barberos">
       <div className="container">
@@ -15,18 +17,23 @@ export default function Barberos({ onReservar }) {
         <h2 className="section-title">Barberos</h2>
         <div className="barberos-grid">
           {BARBEROS.map((b) => (
-            <article className="barbero-card" key={b.id}>
+            <article
+              className="barbero-card"
+              key={b.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => reservar(b.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  reservar(b.id)
+                }
+              }}
+            >
               <div className="barbero-avatar">{iniciales(b.nombre)}</div>
               <h3 className="barbero-nombre">{b.nombre}</h3>
-              <p className="barbero-apodo">
-                {b.apodo ? `"${b.apodo}"` : ' '}
-              </p>
-              <button
-                className="btn btn-primary btn-small"
-                onClick={() => onReservar({ barbero: b.id })}
-              >
-                Reservar con {b.apodo || b.nombre}
-              </button>
+              <p className="barbero-apodo">{b.apodo ? `"${b.apodo}"` : ' '}</p>
+              <span className="card-reservar">Reservar con {b.apodo || b.nombre} →</span>
             </article>
           ))}
         </div>
