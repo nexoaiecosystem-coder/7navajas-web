@@ -21,16 +21,19 @@ function rangoSemana(fechaStr) {
   return [lunes, moverDia(lunes, 6)]
 }
 
-function rangoMes(fechaStr) {
-  const [anio, mes] = fechaStr.split('-').map(Number)
-  const ultimo = new Date(anio, mes, 0).getDate()
-  return [`${fechaStr.slice(0, 8)}01`, `${fechaStr.slice(0, 8)}${String(ultimo).padStart(2, '0')}`]
+// Primer día del mes anterior al de la fecha
+function primeroMesAnterior(fechaStr) {
+  const [a, m] = fechaStr.split('-').map(Number)
+  const d = new Date(a, m - 2, 1)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`
 }
 
 const resumen = (filas) => ({
   cantidad: filas.length,
   total: filas.reduce((s, t) => s + (t.precio || 0), 0),
 })
+
+const plata = (n) => '$' + (n || 0).toLocaleString('es-UY')
 
 const nombreServicio = (id) => SERVICIOS.find((s) => s.id === id)?.nombre || id
 const nombreBarbero = (id) => {
@@ -46,7 +49,23 @@ function fechaLinda(fechaStr) {
   })
 }
 
-const fechaCorta = (fechaStr) => `${fechaStr.slice(8, 10)}/${fechaStr.slice(5, 7)}`
+const LETRA_DIA = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
+
+// variación porcentual contra el período anterior (null si no hay base)
+function variacion(actual, anterior) {
+  if (!anterior) return null
+  return Math.round(((actual - anterior) / anterior) * 100)
+}
+
+function Delta({ valor }) {
+  if (valor === null) return null
+  const sube = valor >= 0
+  return (
+    <span className={sube ? 'stat-delta pos' : 'stat-delta neg'}>
+      {sube ? '▲' : '▼'} {Math.abs(valor)}%
+    </span>
+  )
+}
 
 export default function Panel({ usuario, onCuenta }) {
   // acceso.estado: 'cargando' | 'sin-sesion' | 'sin-acceso' | 'ok'
@@ -114,15 +133,14 @@ export default function Panel({ usuario, onCuenta }) {
     }
   }, [acceso.estado, fecha, refresco])
 
-  // Filas para estadísticas: semana + mes de la fecha elegida + últimos 14 días
+  // Filas para estadísticas: desde el mes anterior hasta hoy/fin de mes
   useEffect(() => {
     if (acceso.estado !== 'ok') return
     let vigente = true
-    const [semIni, semFin] = rangoSemana(fecha)
-    const [mesIni, mesFin] = rangoMes(fecha)
-    const hace14 = moverDia(hoy(), -13)
-    const desde = [semIni, mesIni, hace14].sort()[0]
-    const hasta = [semFin, mesFin, hoy()].sort().slice(-1)[0]
+    const [, semFin] = rangoSemana(fecha)
+    const finMes = rangoSemana(fecha) && fecha.slice(0, 8) + '31'
+    const desde = [primeroMesAnterior(fecha), moverDia(hoy(), -13)].sort()[0]
+    const hasta = [semFin, finMes, hoy()].sort().slice(-1)[0]
     supabase
       .from('turnos')
       .select('barbero, precio, fecha, servicio')
@@ -146,7 +164,7 @@ export default function Panel({ usuario, onCuenta }) {
       .lt('fecha', hoy())
       .order('fecha', { ascending: false })
       .order('hora', { ascending: false })
-      .limit(40)
+      .limit(60)
     if (!esAdmin) q = q.eq('barbero', acceso.barbero)
     q.then(({ data }) => {
       if (vigente) setHistorial(data || [])
@@ -229,48 +247,65 @@ export default function Panel({ usuario, onCuenta }) {
     )
   }
 
-  /* ---------- panel ---------- */
+  /* ---------- datos calculados ---------- */
 
   const visibles = filtro === 'todos' ? turnos : turnos.filter((t) => t.barbero === filtro)
   const filasFiltradas =
     filtro === 'todos' ? statsFilas : statsFilas.filter((t) => t.barbero === filtro)
 
   const [semIni, semFin] = rangoSemana(fecha)
+  const [semAntIni, semAntFin] = [moverDia(semIni, -7), moverDia(semIni, -1)]
+  const mesClave = fecha.slice(0, 7)
+  const mesAntClave = primeroMesAnterior(fecha).slice(0, 7)
+
+  const enRango = (t, ini, fin) => t.fecha >= ini && t.fecha <= fin
+
   const statDia = resumen(visibles)
-  const statSemana = resumen(filasFiltradas.filter((t) => t.fecha >= semIni && t.fecha <= semFin))
-  const statMes = resumen(filasFiltradas.filter((t) => t.fecha.slice(0, 7) === fecha.slice(0, 7)))
+  const statSemana = resumen(filasFiltradas.filter((t) => enRango(t, semIni, semFin)))
+  const statSemanaAnt = resumen(filasFiltradas.filter((t) => enRango(t, semAntIni, semAntFin)))
+  const statMes = resumen(filasFiltradas.filter((t) => t.fecha.slice(0, 7) === mesClave))
+  const statMesAnt = resumen(filasFiltradas.filter((t) => t.fecha.slice(0, 7) === mesAntClave))
 
   // gráfica: ingresos por día, últimos 14 días
   const dias14 = Array.from({ length: 14 }, (_, i) => moverDia(hoy(), i - 13))
   const serie = dias14.map((f) => resumen(filasFiltradas.filter((t) => t.fecha === f)).total)
   const maxSerie = Math.max(...serie, 1)
 
-  // tabla del mes por barbero (siempre todos: es la vista del dueño)
-  const mesFilas = statsFilas.filter((t) => t.fecha.slice(0, 7) === fecha.slice(0, 7))
+  // el mes por barbero (vista del dueño: siempre todos)
+  const mesFilas = statsFilas.filter((t) => t.fecha.slice(0, 7) === mesClave)
   const porBarbero = BARBEROS.map((b) => ({
     ...b,
     ...resumen(mesFilas.filter((t) => t.barbero === b.id)),
-  }))
+  })).sort((a, b) => b.total - a.total)
+  const maxBarbero = Math.max(...porBarbero.map((b) => b.total), 1)
 
   // servicios más pedidos del mes
   const conteoServicios = {}
   for (const t of mesFilas) conteoServicios[t.servicio] = (conteoServicios[t.servicio] || 0) + 1
   const topServicios = Object.entries(conteoServicios)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
+    .slice(0, 4)
 
+  // historial agrupado por día
   const historialVisible =
     esAdmin && filtro !== 'todos' ? historial.filter((t) => t.barbero === filtro) : historial
+  const gruposHistorial = []
+  for (const t of historialVisible) {
+    const ultimo = gruposHistorial[gruposHistorial.length - 1]
+    if (!ultimo || ultimo.fecha !== t.fecha) gruposHistorial.push({ fecha: t.fecha, items: [t] })
+    else ultimo.items.push(t)
+  }
 
   return (
     <div className="panel">
       <div className="container">
         <header className="panel-head">
           <div>
-            <span className="section-tag">
-              {esAdmin ? 'Panel del dueño' : `Hola, ${nombreBarbero(acceso.barbero)}`}
-            </span>
-            <h1 className="section-title">{fechaLinda(fecha)}</h1>
+            <span className="section-tag">Panel · 7 Navajas</span>
+            <h1 className="section-title">
+              Hola, {esAdmin ? nombreBarbero(acceso.barbero) : nombreBarbero(acceso.barbero)}
+            </h1>
+            <p className="panel-rol">{esAdmin ? 'Dueño · ves todo el negocio' : 'Tus turnos y tus números'}</p>
           </div>
           <div className="panel-head-acciones">
             <button className="panel-salir" onClick={salir}>
@@ -282,7 +317,166 @@ export default function Panel({ usuario, onCuenta }) {
           </div>
         </header>
 
-        <div className="panel-controles">
+        {esAdmin && (
+          <div className="panel-tabs">
+            <button className={tab === 'todos' ? 'activo' : ''} onClick={() => setTab('todos')}>
+              Todos
+            </button>
+            {BARBEROS.map((b) => (
+              <button
+                key={b.id}
+                className={tab === b.id ? 'activo' : ''}
+                onClick={() => setTab(b.id)}
+              >
+                {b.apodo || b.nombre}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {error && <p className="reserva-msg error">{error}</p>}
+
+        {/* ---------- Los números ---------- */}
+        <section className="panel-seccion">
+          <div className="panel-seccion-head">
+            <h2 className="panel-sub">Los números</h2>
+            <span className="panel-seccion-nota">
+              {filtro === 'todos' ? 'Toda la barbería' : nombreBarbero(filtro)}
+            </span>
+          </div>
+          <div className="panel-stats">
+            <div className="stat">
+              <span className="stat-label">Este día</span>
+              <strong>{plata(statDia.total)}</strong>
+              <span className="stat-detalle">
+                {statDia.cantidad} {statDia.cantidad === 1 ? 'turno' : 'turnos'}
+              </span>
+            </div>
+            <div className="stat">
+              <span className="stat-label">Esta semana</span>
+              <strong>{plata(statSemana.total)}</strong>
+              <span className="stat-detalle">
+                {statSemana.cantidad} {statSemana.cantidad === 1 ? 'turno' : 'turnos'}
+                <Delta valor={variacion(statSemana.total, statSemanaAnt.total)} />
+              </span>
+            </div>
+            <div className="stat">
+              <span className="stat-label">Este mes</span>
+              <strong>{plata(statMes.total)}</strong>
+              <span className="stat-detalle">
+                {statMes.cantidad} {statMes.cantidad === 1 ? 'turno' : 'turnos'}
+                <Delta valor={variacion(statMes.total, statMesAnt.total)} />
+              </span>
+            </div>
+          </div>
+
+          {esAdmin && (
+            <>
+              <div className="grafica-marco">
+                <div className="grafica-titulo">
+                  <span>Ingresos · últimos 14 días</span>
+                  <strong>{plata(serie.reduce((a, b) => a + b, 0))}</strong>
+                </div>
+                <div className="grafica-scroll">
+                  <svg
+                    className="grafica"
+                    viewBox="0 0 560 175"
+                    role="img"
+                    aria-label="Ingresos de los últimos 14 días"
+                  >
+                    <line x1="0" y1="142" x2="560" y2="142" stroke="rgba(201,162,74,0.25)" strokeWidth="1" />
+                    {serie.map((v, i) => {
+                      const alto = Math.round((v / maxSerie) * 100)
+                      const x = i * 40 + 6
+                      const esHoy = dias14[i] === hoy()
+                      const d = new Date(dias14[i] + 'T12:00:00')
+                      return (
+                        <g key={dias14[i]}>
+                          {v > 0 && (
+                            <text x={x + 14} y={136 - alto} textAnchor="middle" fontSize="9.5" fill="#e3c57e">
+                              {v.toLocaleString('es-UY')}
+                            </text>
+                          )}
+                          <rect
+                            x={x}
+                            y={142 - Math.max(alto, v > 0 ? 4 : 0)}
+                            width={28}
+                            height={Math.max(alto, v > 0 ? 4 : 0)}
+                            rx="3"
+                            fill={esHoy ? '#e3c57e' : '#c9a24a'}
+                            opacity={v > 0 ? 0.95 : 0}
+                          />
+                          {v === 0 && <rect x={x} y={140} width={28} height={2} rx="1" fill="rgba(201,162,74,0.18)" />}
+                          <text
+                            x={x + 14}
+                            y={158}
+                            textAnchor="middle"
+                            fontSize="9.5"
+                            fontWeight={esHoy ? '700' : '400'}
+                            fill={esHoy ? '#e3c57e' : '#b8b1a3'}
+                          >
+                            {LETRA_DIA[d.getDay()]}
+                          </text>
+                          <text x={x + 14} y={169} textAnchor="middle" fontSize="9" fill="#8a857b">
+                            {dias14[i].slice(8, 10)}
+                          </text>
+                        </g>
+                      )
+                    })}
+                  </svg>
+                </div>
+              </div>
+
+              <div className="admin-grid">
+                <div className="tabla-marco">
+                  <h3>El mes por barbero</h3>
+                  {porBarbero.map((b) => (
+                    <div className="fila-barbero" key={b.id}>
+                      <div className="fila-barbero-texto">
+                        <span>{b.apodo || b.nombre}</span>
+                        <strong>{plata(b.total)}</strong>
+                      </div>
+                      <div className="barra-pista">
+                        <div className="barra" style={{ width: `${Math.round((b.total / maxBarbero) * 100)}%` }} />
+                      </div>
+                      <span className="fila-barbero-detalle">
+                        {b.cantidad} {b.cantidad === 1 ? 'turno' : 'turnos'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="tabla-marco">
+                  <h3>Servicios más pedidos del mes</h3>
+                  {topServicios.length === 0 ? (
+                    <p className="panel-vacio">Todavía no hay turnos este mes.</p>
+                  ) : (
+                    <table className="tabla-mes">
+                      <tbody>
+                        {topServicios.map(([id, n]) => (
+                          <tr key={id}>
+                            <td>{nombreServicio(id)}</td>
+                            <td className="tabla-total">×{n}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </section>
+
+        {/* ---------- Agenda ---------- */}
+        <section className="panel-seccion">
+          <div className="panel-seccion-head">
+            <h2 className="panel-sub">Agenda</h2>
+            <span className="panel-seccion-nota">
+              {fechaLinda(fecha)} · {statDia.cantidad}{' '}
+              {statDia.cantidad === 1 ? 'turno' : 'turnos'} · {plata(statDia.total)}
+            </span>
+          </div>
+
           <div className="panel-fecha">
             <button className="btn btn-outline btn-small" onClick={() => setFecha(moverDia(fecha, -1))}>
               ‹
@@ -295,179 +489,66 @@ export default function Panel({ usuario, onCuenta }) {
               Hoy
             </button>
           </div>
-          {esAdmin && (
-            <div className="panel-tabs">
-              <button className={tab === 'todos' ? 'activo' : ''} onClick={() => setTab('todos')}>
-                Todos
-              </button>
-              {BARBEROS.map((b) => (
-                <button
-                  key={b.id}
-                  className={tab === b.id ? 'activo' : ''}
-                  onClick={() => setTab(b.id)}
-                >
-                  {b.apodo || b.nombre}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {error && <p className="reserva-msg error">{error}</p>}
-
-        <div className="panel-stats">
-          <div className="stat">
-            <span className="stat-label">Este día</span>
-            <strong>${statDia.total}</strong>
-            <span className="stat-detalle">
-              {statDia.cantidad} {statDia.cantidad === 1 ? 'turno' : 'turnos'}
-            </span>
-          </div>
-          <div className="stat">
-            <span className="stat-label">Semana</span>
-            <strong>${statSemana.total}</strong>
-            <span className="stat-detalle">
-              {statSemana.cantidad} {statSemana.cantidad === 1 ? 'turno' : 'turnos'}
-            </span>
-          </div>
-          <div className="stat">
-            <span className="stat-label">Mes</span>
-            <strong>${statMes.total}</strong>
-            <span className="stat-detalle">
-              {statMes.cantidad} {statMes.cantidad === 1 ? 'turno' : 'turnos'}
-            </span>
-          </div>
-        </div>
-
-        {cargando ? (
-          <p className="panel-vacio">Cargando turnos…</p>
-        ) : visibles.length === 0 ? (
-          <p className="panel-vacio">
-            No hay turnos {filtro !== 'todos' ? `para ${nombreBarbero(filtro)} ` : ''}este día.
-          </p>
-        ) : (
-          <ul className="panel-lista">
-            {visibles.map((t) => (
-              <li className="turno" key={t.id}>
-                <span className="turno-hora">{t.hora.slice(0, 5)}</span>
-                <div className="turno-datos">
-                  <strong>{t.cliente_nombre}</strong>
-                  <span>
-                    {nombreServicio(t.servicio)} · con {nombreBarbero(t.barbero)}
-                  </span>
-                  <a href={`tel:${t.cliente_telefono}`}>{t.cliente_telefono}</a>
-                </div>
-                <span className="turno-precio">${t.precio}</span>
-                <button className="turno-cancelar" onClick={() => cancelar(t)}>
-                  Cancelar
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {esAdmin && (
-          <section className="panel-bloque">
-            <h2 className="panel-sub">Resumen del negocio</h2>
-
-            <div className="grafica-marco">
-              <div className="grafica-titulo">
-                <span>Ingresos · últimos 14 días{filtro !== 'todos' ? ` · ${nombreBarbero(filtro)}` : ''}</span>
-                <strong>${serie.reduce((a, b) => a + b, 0)}</strong>
-              </div>
-              <svg
-                className="grafica"
-                viewBox="0 0 560 170"
-                preserveAspectRatio="none"
-                role="img"
-                aria-label="Ingresos de los últimos 14 días"
-              >
-                <line x1="0" y1="140" x2="560" y2="140" stroke="rgba(201,162,74,0.25)" strokeWidth="1" />
-                {serie.map((v, i) => {
-                  const alto = Math.round((v / maxSerie) * 115)
-                  const x = i * 40 + 6
-                  return (
-                    <g key={dias14[i]}>
-                      <rect
-                        x={x}
-                        y={140 - alto}
-                        width={28}
-                        height={Math.max(alto, v > 0 ? 3 : 0)}
-                        rx="3"
-                        fill={i === 13 ? '#e3c57e' : '#c9a24a'}
-                        opacity={v > 0 ? 0.95 : 0.15}
-                      />
-                      {v === 0 && <rect x={x} y={138} width={28} height={2} rx="1" fill="rgba(201,162,74,0.2)" />}
-                      <text x={x + 14} y={158} textAnchor="middle" fontSize="10" fill="#b8b1a3">
-                        {fechaCorta(dias14[i]).slice(0, 5)}
-                      </text>
-                    </g>
-                  )
-                })}
-              </svg>
-            </div>
-
-            <div className="admin-grid">
-              <div className="tabla-marco">
-                <h3>El mes por barbero</h3>
-                <table className="tabla-mes">
-                  <tbody>
-                    {porBarbero.map((b) => (
-                      <tr key={b.id}>
-                        <td>{b.apodo || b.nombre}</td>
-                        <td>{b.cantidad} turnos</td>
-                        <td className="tabla-total">${b.total}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="tabla-marco">
-                <h3>Servicios más pedidos del mes</h3>
-                {topServicios.length === 0 ? (
-                  <p className="panel-vacio">Todavía no hay turnos este mes.</p>
-                ) : (
-                  <table className="tabla-mes">
-                    <tbody>
-                      {topServicios.map(([id, n]) => (
-                        <tr key={id}>
-                          <td>{nombreServicio(id)}</td>
-                          <td className="tabla-total">×{n}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
-        <section className="panel-bloque">
-          <h2 className="panel-sub">
-            {esAdmin ? 'Registro de trabajos' : 'Tus trabajos realizados'}
-          </h2>
-          {historialVisible.length === 0 ? (
-            <p className="panel-vacio">Todavía no hay trabajos registrados.</p>
+          {cargando ? (
+            <p className="panel-vacio">Cargando turnos…</p>
+          ) : visibles.length === 0 ? (
+            <p className="panel-vacio">
+              No hay turnos {filtro !== 'todos' ? `para ${nombreBarbero(filtro)} ` : ''}este día.
+            </p>
           ) : (
             <ul className="panel-lista">
-              {historialVisible.map((t) => (
-                <li className="turno historial" key={t.id}>
-                  <span className="turno-hora">
-                    {fechaCorta(t.fecha)}
-                    <em>{t.hora.slice(0, 5)}</em>
-                  </span>
+              {visibles.map((t) => (
+                <li className="turno" key={t.id}>
+                  <span className="turno-hora">{t.hora.slice(0, 5)}</span>
                   <div className="turno-datos">
                     <strong>{t.cliente_nombre}</strong>
                     <span>
-                      {nombreServicio(t.servicio)}
-                      {esAdmin ? ` · ${nombreBarbero(t.barbero)}` : ''}
+                      {nombreServicio(t.servicio)} · con {nombreBarbero(t.barbero)}
                     </span>
+                    <a href={`tel:${t.cliente_telefono}`}>{t.cliente_telefono}</a>
                   </div>
-                  <span className="turno-precio">${t.precio}</span>
+                  <span className="turno-precio">{plata(t.precio)}</span>
+                  <button className="turno-cancelar" onClick={() => cancelar(t)}>
+                    Cancelar
+                  </button>
                 </li>
               ))}
             </ul>
+          )}
+        </section>
+
+        {/* ---------- Registro de trabajos ---------- */}
+        <section className="panel-seccion">
+          <div className="panel-seccion-head">
+            <h2 className="panel-sub">
+              {esAdmin ? 'Registro de trabajos' : 'Tus trabajos realizados'}
+            </h2>
+            <span className="panel-seccion-nota">últimos {historialVisible.length}</span>
+          </div>
+          {gruposHistorial.length === 0 ? (
+            <p className="panel-vacio">Todavía no hay trabajos registrados.</p>
+          ) : (
+            gruposHistorial.map((g) => (
+              <div className="hist-grupo" key={g.fecha}>
+                <h3 className="hist-fecha">{fechaLinda(g.fecha)}</h3>
+                <ul className="panel-lista">
+                  {g.items.map((t) => (
+                    <li className="turno historial" key={t.id}>
+                      <span className="turno-hora">{t.hora.slice(0, 5)}</span>
+                      <div className="turno-datos">
+                        <strong>{t.cliente_nombre}</strong>
+                        <span>
+                          {nombreServicio(t.servicio)}
+                          {esAdmin ? ` · ${nombreBarbero(t.barbero)}` : ''}
+                        </span>
+                      </div>
+                      <span className="turno-precio">{plata(t.precio)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
           )}
         </section>
       </div>

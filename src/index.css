@@ -1583,6 +1583,130 @@ section {
   border-color: var(--bronce);
 }
 
+.panel-rol {
+  color: var(--hueso-tenue);
+  font-family: var(--font-detalle);
+  font-style: italic;
+  font-size: 0.95rem;
+  margin-top: -0.75rem;
+}
+
+.panel-seccion {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(201, 162, 74, 0.14);
+}
+
+.panel-seccion-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.panel-seccion-head .panel-sub {
+  margin-bottom: 0;
+}
+
+.panel-seccion-nota {
+  color: var(--hueso-tenue);
+  font-size: 0.85rem;
+}
+
+.stat-delta {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+
+.stat-delta.pos {
+  color: #9ed3a4;
+  background: rgba(88, 179, 104, 0.12);
+}
+
+.stat-delta.neg {
+  color: #d99a9a;
+  background: rgba(184, 48, 59, 0.14);
+}
+
+.grafica-scroll {
+  overflow-x: auto;
+}
+
+.grafica-scroll .grafica {
+  min-width: 540px;
+}
+
+.fila-barbero {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(201, 162, 74, 0.1);
+}
+
+.fila-barbero:last-child {
+  border-bottom: none;
+}
+
+.fila-barbero-texto {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.fila-barbero-texto span {
+  color: var(--hueso);
+  font-size: 0.95rem;
+}
+
+.fila-barbero-texto strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--bronce);
+}
+
+.barra-pista {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(201, 162, 74, 0.12);
+  margin: 0.4rem 0 0.25rem;
+  overflow: hidden;
+}
+
+.barra {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--grad-oro);
+  min-width: 2px;
+}
+
+.fila-barbero-detalle {
+  color: var(--hueso-tenue);
+  font-size: 0.8rem;
+}
+
+.hist-grupo {
+  margin-bottom: 1.1rem;
+}
+
+.hist-fecha {
+  font-family: var(--font-detalle);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--hueso-tenue);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  text-transform: capitalize;
+}
+
+.panel-fecha {
+  margin-bottom: 1rem;
+}
+
 .panel-bloque {
   margin-top: 2.5rem;
   padding: 0;
