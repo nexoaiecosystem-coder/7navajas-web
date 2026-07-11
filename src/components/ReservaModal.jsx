@@ -98,7 +98,8 @@ export default function ReservaModal({ abierto, preseleccion, onCerrar }) {
 
       const { error: errorInsert } = await supabase.from('turnos').insert({
         cliente_nombre: form.nombre,
-        cliente_telefono: form.telefono,
+        // solo dígitos, para poder buscarlo después al cancelar
+        cliente_telefono: form.telefono.replace(/\D/g, ''),
         barbero: form.barbero,
         servicio: form.servicio,
         precio: SERVICIOS.find((s) => s.id === form.servicio)?.precio ?? 0,
@@ -145,7 +146,8 @@ export default function ReservaModal({ abierto, preseleccion, onCerrar }) {
               {form.nombre}, te esperamos el {estado.texto}
             </p>
             <p className="exito-nota">
-              Si no podés venir, avisanos por Instagram así liberamos el horario.
+              Si no podés venir, cancelalo desde "Cancelar un turno" al pie de la página,
+              con tu número de teléfono.
             </p>
             <button className="btn btn-primary" onClick={onCerrar}>
               Listo

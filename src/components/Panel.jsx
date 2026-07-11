@@ -10,6 +10,24 @@ function moverDia(fechaStr, dias) {
   return d.toISOString().slice(0, 10)
 }
 
+// Semana de lunes a domingo que contiene a la fecha
+function rangoSemana(fechaStr) {
+  const d = new Date(fechaStr + 'T12:00:00')
+  const lunes = moverDia(fechaStr, -((d.getDay() + 6) % 7))
+  return [lunes, moverDia(lunes, 6)]
+}
+
+function rangoMes(fechaStr) {
+  const [anio, mes] = fechaStr.split('-').map(Number)
+  const ultimo = new Date(anio, mes, 0).getDate()
+  return [`${fechaStr.slice(0, 8)}01`, `${fechaStr.slice(0, 8)}${String(ultimo).padStart(2, '0')}`]
+}
+
+const resumen = (filas) => ({
+  cantidad: filas.length,
+  total: filas.reduce((s, t) => s + (t.precio || 0), 0),
+})
+
 function fechaLinda(fechaStr) {
   return new Date(fechaStr + 'T12:00:00').toLocaleDateString('es-UY', {
     weekday: 'long',
@@ -35,6 +53,28 @@ export default function Panel() {
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState('')
   const [refresco, setRefresco] = useState(0)
+  const [statsFilas, setStatsFilas] = useState([])
+
+  // Filas de la semana y el mes de la fecha elegida, para las estadísticas
+  useEffect(() => {
+    if (!auth || !supabase) return
+    let vigente = true
+    const [semIni, semFin] = rangoSemana(fecha)
+    const [mesIni, mesFin] = rangoMes(fecha)
+    const desde = semIni < mesIni ? semIni : mesIni
+    const hasta = semFin > mesFin ? semFin : mesFin
+    supabase
+      .from('turnos')
+      .select('barbero, precio, fecha')
+      .gte('fecha', desde)
+      .lte('fecha', hasta)
+      .then(({ data }) => {
+        if (vigente) setStatsFilas(data || [])
+      })
+    return () => {
+      vigente = false
+    }
+  }, [auth, fecha, refresco])
 
   useEffect(() => {
     if (!auth) return
@@ -125,6 +165,13 @@ export default function Panel() {
 
   const visibles = barbero === 'todos' ? turnos : turnos.filter((t) => t.barbero === barbero)
 
+  const [semIni, semFin] = rangoSemana(fecha)
+  const filasFiltradas =
+    barbero === 'todos' ? statsFilas : statsFilas.filter((t) => t.barbero === barbero)
+  const statDia = resumen(visibles)
+  const statSemana = resumen(filasFiltradas.filter((t) => t.fecha >= semIni && t.fecha <= semFin))
+  const statMes = resumen(filasFiltradas.filter((t) => t.fecha.slice(0, 7) === fecha.slice(0, 7)))
+
   return (
     <div className="panel">
       <div className="container">
@@ -172,12 +219,29 @@ export default function Panel() {
 
         {error && <p className="reserva-msg error">{error}</p>}
 
-        {!cargando && visibles.length > 0 && (
-          <p className="panel-total">
-            {visibles.length} {visibles.length === 1 ? 'turno' : 'turnos'} · total del día:{' '}
-            <strong>${visibles.reduce((suma, t) => suma + (t.precio || 0), 0)}</strong>
-          </p>
-        )}
+        <div className="panel-stats">
+          <div className="stat">
+            <span className="stat-label">Este día</span>
+            <strong>${statDia.total}</strong>
+            <span className="stat-detalle">
+              {statDia.cantidad} {statDia.cantidad === 1 ? 'turno' : 'turnos'}
+            </span>
+          </div>
+          <div className="stat">
+            <span className="stat-label">Semana</span>
+            <strong>${statSemana.total}</strong>
+            <span className="stat-detalle">
+              {statSemana.cantidad} {statSemana.cantidad === 1 ? 'turno' : 'turnos'}
+            </span>
+          </div>
+          <div className="stat">
+            <span className="stat-label">Mes</span>
+            <strong>${statMes.total}</strong>
+            <span className="stat-detalle">
+              {statMes.cantidad} {statMes.cantidad === 1 ? 'turno' : 'turnos'}
+            </span>
+          </div>
+        </div>
 
         {cargando ? (
           <p className="panel-vacio">Cargando turnos…</p>

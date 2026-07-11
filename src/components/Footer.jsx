@@ -1,6 +1,6 @@
 import { NEGOCIO } from '../data/negocio'
 
-export default function Footer() {
+export default function Footer({ onCancelar }) {
   return (
     <footer className="footer">
       <div className="container footer-inner">
@@ -11,6 +11,10 @@ export default function Footer() {
           <a href={NEGOCIO.instagramUrl} target="_blank" rel="noreferrer">
             @{NEGOCIO.instagram}
           </a>
+          {' · '}
+          <button className="footer-link" onClick={onCancelar}>
+            Cancelar un turno
+          </button>
           {' · '}
           <a href="#panel" className="footer-panel">
             Acceso barberos

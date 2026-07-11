@@ -35,6 +35,25 @@ export const BARBEROS = [
   { id: 'mathias-alegre', nombre: 'Mathias Alegre', apodo: null },
 ]
 
+// REEMPLAZAR por reseñas reales de Google cuando las haya
+export const RESENIAS = [
+  {
+    nombre: 'Martín R.',
+    texto: 'Corte impecable y te atienden como en casa. Juanca es un crack con la máquina.',
+    estrellas: 5,
+  },
+  {
+    nombre: 'Sebastián P.',
+    texto: 'Llevo a mi hijo y salimos los dos cortados en una hora. La reserva online anda de diez.',
+    estrellas: 5,
+  },
+  {
+    nombre: 'Agustín M.',
+    texto: 'Le pedí mechas y quedaron tal cual la foto que llevé. Volvés seguro.',
+    estrellas: 5,
+  },
+]
+
 export const SERVICIOS = [
   { id: 'corte-jubilado', nombre: 'Corte jubilado', precio: 240, nota: null },
   { id: 'corte-clasico', nombre: 'Corte clásico', precio: 280, nota: null },

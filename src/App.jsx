@@ -6,13 +6,16 @@ import Sobre from './components/Sobre'
 import Servicios from './components/Servicios'
 import Barberos from './components/Barberos'
 import Galeria from './components/Galeria'
+import Resenias from './components/Resenias'
 import ReservaModal from './components/ReservaModal'
+import CancelarModal from './components/CancelarModal'
 import Ubicacion from './components/Ubicacion'
 import Footer from './components/Footer'
 import Separador from './components/Separador'
 
 export default function App() {
   const [modal, setModal] = useState({ abierto: false, preseleccion: null })
+  const [cancelarAbierto, setCancelarAbierto] = useState(false)
   const [ruta, setRuta] = useState(window.location.hash)
 
   useEffect(() => {
@@ -49,14 +52,17 @@ export default function App() {
         <Separador />
         <Galeria />
         <Separador />
+        <Resenias />
+        <Separador />
         <Ubicacion />
       </main>
-      <Footer />
+      <Footer onCancelar={() => setCancelarAbierto(true)} />
       <ReservaModal
         abierto={modal.abierto}
         preseleccion={modal.preseleccion}
         onCerrar={cerrarReserva}
       />
+      <CancelarModal abierto={cancelarAbierto} onCerrar={() => setCancelarAbierto(false)} />
     </>
   )
 }

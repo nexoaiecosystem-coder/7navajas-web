@@ -33,6 +33,14 @@ export default function Ubicacion() {
             </table>
           </div>
         </div>
+        <iframe
+          className="mapa"
+          title="Mapa: 7 Navajas Barber"
+          src="https://www.google.com/maps?q=Wilson%20Ferreira%20Aldunate%2051%2C%20Paso%20Carrasco%2C%20Canelones%2C%20Uruguay&output=embed"
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen
+        />
       </div>
     </section>
   )
