@@ -481,45 +481,13 @@ section {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -12px 30px rgba(0, 0, 0, 0.25);
 }
 
-.sobre-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  align-items: center;
+.sobre-texto {
+  max-width: 620px;
 }
 
 .sobre-texto p {
   color: var(--hueso-tenue);
   margin-bottom: 1rem;
-}
-
-.sobre-datos {
-  display: grid;
-  gap: 1.25rem;
-}
-
-.dato {
-  border-left: 2px solid var(--bronce);
-  padding-left: 1.25rem;
-}
-
-.dato strong {
-  font-family: var(--font-display);
-  font-size: 1.55rem;
-  font-weight: 700;
-  display: block;
-  line-height: 1.1;
-}
-
-.dato span {
-  color: var(--hueso-tenue);
-  font-size: 0.9rem;
-}
-
-@media (max-width: 760px) {
-  .sobre-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* ---------- Servicios ---------- */
