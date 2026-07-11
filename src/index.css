@@ -35,6 +35,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -1618,6 +1619,122 @@ section {
 
   .turno-cancelar {
     margin-left: auto;
+  }
+}
+
+/* ---------- Optimización para celular ---------- */
+
+/* botón flotante de reserva: siempre a mano en el celular */
+.fab-reservar {
+  display: none;
+  position: fixed;
+  bottom: 1.1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  background: var(--grad-oro);
+  color: var(--carbon);
+  border: none;
+  border-radius: 999px;
+  font-family: var(--font-cuerpo);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.95rem 2.2rem;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 4px 16px rgba(201, 162, 74, 0.35);
+}
+
+.fab-reservar:active {
+  transform: translateX(-50%) scale(0.96);
+}
+
+/* feedback táctil: las tarjetas y botones responden al toque */
+@media (hover: none) {
+  .servicio-card:active,
+  .barbero-card:active,
+  .contacto-card:active,
+  .galeria-item:active {
+    transform: scale(0.98);
+    border-color: rgba(201, 162, 74, 0.55);
+  }
+
+  .btn:active,
+  .nav-cta:active {
+    transform: scale(0.97);
+  }
+}
+
+@media (max-width: 640px) {
+  .fab-reservar {
+    display: inline-flex;
+  }
+
+  /* menos aire vertical: todo más a mano */
+  section {
+    padding: 2.25rem 0;
+  }
+
+  .hero {
+    padding: 2.75rem 0 2.5rem;
+  }
+
+  .section-title {
+    margin-bottom: 1.1rem;
+  }
+
+  /* servicios como lista compacta de una columna */
+  .servicios-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    gap: 0.5rem;
+  }
+
+  .servicio-card {
+    padding: 0.8rem 1rem;
+  }
+
+  .servicio-nombre {
+    font-size: 0.98rem;
+  }
+
+  .servicio-precio {
+    font-size: 1.1rem;
+  }
+
+  /* barberos más compactos */
+  .barberos-grid {
+    gap: 0.6rem;
+  }
+
+  .barbero-card {
+    padding: 1rem;
+  }
+
+  .barbero-avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 1.15rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .barbero-nombre {
+    font-size: 1.05rem;
+  }
+
+  .galeria-grid {
+    gap: 0.5rem;
+  }
+
+  .lightbox {
+    padding: 0.75rem;
+  }
+
+  /* que el botón flotante no tape el final de la página */
+  .footer {
+    padding-bottom: 5rem;
   }
 }
 

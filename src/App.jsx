@@ -78,6 +78,10 @@ export default function App() {
         <Contacto onReservar={abrirReserva} onCancelar={() => setCancelarAbierto(true)} />
       </main>
       <Footer onCancelar={() => setCancelarAbierto(true)} />
+      {/* botón flotante de reserva, solo en celular */}
+      <button className="fab-reservar" onClick={() => abrirReserva()}>
+        Reservar turno
+      </button>
       <ReservaModal
         abierto={modal.abierto}
         preseleccion={modal.preseleccion}
