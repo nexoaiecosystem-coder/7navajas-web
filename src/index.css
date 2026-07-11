@@ -492,6 +492,67 @@ section {
 }
 
 /* ---------- Servicios ---------- */
+/* la lista arranca plegada y se despliega al tocar */
+.servicios-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--grad-tarjeta);
+  border: var(--borde-tarjeta);
+  border-top-color: rgba(255, 255, 255, 0.09);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-1);
+  color: var(--hueso);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1.05rem 1.3rem;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.servicios-toggle:hover {
+  border-color: rgba(201, 162, 74, 0.55);
+  box-shadow: var(--sombra-2), var(--sombra-oro);
+}
+
+.servicios-toggle .chevron {
+  color: var(--bronce);
+  transition: transform 0.3s;
+  flex-shrink: 0;
+}
+
+.servicios-toggle .chevron.girado {
+  transform: rotate(180deg);
+}
+
+.servicios-despliegue {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.servicios-despliegue.abierto {
+  grid-template-rows: 1fr;
+}
+
+.servicios-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.servicios-inner .section-nota {
+  margin: 1rem 0 0.9rem;
+}
+
+.servicios-inner .servicios-grid {
+  padding-bottom: 6px;
+}
+
 .servicios-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
