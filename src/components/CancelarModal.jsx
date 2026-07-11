@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { BARBEROS, SERVICIOS } from '../data/negocio'
 
-const hoy = () => new Date().toISOString().slice(0, 10)
+// fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
+const hoy = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 const soloDigitos = (t) => t.replace(/\D/g, '')
 
 const nombreServicio = (id) => SERVICIOS.find((s) => s.id === id)?.nombre || id

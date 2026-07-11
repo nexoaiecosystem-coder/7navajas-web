@@ -17,7 +17,16 @@ function slotsParaFecha(fechaStr) {
   return slots
 }
 
-const hoy = () => new Date().toISOString().slice(0, 10)
+// fecha local (no UTC: después de las 21:00 de Uruguay cambiaría de día)
+const hoy = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+const horaActual = () => {
+  const d = new Date()
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
 
 const FORM_VACIO = {
   nombre: '',
@@ -61,7 +70,11 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
 
   if (!abierto) return null
 
-  const slots = slotsParaFecha(form.fecha)
+  // si reservan para hoy, no ofrecer horas que ya pasaron
+  const diaCerrado = Boolean(form.fecha) && slotsParaFecha(form.fecha).length === 0
+  const slots = slotsParaFecha(form.fecha).filter(
+    (s) => form.fecha !== hoy() || s > horaActual(),
+  )
 
   const set = (campo) => (e) => {
     const valor = e.target.value
@@ -248,9 +261,11 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                     <option value="">
                       {!form.fecha
                         ? 'Elegí primero la fecha'
-                        : slots.length === 0
+                        : diaCerrado
                           ? 'Ese día está cerrado'
-                          : 'Elegí una hora'}
+                          : slots.length === 0
+                            ? 'Ya no quedan horarios hoy'
+                            : 'Elegí una hora'}
                     </option>
                     {slots.map((s) => (
                       <option key={s} value={s}>

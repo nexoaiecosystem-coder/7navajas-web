@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { BARBEROS, SERVICIOS, PANEL_CLAVE } from '../data/negocio'
 
-const hoy = () => new Date().toISOString().slice(0, 10)
+// fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
+const hoy = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 function moverDia(fechaStr, dias) {
   const d = new Date(fechaStr + 'T12:00:00')

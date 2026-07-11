@@ -1,6 +1,18 @@
-import { NEGOCIO, HORARIOS_TEXTO } from '../data/negocio'
+import { NEGOCIO, HORARIOS, HORARIOS_TEXTO } from '../data/negocio'
+
+// ¿Está abierta la barbería en este momento? (hora de Uruguay)
+function abiertoAhora() {
+  const ahora = new Date(
+    new Date().toLocaleString('en-US', { timeZone: 'America/Montevideo' }),
+  )
+  const rango = HORARIOS[ahora.getDay()]
+  if (!rango) return false
+  const hora = ahora.getHours() + ahora.getMinutes() / 60
+  return hora >= rango[0] && hora < rango[1]
+}
 
 export default function Ubicacion() {
+  const abierto = abiertoAhora()
   return (
     <section className="ubicacion" id="ubicacion">
       <div className="container">
@@ -12,7 +24,13 @@ export default function Ubicacion() {
             <p>{NEGOCIO.direccion}</p>
           </div>
           <div className="ubicacion-bloque">
-            <h3>Horarios</h3>
+            <h3>
+              Horarios{' '}
+              <span className={abierto ? 'estado-chip abierto' : 'estado-chip cerrado'}>
+                <span className="punto" />
+                {abierto ? 'Abierto ahora' : 'Cerrado ahora'}
+              </span>
+            </h3>
             <table className="horarios-tabla">
               <tbody>
                 {HORARIOS_TEXTO.map((h) => (
