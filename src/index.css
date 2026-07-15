@@ -321,7 +321,9 @@ section {
   align-items: center;
   position: relative;
   overflow: hidden;
+  /* marca de agua con el nombre repetido, estilo sello de la casa */
   background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='250'%3E%3Ctext x='14' y='95' font-family='Georgia, serif' font-style='italic' font-size='44' fill='rgba(201,162,74,0.055)' transform='rotate(-16 14 95)'%3E7 Navajas%3C/text%3E%3Ctext x='185' y='225' font-family='Georgia, serif' font-weight='bold' font-style='italic' font-size='72' fill='rgba(201,162,74,0.05)' transform='rotate(-16 185 225)'%3E7%3C/text%3E%3C/svg%3E") repeat,
     radial-gradient(ellipse at 50% 120%, rgba(0, 0, 0, 0.55), transparent 60%),
     radial-gradient(ellipse at 70% 15%, rgba(201, 162, 74, 0.14), transparent 50%),
     radial-gradient(ellipse at 20% 80%, rgba(58, 71, 80, 0.28), transparent 60%),
