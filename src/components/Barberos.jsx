@@ -31,14 +31,18 @@ export default function Barberos({ onReservar }) {
                 }
               }}
             >
-              {b.foto_url ? (
-                <img className="barbero-foto" src={b.foto_url} alt={b.nombre} loading="lazy" />
-              ) : (
-                <div className="barbero-avatar">{iniciales(b.nombre)}</div>
-              )}
-              <h3 className="barbero-nombre">{b.nombre}</h3>
-              <p className="barbero-apodo">{b.apodo ? `"${b.apodo}"` : 'Barbero'}</p>
-              <span className="card-reservar">Reservar con {b.apodo || b.nombre} →</span>
+              <div className="barbero-retrato">
+                {b.foto_url ? (
+                  <img src={b.foto_url} alt={b.nombre} loading="lazy" />
+                ) : (
+                  <span className="barbero-retrato-iniciales">{iniciales(b.nombre)}</span>
+                )}
+              </div>
+              <div className="barbero-cuerpo">
+                <h3 className="barbero-nombre">{b.nombre}</h3>
+                <p className="barbero-apodo">{b.apodo ? `"${b.apodo}"` : 'Barbero'}</p>
+                <span className="card-reservar">Reservar turno →</span>
+              </div>
             </article>
           ))}
         </div>

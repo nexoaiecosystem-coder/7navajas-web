@@ -29,6 +29,27 @@ export default function App() {
     return () => window.removeEventListener('hashchange', alCambiar)
   }, [])
 
+  // Al abrir/refrescar: arrancar arriba de todo y despedir la pantalla de carga
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual'
+    }
+    if (window.location.hash && window.location.hash !== '#panel') {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      setRuta('')
+    }
+    window.scrollTo(0, 0)
+
+    const splash = document.getElementById('splash')
+    if (splash) {
+      const t = setTimeout(() => {
+        splash.classList.add('oculto')
+        setTimeout(() => splash.remove(), 600)
+      }, 450)
+      return () => clearTimeout(t)
+    }
+  }, [])
+
   // Sesión del cliente (Supabase Auth)
   useEffect(() => {
     if (!supabase) return
@@ -91,6 +112,31 @@ export default function App() {
       <button className="fab-reservar" onClick={() => abrirReserva()}>
         Reservar turno
       </button>
+      {/* flotantes: subir al inicio + redes */}
+      <div className="flotantes">
+        <button
+          className="flotante"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Subir al inicio"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 15l-6-6-6 6" />
+          </svg>
+        </button>
+        <a
+          className="flotante"
+          href="https://instagram.com/7navajas.barber"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Instagram de la barbería"
+        >
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="12" cy="12" r="4" />
+            <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
+          </svg>
+        </a>
+      </div>
       <ReservaModal
         abierto={modal.abierto}
         preseleccion={modal.preseleccion}

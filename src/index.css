@@ -566,13 +566,63 @@ section {
   border: var(--borde-tarjeta);
   border-top-color: rgba(255, 255, 255, 0.09);
   box-shadow: var(--sombra-1);
-  padding: 1rem 1.1rem;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.5rem;
+  overflow: hidden;
   cursor: pointer;
   transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+
+.servicio-foto {
+  height: 150px;
+  overflow: hidden;
+}
+
+.servicio-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.servicio-card:hover .servicio-foto img {
+  transform: scale(1.06);
+}
+
+.servicio-cuerpo {
+  padding: 0.8rem 1rem 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.servicio-chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.chip-precio {
+  background: var(--grad-oro);
+  color: var(--carbon);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  border-radius: 999px;
+  padding: 0.22rem 0.75rem;
+}
+
+.chip-nota {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(201, 162, 74, 0.25);
+  color: var(--hueso-tenue);
+  font-family: var(--font-detalle);
+  font-style: italic;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  padding: 0.22rem 0.7rem;
 }
 
 .servicio-card:hover,
@@ -652,10 +702,48 @@ section {
   border: var(--borde-tarjeta);
   border-top-color: rgba(255, 255, 255, 0.09);
   box-shadow: var(--sombra-1);
-  padding: 1.4rem 1.1rem;
-  text-align: center;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   cursor: pointer;
   transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+
+.barbero-retrato {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: linear-gradient(150deg, #2a2a2e 0%, #17171a 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.barbero-retrato img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.barbero-card:hover .barbero-retrato img {
+  transform: scale(1.05);
+}
+
+.barbero-retrato-iniciales {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 3.2rem;
+  color: rgba(201, 162, 74, 0.55);
+  letter-spacing: 0.05em;
+}
+
+.barbero-cuerpo {
+  padding: 0.9rem 1.1rem 1.1rem;
+  display: grid;
+  gap: 0.25rem;
+  text-align: left;
 }
 
 .barbero-card:hover,
@@ -2607,6 +2695,52 @@ section {
   transform: translateX(-50%) scale(0.96);
 }
 
+/* flotantes: subir al inicio + redes, abajo a la derecha */
+.flotantes {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 75;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.flotante {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(21, 21, 23, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(201, 162, 74, 0.35);
+  color: var(--hueso-tenue);
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+  transition: color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.flotante:hover {
+  color: var(--bronce);
+  border-color: var(--bronce);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 640px) {
+  .flotantes {
+    right: 0.8rem;
+    bottom: 0.95rem;
+  }
+
+  .flotante {
+    width: 42px;
+    height: 42px;
+  }
+}
+
 /* feedback táctil: las tarjetas y botones responden al toque */
 @media (hover: none) {
   .servicio-card:active,
@@ -2641,39 +2775,32 @@ section {
     margin-bottom: 1.1rem;
   }
 
-  /* servicios como lista compacta de una columna */
+  /* servicios como tarjetas con foto, de a dos por fila */
   .servicios-grid {
-    grid-template-columns: 1fr;
-    grid-auto-rows: auto;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 1fr;
     gap: 0.5rem;
   }
 
-  .servicio-card {
-    padding: 0.8rem 1rem;
+  .servicio-foto {
+    height: 108px;
+  }
+
+  .servicio-cuerpo {
+    padding: 0.6rem 0.7rem 0.8rem;
   }
 
   .servicio-nombre {
-    font-size: 0.98rem;
+    font-size: 0.92rem;
   }
 
-  .servicio-precio {
-    font-size: 1.1rem;
+  .chip-precio {
+    font-size: 0.85rem;
   }
 
   /* barberos más compactos */
   .barberos-grid {
     gap: 0.6rem;
-  }
-
-  .barbero-card {
-    padding: 1rem;
-  }
-
-  .barbero-avatar {
-    width: 52px;
-    height: 52px;
-    font-size: 1.15rem;
-    margin-bottom: 0.6rem;
   }
 
   .barbero-nombre {

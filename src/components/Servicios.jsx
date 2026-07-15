@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useCatalogo } from '../lib/catalogo'
+import { fotoServicio } from '../data/fotosServicios'
 
 const plata = (n) => '$' + (n || 0).toLocaleString('es-UY')
 
@@ -64,11 +65,16 @@ export default function Servicios({ onReservar }) {
                     }
                   }}
                 >
-                  <div className="servicio-head">
-                    <h3 className="servicio-nombre">{s.nombre}</h3>
-                    <span className="servicio-precio">{plata(s.precio)}</span>
+                  <div className="servicio-foto">
+                    <img src={fotoServicio(s)} alt={s.nombre} loading="lazy" />
                   </div>
-                  {s.nota && <p className="servicio-nota">{s.nota}</p>}
+                  <div className="servicio-cuerpo">
+                    <h3 className="servicio-nombre">{s.nombre}</h3>
+                    <div className="servicio-chips">
+                      <span className="chip-precio">{plata(s.precio)}</span>
+                      {s.nota && <span className="chip-nota">{s.nota}</span>}
+                    </div>
+                  </div>
                 </article>
               ))}
             </div>
