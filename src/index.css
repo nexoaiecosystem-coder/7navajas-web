@@ -22,6 +22,9 @@
   --radio-m: 14px;
   --radio-l: 20px;
 
+  /* sello de la casa: el nombre repetido en cursiva, apenas visible */
+  --sello: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='360'%3E%3Ctext x='30' y='130' font-family='Georgia, serif' font-style='italic' font-size='48' letter-spacing='2' fill='rgba(201,162,74,0.06)' transform='rotate(-14 30 130)'%3E7 Navajas%3C/text%3E%3Ctext x='250' y='320' font-family='Georgia, serif' font-style='italic' font-size='48' letter-spacing='2' fill='rgba(201,162,74,0.04)' transform='rotate(-14 250 320)'%3E7 Navajas%3C/text%3E%3C/svg%3E");
+
   /* sombras y gradientes */
   --sombra-1: 0 4px 16px rgba(0, 0, 0, 0.35);
   --sombra-2: 0 16px 40px rgba(0, 0, 0, 0.5);
@@ -321,27 +324,11 @@ section {
   align-items: center;
   position: relative;
   overflow: hidden;
-  /* marca de agua con el nombre repetido, estilo sello de la casa */
+  /* sello de la casa sobre el degradado, sin foto */
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='250'%3E%3Ctext x='14' y='95' font-family='Georgia, serif' font-style='italic' font-size='44' fill='rgba(201,162,74,0.055)' transform='rotate(-16 14 95)'%3E7 Navajas%3C/text%3E%3Ctext x='185' y='225' font-family='Georgia, serif' font-weight='bold' font-style='italic' font-size='72' fill='rgba(201,162,74,0.05)' transform='rotate(-16 185 225)'%3E7%3C/text%3E%3C/svg%3E") repeat,
-    radial-gradient(ellipse at 50% 120%, rgba(0, 0, 0, 0.55), transparent 60%),
-    radial-gradient(ellipse at 70% 15%, rgba(201, 162, 74, 0.14), transparent 50%),
-    radial-gradient(ellipse at 20% 80%, rgba(58, 71, 80, 0.28), transparent 60%),
+    var(--sello) repeat,
+    radial-gradient(ellipse at 70% 15%, rgba(201, 162, 74, 0.1), transparent 55%),
     linear-gradient(180deg, #17171a 0%, var(--carbon) 100%);
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    115deg,
-    transparent 0px,
-    transparent 180px,
-    rgba(168, 130, 60, 0.05) 180px,
-    rgba(168, 130, 60, 0.05) 182px
-  );
-  pointer-events: none;
 }
 
 /* que el contenido del hero alinee igual que las demás secciones */
@@ -349,32 +336,9 @@ section {
   width: 100%;
 }
 
-/* foto de un corte real, fundida hacia el texto */
-.hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 58%;
-  background: url('./assets/galeria/corte-08.jpg') center 20% / cover no-repeat;
-  opacity: 0.5;
-  -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 55%, transparent);
-  mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 55%, transparent);
-}
-
 .hero-content {
   position: relative;
   z-index: 1;
-}
-
-@media (max-width: 760px) {
-  .hero::before {
-    width: 100%;
-    opacity: 0.25;
-    -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.3));
-    mask-image: linear-gradient(to left, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.3));
-  }
 }
 
 .hero-tag {
@@ -1966,7 +1930,9 @@ section {
 .footer {
   padding: 2.5rem 0 1.5rem;
   border-top: 1px solid rgba(201, 162, 74, 0.25);
-  background: linear-gradient(180deg, var(--carbon) 0%, #09090b 100%);
+  background:
+    var(--sello) repeat,
+    linear-gradient(180deg, var(--carbon) 0%, #09090b 100%);
 }
 
 .footer-grid {
