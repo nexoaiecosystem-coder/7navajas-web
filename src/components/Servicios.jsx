@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
-import { SERVICIOS } from '../data/negocio'
+import { useCatalogo } from '../lib/catalogo'
+
+const plata = (n) => '$' + (n || 0).toLocaleString('es-UY')
 
 export default function Servicios({ onReservar }) {
+  const { servicios } = useCatalogo()
   const [abierto, setAbierto] = useState(false)
 
   // Si llegan navegando a #servicios (hero o menú), desplegar solo
@@ -47,7 +50,7 @@ export default function Servicios({ onReservar }) {
           <div className="servicios-inner">
             <p className="section-nota">Tocá un servicio para reservarlo.</p>
             <div className="servicios-grid">
-              {SERVICIOS.map((s) => (
+              {servicios.map((s) => (
                 <article
                   className="servicio-card"
                   key={s.id}
@@ -63,7 +66,7 @@ export default function Servicios({ onReservar }) {
                 >
                   <div className="servicio-head">
                     <h3 className="servicio-nombre">{s.nombre}</h3>
-                    <span className="servicio-precio">${s.precio}</span>
+                    <span className="servicio-precio">{plata(s.precio)}</span>
                   </div>
                   {s.nota && <p className="servicio-nota">{s.nota}</p>}
                 </article>

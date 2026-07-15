@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { BARBEROS, SERVICIOS } from '../data/negocio'
+import { useCatalogo } from '../lib/catalogo'
 
 // fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
 const hoy = () => {
@@ -8,12 +8,6 @@ const hoy = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 const soloDigitos = (t) => t.replace(/\D/g, '')
-
-const nombreServicio = (id) => SERVICIOS.find((s) => s.id === id)?.nombre || id
-const nombreBarbero = (id) => {
-  const b = BARBEROS.find((x) => x.id === id)
-  return b ? b.apodo || b.nombre : id
-}
 
 function fechaLinda(fechaStr) {
   return new Date(fechaStr + 'T12:00:00').toLocaleDateString('es-UY', {
@@ -24,6 +18,12 @@ function fechaLinda(fechaStr) {
 }
 
 export default function CancelarModal({ abierto, usuario, onCerrar }) {
+  const { servicios, barberos } = useCatalogo()
+  const nombreServicio = (id) => servicios.find((s) => s.id === id)?.nombre || id
+  const nombreBarbero = (id) => {
+    const b = barberos.find((x) => x.id === id)
+    return b ? b.apodo || b.nombre : id
+  }
   const [telefono, setTelefono] = useState('')
   const [turnos, setTurnos] = useState(null) // null = todavía no se buscó
   const [buscando, setBuscando] = useState(false)

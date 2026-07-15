@@ -1283,6 +1283,402 @@ section {
   flex-wrap: wrap;
 }
 
+/* ---------- Asistente de reserva ---------- */
+.paso-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  padding-right: 2.25rem;
+}
+
+.paso-atras {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radio-s);
+  border: 1px solid rgba(201, 162, 74, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--hueso);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.paso-atras:hover {
+  color: var(--bronce);
+  border-color: var(--bronce);
+}
+
+.paso-atras.vacio {
+  visibility: hidden;
+}
+
+.paso-puntos {
+  display: flex;
+  gap: 6px;
+}
+
+.paso-puntos .punto {
+  width: 22px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(201, 162, 74, 0.18);
+}
+
+.paso-puntos .punto.activo {
+  background: var(--bronce);
+}
+
+.modal-reserva .section-title {
+  margin-bottom: 1rem;
+}
+
+.paso-elegidos {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.paso-elegidos button {
+  background: rgba(201, 162, 74, 0.08);
+  border: 1px solid rgba(201, 162, 74, 0.3);
+  border-radius: 999px;
+  color: var(--bronce);
+  font-family: var(--font-cuerpo);
+  font-size: 0.78rem;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+}
+
+.op-lista {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.op-servicio {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  text-align: left;
+  background: var(--grad-tarjeta);
+  border: var(--borde-tarjeta);
+  border-radius: var(--radio-m);
+  padding: 0.55rem 0.9rem 0.55rem 0.55rem;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.op-servicio:hover,
+.op-servicio.activo {
+  border-color: rgba(201, 162, 74, 0.6);
+  box-shadow: var(--sombra-1), var(--sombra-oro);
+}
+
+.op-servicio:active {
+  transform: scale(0.985);
+}
+
+.op-servicio img {
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radio-s);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.op-servicio .op-foto-redonda {
+  border-radius: 50%;
+  border: 2px solid rgba(201, 162, 74, 0.5);
+}
+
+.op-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.15rem;
+  color: var(--hueso);
+  background: linear-gradient(135deg, var(--acero), var(--carbon-2));
+  border: 2px solid var(--bronce);
+}
+
+.op-texto {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.op-texto strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--hueso);
+  letter-spacing: 0.02em;
+}
+
+.op-texto em {
+  font-family: var(--font-detalle);
+  font-style: italic;
+  color: var(--hueso-tenue);
+  font-size: 0.82rem;
+}
+
+.op-precio {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: var(--bronce);
+  white-space: nowrap;
+}
+
+.op-precio.flecha {
+  font-weight: 400;
+  font-size: 1.5rem;
+  color: var(--hueso-tenue);
+}
+
+.paso-horario {
+  display: grid;
+  gap: 1rem;
+}
+
+.paso-nota {
+  color: var(--hueso-tenue);
+  font-family: var(--font-detalle);
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+.chips-horas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 0.45rem;
+}
+
+.chip {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(201, 162, 74, 0.25);
+  border-radius: var(--radio-s);
+  color: var(--hueso);
+  font-family: var(--font-cuerpo);
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.6rem 0.4rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chip:hover {
+  border-color: var(--bronce);
+  color: var(--bronce);
+}
+
+.chip.activo {
+  background: var(--grad-oro);
+  border-color: transparent;
+  color: var(--carbon);
+  font-weight: 700;
+}
+
+.resumen {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.resumen-fila {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(201, 162, 74, 0.18);
+  border-radius: var(--radio-s);
+  padding: 0.7rem 0.95rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.resumen-fila:hover {
+  border-color: rgba(201, 162, 74, 0.5);
+}
+
+.resumen-fila span {
+  color: var(--hueso-tenue);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.resumen-fila strong {
+  color: var(--hueso);
+  font-size: 0.95rem;
+  text-align: right;
+}
+
+/* ---------- Fotos de barberos en la web ---------- */
+.barbero-foto {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 0.9rem;
+  display: block;
+  border: 2px solid var(--bronce);
+  box-shadow: 0 0 0 4px rgba(201, 162, 74, 0.12), 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- Editor de contenido (panel del dueño) ---------- */
+.editor {
+  margin-top: 1rem;
+}
+
+.editor-titulo {
+  font-family: var(--font-cuerpo);
+  font-weight: 500;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bronce);
+  margin: 1.25rem 0 0.6rem;
+}
+
+.editor-lista {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.editor-fila {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: var(--grad-tarjeta);
+  border: var(--borde-tarjeta);
+  border-radius: var(--radio-m);
+  padding: 0.6rem 0.8rem;
+}
+
+.editor-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radio-s);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.editor-thumb.redonda {
+  border-radius: 50%;
+  border: 2px solid rgba(201, 162, 74, 0.5);
+}
+
+.editor-iniciales {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: var(--hueso);
+  background: linear-gradient(135deg, var(--acero), var(--carbon-2));
+}
+
+.editor-campos {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.editor-campos input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(201, 162, 74, 0.2);
+  border-radius: var(--radio-s);
+  color: var(--hueso);
+  font-family: var(--font-cuerpo);
+  font-size: 0.92rem;
+  padding: 0.45rem 0.6rem;
+  outline: none;
+}
+
+.editor-campos input:focus {
+  border-color: var(--bronce);
+}
+
+.editor-linea2 {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.editor-precio {
+  max-width: 92px;
+}
+
+.editor-acciones {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.editor-foto-btn,
+.editor-guardar {
+  font-family: var(--font-cuerpo);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--radio-s);
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.editor-foto-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(201, 162, 74, 0.3);
+  color: var(--hueso-tenue);
+}
+
+.editor-foto-btn:hover {
+  color: var(--bronce);
+  border-color: var(--bronce);
+}
+
+.editor-guardar {
+  background: var(--grad-oro);
+  border: none;
+  color: var(--carbon);
+  font-weight: 700;
+}
+
+.editor-nota {
+  margin-top: 1rem;
+  color: var(--hueso-tenue);
+  font-family: var(--font-detalle);
+  font-style: italic;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 520px) {
+  .editor-fila {
+    flex-wrap: wrap;
+  }
+
+  .editor-acciones {
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+}
+
 /* ---------- Modal de reserva ---------- */
 .modal-backdrop {
   position: fixed;

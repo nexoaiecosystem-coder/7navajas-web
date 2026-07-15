@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { BARBEROS, SERVICIOS } from '../data/negocio'
+import { useCatalogo } from '../lib/catalogo'
+import { fotoServicio } from '../data/fotosServicios'
 
 // fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
 const hoy = () => {
@@ -35,11 +36,12 @@ const resumen = (filas) => ({
 
 const plata = (n) => '$' + (n || 0).toLocaleString('es-UY')
 
-const nombreServicio = (id) => SERVICIOS.find((s) => s.id === id)?.nombre || id
-const nombreBarbero = (id) => {
-  const b = BARBEROS.find((x) => x.id === id)
-  return b ? b.apodo || b.nombre : id
-}
+const iniciales = (nombre) =>
+  nombre
+    .split(' ')
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
 
 function fechaLinda(fechaStr) {
   return new Date(fechaStr + 'T12:00:00').toLocaleDateString('es-UY', {
@@ -74,6 +76,13 @@ function Delta({ valor }) {
 }
 
 export default function Panel({ usuario, onCuenta }) {
+  const { servicios, barberos, recargar } = useCatalogo()
+  const nombreServicio = (id) => servicios.find((s) => s.id === id)?.nombre || id
+  const nombreBarbero = (id) => {
+    const b = barberos.find((x) => x.id === id)
+    return b ? b.apodo || b.nombre : id
+  }
+
   // acceso.estado: 'cargando' | 'sin-sesion' | 'sin-acceso' | 'ok'
   const [acceso, setAcceso] = useState({ estado: 'cargando', barbero: null, esAdmin: false })
 
@@ -210,6 +219,60 @@ export default function Panel({ usuario, onCuenta }) {
     await supabase.auth.signOut()
   }
 
+  /* ---------- edición de contenido (solo dueño) ---------- */
+
+  const [contenidoAbierto, setContenidoAbierto] = useState(false)
+  const [edicion, setEdicion] = useState({})
+  const [msgContenido, setMsgContenido] = useState(null)
+  const [subiendo, setSubiendo] = useState(null)
+
+  const valorDe = (item, campo) => edicion[item.id]?.[campo] ?? (item[campo] ?? '')
+  const editar = (id, campo, valor) =>
+    setEdicion((e) => ({ ...e, [id]: { ...e[id], [campo]: valor } }))
+
+  async function guardarFila(tabla, item, campos) {
+    setMsgContenido(null)
+    const cambios = {}
+    for (const c of campos) {
+      const v = valorDe(item, c)
+      cambios[c] = c === 'precio' ? Number(v) || 0 : v === '' ? null : v
+    }
+    const { error: err } = await supabase.from(tabla).update(cambios).eq('id', item.id)
+    setMsgContenido(
+      err
+        ? { tipo: 'error', texto: 'No se pudo guardar. ¿Tu cuenta es la del dueño?' }
+        : { tipo: 'ok', texto: 'Guardado ✓' },
+    )
+    if (!err) recargar()
+  }
+
+  async function subirFoto(tabla, id, archivo) {
+    if (!archivo) return
+    setMsgContenido(null)
+    setSubiendo(tabla + id)
+    try {
+      const ext = (archivo.name.split('.').pop() || 'jpg').toLowerCase()
+      const ruta = `${tabla}/${id}-${Date.now()}.${ext}`
+      const { error: eSubida } = await supabase.storage
+        .from('fotos')
+        .upload(ruta, archivo, { upsert: true, contentType: archivo.type })
+      if (eSubida) throw eSubida
+      const { data } = supabase.storage.from('fotos').getPublicUrl(ruta)
+      const { error: eUpdate } = await supabase
+        .from(tabla)
+        .update({ foto_url: data.publicUrl })
+        .eq('id', id)
+      if (eUpdate) throw eUpdate
+      setMsgContenido({ tipo: 'ok', texto: 'Foto actualizada ✓' })
+      recargar()
+    } catch (err) {
+      console.error(err)
+      setMsgContenido({ tipo: 'error', texto: 'No se pudo subir la foto.' })
+    } finally {
+      setSubiendo(null)
+    }
+  }
+
   /* ---------- pantallas de acceso ---------- */
 
   if (acceso.estado === 'sin-sesion') {
@@ -300,7 +363,7 @@ export default function Panel({ usuario, onCuenta }) {
 
   // el mes por barbero (vista del dueño: siempre todos)
   const mesFilas = statsFilas.filter((t) => t.fecha.slice(0, 7) === mesClave)
-  const porBarbero = BARBEROS.map((b) => ({
+  const porBarbero = barberos.map((b) => ({
     ...b,
     ...resumen(mesFilas.filter((t) => t.barbero === b.id)),
   })).sort((a, b) => b.total - a.total)
@@ -348,7 +411,7 @@ export default function Panel({ usuario, onCuenta }) {
             <button className={tab === 'todos' ? 'activo' : ''} onClick={() => setTab('todos')}>
               Todos
             </button>
-            {BARBEROS.map((b) => (
+            {barberos.map((b) => (
               <button
                 key={b.id}
                 className={tab === b.id ? 'activo' : ''}
@@ -647,6 +710,144 @@ export default function Panel({ usuario, onCuenta }) {
             ))
           )}
         </section>
+
+        {/* ---------- Editar contenido (solo dueño) ---------- */}
+        {esAdmin && (
+          <section className="panel-seccion">
+            <div className="panel-seccion-head">
+              <h2 className="panel-sub">Editar contenido</h2>
+              <span className="panel-seccion-nota">servicios, precios y fotos</span>
+            </div>
+            <button
+              className="servicios-toggle"
+              onClick={() => setContenidoAbierto((a) => !a)}
+              aria-expanded={contenidoAbierto}
+            >
+              <span>{contenidoAbierto ? 'Cerrar el editor' : 'Abrir el editor'}</span>
+              <svg
+                className={contenidoAbierto ? 'chevron girado' : 'chevron'}
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+
+            {contenidoAbierto && (
+              <div className="editor">
+                {msgContenido && (
+                  <p className={`reserva-msg ${msgContenido.tipo}`}>{msgContenido.texto}</p>
+                )}
+
+                <h3 className="editor-titulo">Servicios</h3>
+                <div className="editor-lista">
+                  {servicios.map((s) => (
+                    <div className="editor-fila" key={s.id}>
+                      <img className="editor-thumb" src={fotoServicio(s)} alt="" />
+                      <div className="editor-campos">
+                        <input
+                          value={valorDe(s, 'nombre')}
+                          onChange={(e) => editar(s.id, 'nombre', e.target.value)}
+                          aria-label="Nombre del servicio"
+                        />
+                        <div className="editor-linea2">
+                          <input
+                            type="number"
+                            className="editor-precio"
+                            value={valorDe(s, 'precio')}
+                            onChange={(e) => editar(s.id, 'precio', e.target.value)}
+                            aria-label="Precio"
+                          />
+                          <input
+                            placeholder="Nota (opcional)"
+                            value={valorDe(s, 'nota')}
+                            onChange={(e) => editar(s.id, 'nota', e.target.value)}
+                            aria-label="Nota"
+                          />
+                        </div>
+                      </div>
+                      <div className="editor-acciones">
+                        <label className="editor-foto-btn">
+                          {subiendo === 'servicios' + s.id ? 'Subiendo…' : 'Foto'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={(e) => subirFoto('servicios', s.id, e.target.files[0])}
+                          />
+                        </label>
+                        <button
+                          className="editor-guardar"
+                          onClick={() => guardarFila('servicios', s, ['nombre', 'precio', 'nota'])}
+                        >
+                          Guardar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <h3 className="editor-titulo">Barberos</h3>
+                <div className="editor-lista">
+                  {barberos.map((b) => (
+                    <div className="editor-fila" key={b.id}>
+                      {b.foto_url ? (
+                        <img className="editor-thumb redonda" src={b.foto_url} alt="" />
+                      ) : (
+                        <span className="editor-thumb redonda editor-iniciales">
+                          {iniciales(b.nombre)}
+                        </span>
+                      )}
+                      <div className="editor-campos">
+                        <input
+                          value={valorDe(b, 'nombre')}
+                          onChange={(e) => editar(b.id, 'nombre', e.target.value)}
+                          aria-label="Nombre del barbero"
+                        />
+                        <div className="editor-linea2">
+                          <input
+                            placeholder="Apodo (opcional)"
+                            value={valorDe(b, 'apodo')}
+                            onChange={(e) => editar(b.id, 'apodo', e.target.value)}
+                            aria-label="Apodo"
+                          />
+                        </div>
+                      </div>
+                      <div className="editor-acciones">
+                        <label className="editor-foto-btn">
+                          {subiendo === 'barberos' + b.id ? 'Subiendo…' : 'Foto'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={(e) => subirFoto('barberos', b.id, e.target.files[0])}
+                          />
+                        </label>
+                        <button
+                          className="editor-guardar"
+                          onClick={() => guardarFila('barberos', b, ['nombre', 'apodo'])}
+                        >
+                          Guardar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="editor-nota">
+                  Los cambios se ven al instante en la web. Las fotos ideales: cuadradas o
+                  verticales, de menos de 2&nbsp;MB.
+                </p>
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </div>
   )

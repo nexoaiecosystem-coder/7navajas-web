@@ -1,4 +1,4 @@
-import { BARBEROS } from '../data/negocio'
+import { useCatalogo } from '../lib/catalogo'
 
 const iniciales = (nombre) =>
   nombre
@@ -8,6 +8,7 @@ const iniciales = (nombre) =>
     .toUpperCase()
 
 export default function Barberos({ onReservar }) {
+  const { barberos } = useCatalogo()
   const reservar = (id) => onReservar({ barbero: id })
 
   return (
@@ -16,7 +17,7 @@ export default function Barberos({ onReservar }) {
         <span className="section-tag">El equipo</span>
         <h2 className="section-title">Barberos</h2>
         <div className="barberos-grid">
-          {BARBEROS.map((b) => (
+          {barberos.map((b) => (
             <article
               className="barbero-card"
               key={b.id}
@@ -30,7 +31,11 @@ export default function Barberos({ onReservar }) {
                 }
               }}
             >
-              <div className="barbero-avatar">{iniciales(b.nombre)}</div>
+              {b.foto_url ? (
+                <img className="barbero-foto" src={b.foto_url} alt={b.nombre} loading="lazy" />
+              ) : (
+                <div className="barbero-avatar">{iniciales(b.nombre)}</div>
+              )}
               <h3 className="barbero-nombre">{b.nombre}</h3>
               <p className="barbero-apodo">{b.apodo ? `"${b.apodo}"` : 'Barbero'}</p>
               <span className="card-reservar">Reservar con {b.apodo || b.nombre} →</span>
