@@ -27,9 +27,9 @@ export const HORARIOS_TEXTO = [
 ]
 
 export const BARBEROS = [
+  { id: 'mathias-alegre', nombre: 'Mathias Alegre', apodo: null },
   { id: 'juanca', nombre: 'Juan Carlos', apodo: 'Juanca' },
   { id: 'mathias-fonseca', nombre: 'Mathias Fonseca', apodo: null },
-  { id: 'mathias-alegre', nombre: 'Mathias Alegre', apodo: null },
 ]
 
 // REEMPLAZAR por reseñas reales de Google cuando las haya
