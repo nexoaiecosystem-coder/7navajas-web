@@ -87,7 +87,7 @@ function Delta({ valor }) {
 }
 
 export default function Panel({ usuario, onCuenta }) {
-  const { servicios, barberos, recargar } = useCatalogo()
+  const { servicios, barberos, galeria, recargar } = useCatalogo()
   const nombreServicio = (id) => servicios.find((s) => s.id === id)?.nombre || id
   const nombreBarbero = (id) => {
     const b = barberos.find((x) => x.id === id)
@@ -355,6 +355,73 @@ export default function Panel({ usuario, onCuenta }) {
     } finally {
       setSubiendo(null)
     }
+  }
+
+  async function agregarFotoGaleria(archivo) {
+    if (!archivo) return
+    setMsgContenido(null)
+    setSubiendo('galeria-nueva')
+    try {
+      const ext = (archivo.name.split('.').pop() || 'jpg').toLowerCase()
+      const ruta = `galeria/corte-${Date.now()}.${ext}`
+      const { error: eSubida } = await supabase.storage
+        .from('fotos')
+        .upload(ruta, archivo, { upsert: true, contentType: archivo.type })
+      if (eSubida) throw eSubida
+      const { data } = supabase.storage.from('fotos').getPublicUrl(ruta)
+      const orden = Math.max(0, ...galeria.map((g) => g.orden || 0)) + 1
+      const { error: eInsert } = await supabase
+        .from('galeria')
+        .insert({ foto_url: data.publicUrl, orden })
+      if (eInsert) throw eInsert
+      setMsgContenido({ tipo: 'ok', texto: 'Foto agregada a la galería ✓' })
+      recargar()
+    } catch (err) {
+      console.error(err)
+      setMsgContenido({ tipo: 'error', texto: 'No se pudo subir la foto.' })
+    } finally {
+      setSubiendo(null)
+    }
+  }
+
+  async function cambiarFotoGaleria(item, archivo) {
+    if (!archivo) return
+    setMsgContenido(null)
+    setSubiendo('galeria' + item.id)
+    try {
+      const ext = (archivo.name.split('.').pop() || 'jpg').toLowerCase()
+      const ruta = `galeria/corte-${Date.now()}.${ext}`
+      const { error: eSubida } = await supabase.storage
+        .from('fotos')
+        .upload(ruta, archivo, { upsert: true, contentType: archivo.type })
+      if (eSubida) throw eSubida
+      const { data } = supabase.storage.from('fotos').getPublicUrl(ruta)
+      const { error: eUpdate } = await supabase
+        .from('galeria')
+        .update({ foto_url: data.publicUrl })
+        .eq('id', item.id)
+      if (eUpdate) throw eUpdate
+      setMsgContenido({ tipo: 'ok', texto: 'Foto cambiada ✓' })
+      recargar()
+    } catch (err) {
+      console.error(err)
+      setMsgContenido({ tipo: 'error', texto: 'No se pudo subir la foto.' })
+    } finally {
+      setSubiendo(null)
+    }
+  }
+
+  async function eliminarFotoGaleria(item) {
+    const seguro = window.confirm('¿Sacar esta foto de la galería?')
+    if (!seguro) return
+    setMsgContenido(null)
+    const { error: err } = await supabase.from('galeria').delete().eq('id', item.id)
+    setMsgContenido(
+      err
+        ? { tipo: 'error', texto: 'No se pudo eliminar.' }
+        : { tipo: 'ok', texto: 'Foto eliminada ✓' },
+    )
+    if (!err) recargar()
   }
 
   /* ---------- accesos al panel (solo dueño) ---------- */
@@ -1055,6 +1122,48 @@ export default function Panel({ usuario, onCuenta }) {
                     + Agregar barbero
                   </button>
                 </form>
+
+                <h3 className="editor-titulo">Galería de trabajos</h3>
+                <div className="galeria-editor">
+                  {galeria.map((g) => (
+                    <div className="galeria-editor-item" key={g.id}>
+                      <img src={g.foto_url} alt={g.alt || ''} loading="lazy" />
+                      <div className="galeria-editor-acciones">
+                        <label className="editor-foto-btn">
+                          {subiendo === 'galeria' + g.id ? 'Subiendo…' : 'Cambiar'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={(e) => cambiarFotoGaleria(g, e.target.files[0])}
+                          />
+                        </label>
+                        <button
+                          className="editor-eliminar"
+                          onClick={() => eliminarFotoGaleria(g)}
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <label className="galeria-editor-nueva">
+                    {subiendo === 'galeria-nueva' ? (
+                      'Subiendo…'
+                    ) : (
+                      <>
+                        <span className="galeria-editor-mas">+</span>
+                        <span>Agregar foto</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => agregarFotoGaleria(e.target.files[0])}
+                    />
+                  </label>
+                </div>
 
                 <p className="editor-nota">
                   Los cambios se ven al instante en la web. Las fotos ideales: cuadradas o

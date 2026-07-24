@@ -1852,6 +1852,72 @@ section {
   font-size: 0.88rem;
 }
 
+/* ---------- Editor de galería ---------- */
+.galeria-editor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.galeria-editor-item {
+  display: grid;
+  gap: 0.4rem;
+  background: var(--grad-tarjeta);
+  border: var(--borde-tarjeta);
+  border-radius: var(--radio-m);
+  padding: 0.5rem;
+}
+
+.galeria-editor-item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radio-s);
+  display: block;
+}
+
+.galeria-editor-acciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+
+.galeria-editor-acciones .editor-foto-btn,
+.galeria-editor-acciones .editor-eliminar {
+  padding: 0.35rem 0.4rem;
+  font-size: 0.68rem;
+}
+
+.galeria-editor-nueva {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-height: 180px;
+  border: 1px dashed rgba(201, 162, 74, 0.4);
+  border-radius: var(--radio-m);
+  background: rgba(201, 162, 74, 0.05);
+  color: var(--hueso-tenue);
+  font-family: var(--font-cuerpo);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.galeria-editor-nueva:hover {
+  border-color: var(--bronce);
+  color: var(--bronce);
+}
+
+.galeria-editor-mas {
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--bronce);
+}
+
 @media (max-width: 520px) {
   .editor-fila {
     flex-wrap: wrap;
