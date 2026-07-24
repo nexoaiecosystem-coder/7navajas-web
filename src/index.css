@@ -691,6 +691,8 @@ section {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* son fotos de cuerpo entero: priorizar la cara al recortar el cuadrado */
+  object-position: center 12%;
   display: block;
   transition: transform 0.35s ease;
 }
