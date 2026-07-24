@@ -2204,11 +2204,22 @@ section {
 .footer-pie {
   border-top: 1px solid rgba(201, 162, 74, 0.12);
   padding-top: 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
 }
 
 .footer-pie p {
   color: var(--hueso-tenue);
   font-size: 0.8rem;
+}
+
+.footer-credito span {
+  color: var(--bronce);
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .footer a {

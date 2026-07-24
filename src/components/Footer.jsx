@@ -48,6 +48,9 @@ export default function Footer({ onCancelar }) {
 
         <div className="footer-pie">
           <p>© {new Date().getFullYear()} {NEGOCIO.nombre} — Paso Carrasco, Montevideo</p>
+          <p className="footer-credito">
+            Desarrollado por <span>Victory &amp; Solutions</span>
+          </p>
         </div>
       </div>
     </footer>
