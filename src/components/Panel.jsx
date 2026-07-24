@@ -259,7 +259,7 @@ export default function Panel({ usuario, onCuenta }) {
   }
 
   const [nuevoServicio, setNuevoServicio] = useState({ nombre: '', precio: '', nota: '' })
-  const [nuevoBarbero, setNuevoBarbero] = useState({ nombre: '', apodo: '' })
+  const [nuevoBarbero, setNuevoBarbero] = useState({ nombre: '', apodo: '', email: '' })
 
   // genera un id único a partir del nombre (agrega -2, -3... si ya existe)
   function idLibre(base, existentes) {
@@ -310,18 +310,49 @@ export default function Panel({ usuario, onCuenta }) {
       setMsgContenido({ tipo: 'error', texto: 'No se pudo agregar el barbero.' })
       return
     }
-    setNuevoBarbero({ nombre: '', apodo: '' })
-    setMsgContenido({ tipo: 'ok', texto: 'Barbero agregado ✓' })
+    const email = (nuevoBarbero.email || '').trim().toLowerCase()
+    if (email) {
+      const { error: eAcc } = await supabase
+        .from('barberos_acceso')
+        .upsert({ email, barbero: id, es_admin: false })
+      if (eAcc) {
+        setNuevoBarbero({ nombre: '', apodo: '', email: '' })
+        setMsgContenido({
+          tipo: 'error',
+          texto: 'Barbero agregado, pero no se pudo dar el acceso al panel.',
+        })
+        recargar()
+        return
+      }
+    }
+    setNuevoBarbero({ nombre: '', apodo: '', email: '' })
+    setMsgContenido({
+      tipo: 'ok',
+      texto: email
+        ? 'Barbero agregado ✓ — cuando se cree la cuenta con ese mail ya entra al panel'
+        : 'Barbero agregado ✓',
+    })
+    setRefresco((r) => r + 1)
     recargar()
   }
 
   async function eliminarFila(tabla, item, nombreMostrado) {
     const seguro = window.confirm(
-      `¿Eliminar "${nombreMostrado}"? Los turnos que ya tiene reservados no se borran, pero dejará de aparecer en la web.`,
+      `¿Eliminar "${nombreMostrado}"? Los turnos que ya tiene reservados no se borran, pero dejará de aparecer en la web.` +
+        (tabla === 'barberos' ? ' Si tenía acceso al panel, también se le quita.' : ''),
     )
     if (!seguro) return
     setMsgContenido(null)
     const { error: err } = await supabase.from(tabla).delete().eq('id', item.id)
+    if (!err && tabla === 'barberos') {
+      // el acceso al panel va de la mano del barbero (sin tocar el del dueño)
+      await supabase
+        .from('barberos_acceso')
+        .delete()
+        .eq('barbero', item.id)
+        .neq('email', usuario.email)
+      setRefresco((r) => r + 1)
+    }
     setMsgContenido(
       err
         ? { tipo: 'error', texto: 'No se pudo eliminar.' }
@@ -430,6 +461,50 @@ export default function Panel({ usuario, onCuenta }) {
   const [nuevoAcceso, setNuevoAcceso] = useState({ email: '', barbero: '', esAdmin: false })
   const [msgAccesos, setMsgAccesos] = useState(null)
 
+  // fila de acceso al panel asociada a un barbero, y el mail que se muestra en su editor
+  const accesoDe = (b) => accesos.find((a) => a.barbero === b.id)
+  const emailDe = (b) => edicion[b.id]?.email ?? accesoDe(b)?.email ?? ''
+
+  async function sincronizarAccesoBarbero(b) {
+    const fila = accesoDe(b)
+    const escrito = emailDe(b).trim().toLowerCase()
+    const actual = fila?.email || ''
+    if (escrito === actual) return
+
+    if (fila && fila.email === usuario.email) {
+      window.alert('Tu propio mail de acceso se cambia desde "Accesos al panel".')
+      return
+    }
+
+    let err = null
+    if (!escrito && fila) {
+      const seguro = window.confirm(`¿Quitar el acceso al panel de ${fila.email}?`)
+      if (!seguro) return
+      err = (await supabase.from('barberos_acceso').delete().eq('email', fila.email)).error
+    } else if (fila) {
+      err = (
+        await supabase.from('barberos_acceso').update({ email: escrito }).eq('email', fila.email)
+      ).error
+    } else if (escrito) {
+      err = (
+        await supabase
+          .from('barberos_acceso')
+          .upsert({ email: escrito, barbero: b.id, es_admin: false })
+      ).error
+    }
+    if (err) {
+      setMsgContenido({ tipo: 'error', texto: 'No se pudo actualizar el acceso al panel.' })
+      return
+    }
+    setMsgContenido({ tipo: 'ok', texto: 'Guardado ✓ (acceso al panel actualizado)' })
+    setRefresco((r) => r + 1)
+  }
+
+  async function guardarBarbero(b) {
+    await guardarFila('barberos', b, ['nombre', 'apodo'])
+    await sincronizarAccesoBarbero(b)
+  }
+
   useEffect(() => {
     if (acceso.estado !== 'ok' || !esAdmin) return
     let vigente = true
@@ -449,7 +524,7 @@ export default function Panel({ usuario, onCuenta }) {
     if (!nuevoAcceso.email || !nuevoAcceso.barbero) return
     setMsgAccesos(null)
     const { error: err } = await supabase.from('barberos_acceso').upsert({
-      email: nuevoAcceso.email.trim(),
+      email: nuevoAcceso.email.trim().toLowerCase(),
       barbero: nuevoAcceso.barbero,
       es_admin: nuevoAcceso.esAdmin,
     })
@@ -1078,6 +1153,13 @@ export default function Panel({ usuario, onCuenta }) {
                             onChange={(e) => editar(b.id, 'apodo', e.target.value)}
                             aria-label="Apodo"
                           />
+                          <input
+                            type="email"
+                            placeholder="Mail para entrar al panel"
+                            value={emailDe(b)}
+                            onChange={(e) => editar(b.id, 'email', e.target.value)}
+                            aria-label="Mail de acceso al panel"
+                          />
                         </div>
                       </div>
                       <div className="editor-acciones">
@@ -1092,7 +1174,7 @@ export default function Panel({ usuario, onCuenta }) {
                         </label>
                         <button
                           className="editor-guardar"
-                          onClick={() => guardarFila('barberos', b, ['nombre', 'apodo'])}
+                          onClick={() => guardarBarbero(b)}
                         >
                           Guardar
                         </button>
@@ -1117,6 +1199,12 @@ export default function Panel({ usuario, onCuenta }) {
                     placeholder="Apodo (opcional)"
                     value={nuevoBarbero.apodo}
                     onChange={(e) => setNuevoBarbero((f) => ({ ...f, apodo: e.target.value }))}
+                  />
+                  <input
+                    type="email"
+                    placeholder="Mail para entrar al panel (opcional)"
+                    value={nuevoBarbero.email}
+                    onChange={(e) => setNuevoBarbero((f) => ({ ...f, email: e.target.value }))}
                   />
                   <button type="submit" className="editor-agregar">
                     + Agregar barbero
@@ -1168,7 +1256,8 @@ export default function Panel({ usuario, onCuenta }) {
                 <p className="editor-nota">
                   Los cambios se ven al instante en la web. Las fotos ideales: cuadradas o
                   verticales, de menos de 2&nbsp;MB. Eliminar un servicio o barbero no borra los
-                  turnos que ya tiene reservados.
+                  turnos que ya tiene reservados. Si a un barbero le ponés su mail, cuando él se
+                  cree la cuenta con ese mail ya va a poder entrar al panel.
                 </p>
               </div>
             )}
