@@ -39,8 +39,8 @@ export default function Barberos({ onReservar }) {
                 )}
               </div>
               <div className="barbero-cuerpo">
-                <h3 className="barbero-nombre">{b.nombre}</h3>
-                <p className="barbero-apodo">{b.apodo ? `"${b.apodo}"` : 'Barbero'}</p>
+                <h3 className="barbero-nombre">{b.apodo || b.nombre}</h3>
+                <p className="barbero-apodo">Barbero</p>
                 <span className="card-reservar">Reservar turno →</span>
               </div>
             </article>
