@@ -104,6 +104,7 @@ export default function Panel({ usuario, onCuenta }) {
   const [historial, setHistorial] = useState([])
   const [cargando, setCargando] = useState(false)
   const [compAbierta, setCompAbierta] = useState(false)
+  const [historialAbierto, setHistorialAbierto] = useState(false)
   const [diasGrafica, setDiasGrafica] = useState(14)
 
   // en pantalla chica la gráfica usa un lienzo compacto (sin scroll lateral)
@@ -823,30 +824,56 @@ export default function Panel({ usuario, onCuenta }) {
             </h2>
             <span className="panel-seccion-nota">últimos {historialVisible.length}</span>
           </div>
-          {gruposHistorial.length === 0 ? (
-            <p className="panel-vacio">Todavía no hay trabajos registrados.</p>
-          ) : (
-            gruposHistorial.map((g) => (
-              <div className="hist-grupo" key={g.fecha}>
-                <h3 className="hist-fecha">{fechaLinda(g.fecha)}</h3>
-                <ul className="panel-lista">
-                  {g.items.map((t) => (
-                    <li className="turno historial" key={t.id}>
-                      <span className="turno-hora">{t.hora.slice(0, 5)}</span>
-                      <div className="turno-datos">
-                        <strong>{t.cliente_nombre}</strong>
-                        <span>
-                          {nombreServicio(t.servicio)}
-                          {esAdmin ? ` · ${nombreBarbero(t.barbero)}` : ''}
-                        </span>
-                      </div>
-                      <span className="turno-precio">{plata(t.precio)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          )}
+
+          <button
+            className="servicios-toggle"
+            onClick={() => setHistorialAbierto((a) => !a)}
+            aria-expanded={historialAbierto}
+          >
+            <span>{historialAbierto ? 'Ocultar el registro' : 'Ver registro de trabajos'}</span>
+            <svg
+              className={historialAbierto ? 'chevron girado' : 'chevron'}
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+
+          <div className={historialAbierto ? 'servicios-despliegue abierto' : 'servicios-despliegue'}>
+            <div className="servicios-inner">
+              {gruposHistorial.length === 0 ? (
+                <p className="panel-vacio">Todavía no hay trabajos registrados.</p>
+              ) : (
+                gruposHistorial.map((g) => (
+                  <div className="hist-grupo" key={g.fecha}>
+                    <h3 className="hist-fecha">{fechaLinda(g.fecha)}</h3>
+                    <ul className="panel-lista">
+                      {g.items.map((t) => (
+                        <li className="turno historial" key={t.id}>
+                          <span className="turno-hora">{t.hora.slice(0, 5)}</span>
+                          <div className="turno-datos">
+                            <strong>{t.cliente_nombre}</strong>
+                            <span>
+                              {nombreServicio(t.servicio)}
+                              {esAdmin ? ` · ${nombreBarbero(t.barbero)}` : ''}
+                            </span>
+                          </div>
+                          <span className="turno-precio">{plata(t.precio)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </section>
 
         {/* ---------- Editar contenido (solo dueño) ---------- */}
