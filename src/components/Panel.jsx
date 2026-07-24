@@ -53,6 +53,17 @@ function fechaLinda(fechaStr) {
 
 const LETRA_DIA = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
+// "Corte Degradé" → "corte-degrade" (sin tildes, minúsculas, guiones)
+function slug(texto) {
+  return texto
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
 // "Mathias Fonseca" → "M. Fonseca" (para que las pestañas entren sin scroll)
 const abreviar = (nombre) => {
   const partes = nombre.split(' ')
@@ -246,6 +257,78 @@ export default function Panel({ usuario, onCuenta }) {
     if (!err) recargar()
   }
 
+  const [nuevoServicio, setNuevoServicio] = useState({ nombre: '', precio: '', nota: '' })
+  const [nuevoBarbero, setNuevoBarbero] = useState({ nombre: '', apodo: '' })
+
+  // genera un id único a partir del nombre (agrega -2, -3... si ya existe)
+  function idLibre(base, existentes) {
+    let candidato = slug(base) || 'item'
+    let n = 2
+    while (existentes.some((x) => x.id === candidato)) {
+      candidato = `${slug(base)}-${n}`
+      n++
+    }
+    return candidato
+  }
+
+  async function agregarServicio(e) {
+    e.preventDefault()
+    if (!nuevoServicio.nombre || !nuevoServicio.precio) return
+    setMsgContenido(null)
+    const id = idLibre(nuevoServicio.nombre, servicios)
+    const orden = Math.max(0, ...servicios.map((s) => s.orden || 0)) + 1
+    const { error: err } = await supabase.from('servicios').insert({
+      id,
+      nombre: nuevoServicio.nombre,
+      precio: Number(nuevoServicio.precio) || 0,
+      nota: nuevoServicio.nota || null,
+      orden,
+    })
+    if (err) {
+      setMsgContenido({ tipo: 'error', texto: 'No se pudo agregar el servicio.' })
+      return
+    }
+    setNuevoServicio({ nombre: '', precio: '', nota: '' })
+    setMsgContenido({ tipo: 'ok', texto: 'Servicio agregado ✓' })
+    recargar()
+  }
+
+  async function agregarBarbero(e) {
+    e.preventDefault()
+    if (!nuevoBarbero.nombre) return
+    setMsgContenido(null)
+    const id = idLibre(nuevoBarbero.nombre, barberos)
+    const orden = Math.max(0, ...barberos.map((b) => b.orden || 0)) + 1
+    const { error: err } = await supabase.from('barberos').insert({
+      id,
+      nombre: nuevoBarbero.nombre,
+      apodo: nuevoBarbero.apodo || null,
+      orden,
+    })
+    if (err) {
+      setMsgContenido({ tipo: 'error', texto: 'No se pudo agregar el barbero.' })
+      return
+    }
+    setNuevoBarbero({ nombre: '', apodo: '' })
+    setMsgContenido({ tipo: 'ok', texto: 'Barbero agregado ✓' })
+    recargar()
+  }
+
+  async function eliminarFila(tabla, item, nombreMostrado) {
+    const seguro = window.confirm(
+      `¿Eliminar "${nombreMostrado}"? Los turnos que ya tiene reservados no se borran, pero dejará de aparecer en la web.`,
+    )
+    if (!seguro) return
+    setMsgContenido(null)
+    const { error: err } = await supabase.from(tabla).delete().eq('id', item.id)
+    setMsgContenido(
+      err
+        ? { tipo: 'error', texto: 'No se pudo eliminar.' }
+        : { tipo: 'ok', texto: 'Eliminado ✓' },
+    )
+    if (!err) recargar()
+  }
+
   async function subirFoto(tabla, id, archivo) {
     if (!archivo) return
     setMsgContenido(null)
@@ -271,6 +354,61 @@ export default function Panel({ usuario, onCuenta }) {
     } finally {
       setSubiendo(null)
     }
+  }
+
+  /* ---------- accesos al panel (solo dueño) ---------- */
+
+  const [accesos, setAccesos] = useState([])
+  const [nuevoAcceso, setNuevoAcceso] = useState({ email: '', barbero: '', esAdmin: false })
+  const [msgAccesos, setMsgAccesos] = useState(null)
+
+  useEffect(() => {
+    if (acceso.estado !== 'ok' || !esAdmin) return
+    let vigente = true
+    supabase
+      .from('barberos_acceso')
+      .select('*')
+      .then(({ data }) => {
+        if (vigente) setAccesos(data || [])
+      })
+    return () => {
+      vigente = false
+    }
+  }, [acceso.estado, esAdmin, refresco])
+
+  async function agregarAcceso(e) {
+    e.preventDefault()
+    if (!nuevoAcceso.email || !nuevoAcceso.barbero) return
+    setMsgAccesos(null)
+    const { error: err } = await supabase.from('barberos_acceso').upsert({
+      email: nuevoAcceso.email.trim(),
+      barbero: nuevoAcceso.barbero,
+      es_admin: nuevoAcceso.esAdmin,
+    })
+    if (err) {
+      setMsgAccesos({ tipo: 'error', texto: 'No se pudo dar de alta el acceso.' })
+      return
+    }
+    setNuevoAcceso({ email: '', barbero: '', esAdmin: false })
+    setMsgAccesos({ tipo: 'ok', texto: 'Acceso dado de alta ✓' })
+    setRefresco((r) => r + 1)
+  }
+
+  async function quitarAcceso(fila) {
+    if (fila.email === usuario.email) {
+      window.alert('No podés quitarte el acceso a vos mismo desde acá.')
+      return
+    }
+    const seguro = window.confirm(`¿Quitar el acceso al panel de ${fila.email}?`)
+    if (!seguro) return
+    setMsgAccesos(null)
+    const { error: err } = await supabase.from('barberos_acceso').delete().eq('email', fila.email)
+    setMsgAccesos(
+      err
+        ? { tipo: 'error', texto: 'No se pudo quitar el acceso.' }
+        : { tipo: 'ok', texto: 'Acceso quitado ✓' },
+    )
+    if (!err) setRefresco((r) => r + 1)
   }
 
   /* ---------- pantallas de acceso ---------- */
@@ -788,10 +926,39 @@ export default function Panel({ usuario, onCuenta }) {
                         >
                           Guardar
                         </button>
+                        <button
+                          className="editor-eliminar"
+                          onClick={() => eliminarFila('servicios', s, s.nombre)}
+                        >
+                          Eliminar
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
+
+                <form className="editor-nuevo" onSubmit={agregarServicio}>
+                  <input
+                    placeholder="Nombre del servicio nuevo"
+                    value={nuevoServicio.nombre}
+                    onChange={(e) => setNuevoServicio((f) => ({ ...f, nombre: e.target.value }))}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Precio"
+                    className="editor-precio"
+                    value={nuevoServicio.precio}
+                    onChange={(e) => setNuevoServicio((f) => ({ ...f, precio: e.target.value }))}
+                  />
+                  <input
+                    placeholder="Nota (opcional)"
+                    value={nuevoServicio.nota}
+                    onChange={(e) => setNuevoServicio((f) => ({ ...f, nota: e.target.value }))}
+                  />
+                  <button type="submit" className="editor-agregar">
+                    + Agregar servicio
+                  </button>
+                </form>
 
                 <h3 className="editor-titulo">Barberos</h3>
                 <div className="editor-lista">
@@ -835,17 +1002,108 @@ export default function Panel({ usuario, onCuenta }) {
                         >
                           Guardar
                         </button>
+                        <button
+                          className="editor-eliminar"
+                          onClick={() => eliminarFila('barberos', b, b.nombre)}
+                        >
+                          Eliminar
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
 
+                <form className="editor-nuevo" onSubmit={agregarBarbero}>
+                  <input
+                    placeholder="Nombre del barbero nuevo"
+                    value={nuevoBarbero.nombre}
+                    onChange={(e) => setNuevoBarbero((f) => ({ ...f, nombre: e.target.value }))}
+                  />
+                  <input
+                    placeholder="Apodo (opcional)"
+                    value={nuevoBarbero.apodo}
+                    onChange={(e) => setNuevoBarbero((f) => ({ ...f, apodo: e.target.value }))}
+                  />
+                  <button type="submit" className="editor-agregar">
+                    + Agregar barbero
+                  </button>
+                </form>
+
                 <p className="editor-nota">
                   Los cambios se ven al instante en la web. Las fotos ideales: cuadradas o
-                  verticales, de menos de 2&nbsp;MB.
+                  verticales, de menos de 2&nbsp;MB. Eliminar un servicio o barbero no borra los
+                  turnos que ya tiene reservados.
                 </p>
               </div>
             )}
+          </section>
+        )}
+
+        {/* ---------- Accesos al panel (solo dueño) ---------- */}
+        {esAdmin && (
+          <section className="panel-seccion">
+            <div className="panel-seccion-head">
+              <h2 className="panel-sub">Accesos al panel</h2>
+              <span className="panel-seccion-nota">quién puede entrar</span>
+            </div>
+
+            {msgAccesos && <p className={`reserva-msg ${msgAccesos.tipo}`}>{msgAccesos.texto}</p>}
+
+            {accesos.length === 0 ? (
+              <p className="panel-vacio">Cargando accesos…</p>
+            ) : (
+              <div className="editor-lista">
+                {accesos.map((a) => (
+                  <div className="acceso-fila" key={a.email}>
+                    <div className="acceso-datos">
+                      <strong>{a.email}</strong>
+                      <span>
+                        {nombreBarbero(a.barbero)} · {a.es_admin ? 'Dueño (ve todo el negocio)' : 'Barbero'}
+                      </span>
+                    </div>
+                    <button className="editor-eliminar" onClick={() => quitarAcceso(a)}>
+                      Quitar
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <form className="editor-nuevo acceso-nuevo" onSubmit={agregarAcceso}>
+              <input
+                type="email"
+                placeholder="Correo de la cuenta"
+                value={nuevoAcceso.email}
+                onChange={(e) => setNuevoAcceso((f) => ({ ...f, email: e.target.value }))}
+              />
+              <select
+                value={nuevoAcceso.barbero}
+                onChange={(e) => setNuevoAcceso((f) => ({ ...f, barbero: e.target.value }))}
+              >
+                <option value="">Es el/la…</option>
+                {barberos.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.nombre}
+                  </option>
+                ))}
+              </select>
+              <label className="acceso-checkbox">
+                <input
+                  type="checkbox"
+                  checked={nuevoAcceso.esAdmin}
+                  onChange={(e) => setNuevoAcceso((f) => ({ ...f, esAdmin: e.target.checked }))}
+                />
+                Es el dueño (ve todo el negocio)
+              </label>
+              <button type="submit" className="editor-agregar">
+                + Dar acceso
+              </button>
+            </form>
+
+            <p className="editor-nota">
+              La persona tiene que crearse una cuenta en la web con este mismo correo (con
+              contraseña o con Google) para poder entrar.
+            </p>
           </section>
         )}
       </div>

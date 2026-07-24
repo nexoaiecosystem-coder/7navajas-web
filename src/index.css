@@ -1718,6 +1718,132 @@ section {
   font-weight: 700;
 }
 
+.editor-eliminar {
+  background: none;
+  border: 1px solid rgba(184, 48, 59, 0.4);
+  color: var(--rojo-claro);
+  font-family: var(--font-cuerpo);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--radio-s);
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.editor-eliminar:hover {
+  background: var(--rojo);
+  border-color: var(--rojo);
+  color: var(--hueso);
+}
+
+.editor-nuevo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 0.9rem;
+  background: rgba(201, 162, 74, 0.05);
+  border: 1px dashed rgba(201, 162, 74, 0.3);
+  border-radius: var(--radio-m);
+}
+
+.editor-nuevo input,
+.editor-nuevo select {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(201, 162, 74, 0.25);
+  border-radius: var(--radio-s);
+  color: var(--hueso);
+  font-family: var(--font-cuerpo);
+  font-size: 0.9rem;
+  padding: 0.5rem 0.7rem;
+  outline: none;
+  flex: 1;
+  min-width: 140px;
+}
+
+.editor-nuevo input:focus,
+.editor-nuevo select:focus {
+  border-color: var(--bronce);
+}
+
+.editor-nuevo .editor-precio {
+  flex: 0 0 90px;
+  min-width: 0;
+}
+
+.editor-agregar {
+  background: var(--grad-oro);
+  border: none;
+  color: var(--carbon);
+  font-family: var(--font-cuerpo);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--radio-s);
+  padding: 0.6rem 1.1rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.acceso-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--hueso-tenue);
+  font-size: 0.85rem;
+  flex: 1 1 100%;
+}
+
+.acceso-checkbox input {
+  width: auto;
+  flex: 0;
+  accent-color: var(--bronce);
+}
+
+.acceso-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--grad-tarjeta);
+  border: var(--borde-tarjeta);
+  border-radius: var(--radio-m);
+  padding: 0.7rem 0.9rem;
+}
+
+.acceso-datos {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.acceso-datos strong {
+  color: var(--hueso);
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.acceso-datos span {
+  color: var(--hueso-tenue);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 520px) {
+  .editor-nuevo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .editor-nuevo .editor-precio {
+    flex: 1;
+  }
+}
+
 .editor-nota {
   margin-top: 1rem;
   color: var(--hueso-tenue);
