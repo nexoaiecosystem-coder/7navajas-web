@@ -12,8 +12,8 @@
   --bronce-oscuro: #8a6d2f;
   --acero: #3a4750;
 
-  /* serif clásica de cartel de barbería antigua */
-  --font-display: 'Fraunces', serif;
+  /* sans moderna y angular para el logo y titulares; el italic de detalle sigue en serif clasica */
+  --font-display: 'Unbounded', sans-serif;
   --font-detalle: 'Fraunces', serif;
   --font-cuerpo: 'Work Sans', sans-serif;
 
