@@ -1,6 +1,8 @@
 export default function Hero({ onReservar }) {
   return (
     <section className="hero">
+      <div className="hero-orb hero-orb-1" aria-hidden="true" />
+      <div className="hero-orb hero-orb-2" aria-hidden="true" />
       <div className="container hero-content">
         <span className="hero-tag">Barbería · Paso Carrasco, Montevideo</span>
         <h1 className="hero-title">

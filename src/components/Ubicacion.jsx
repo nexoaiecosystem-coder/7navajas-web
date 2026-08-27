@@ -1,4 +1,5 @@
 import { NEGOCIO, HORARIOS, HORARIOS_TEXTO } from '../data/negocio'
+import Reveal from './Reveal'
 
 // ¿Está abierta la barbería en este momento? (hora de Uruguay)
 function abiertoAhora() {
@@ -16,14 +17,16 @@ export default function Ubicacion() {
   return (
     <section className="ubicacion" id="ubicacion">
       <div className="container">
-        <span className="section-tag">Dónde estamos</span>
-        <h2 className="section-title">Ubicación y horarios</h2>
+        <Reveal>
+          <span className="section-tag">Dónde estamos</span>
+          <h2 className="section-title">Ubicación y horarios</h2>
+        </Reveal>
         <div className="ubicacion-grid">
-          <div className="ubicacion-bloque">
+          <Reveal className="ubicacion-bloque">
             <h3>Dirección</h3>
             <p>{NEGOCIO.direccion}</p>
-          </div>
-          <div className="ubicacion-bloque">
+          </Reveal>
+          <Reveal className="ubicacion-bloque" delay={100}>
             <h3>
               Horarios{' '}
               <span className={abierto ? 'estado-chip abierto' : 'estado-chip cerrado'}>
@@ -41,9 +44,9 @@ export default function Ubicacion() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </Reveal>
         </div>
-        <div className="mapa-marco">
+        <Reveal className="mapa-marco" delay={150}>
           <iframe
             className="mapa"
             title="Mapa: 7 Navajas Barber"
@@ -60,7 +63,7 @@ export default function Ubicacion() {
           >
             Cómo llegar
           </a>
-        </div>
+        </Reveal>
       </div>
     </section>
   )

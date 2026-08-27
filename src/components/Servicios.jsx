@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useCatalogo } from '../lib/catalogo'
 import { fotoServicio } from '../data/fotosServicios'
+import Reveal from './Reveal'
 
 const plata = (n) => '$' + (n || 0).toLocaleString('es-UY')
 
@@ -23,8 +24,10 @@ export default function Servicios({ onReservar }) {
   return (
     <section id="servicios">
       <div className="container">
-        <span className="section-tag">Lista de precios</span>
-        <h2 className="section-title">Servicios</h2>
+        <Reveal>
+          <span className="section-tag">Lista de precios</span>
+          <h2 className="section-title">Servicios</h2>
+        </Reveal>
 
         <button
           className="servicios-toggle"
@@ -51,10 +54,12 @@ export default function Servicios({ onReservar }) {
           <div className="servicios-inner">
             <p className="section-nota">Tocá un servicio para reservarlo.</p>
             <div className="servicios-grid">
-              {servicios.map((s) => (
-                <article
+              {servicios.map((s, i) => (
+                <Reveal
+                  as="article"
                   className="servicio-card"
                   key={s.id}
+                  delay={Math.min(i * 70, 420)}
                   role="button"
                   tabIndex={abierto ? 0 : -1}
                   onClick={() => reservar(s.id)}
@@ -75,7 +80,7 @@ export default function Servicios({ onReservar }) {
                       {s.nota && <span className="chip-nota">{s.nota}</span>}
                     </div>
                   </div>
-                </article>
+                </Reveal>
               ))}
             </div>
           </div>

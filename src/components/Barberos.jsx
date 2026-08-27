@@ -1,4 +1,5 @@
 import { useCatalogo } from '../lib/catalogo'
+import Reveal from './Reveal'
 
 const iniciales = (nombre) =>
   nombre
@@ -14,13 +15,17 @@ export default function Barberos({ onReservar }) {
   return (
     <section className="barberos" id="barberos">
       <div className="container">
-        <span className="section-tag">El equipo</span>
-        <h2 className="section-title">Barberos</h2>
+        <Reveal>
+          <span className="section-tag">El equipo</span>
+          <h2 className="section-title">Barberos</h2>
+        </Reveal>
         <div className="barberos-grid">
-          {barberos.map((b) => (
-            <article
+          {barberos.map((b, i) => (
+            <Reveal
+              as="article"
               className="barbero-card"
               key={b.id}
+              delay={Math.min(i * 80, 400)}
               role="button"
               tabIndex={0}
               onClick={() => reservar(b.id)}
@@ -43,7 +48,7 @@ export default function Barberos({ onReservar }) {
                 <p className="barbero-apodo">Barbero</p>
                 <span className="card-reservar">Reservar turno →</span>
               </div>
-            </article>
+            </Reveal>
           ))}
         </div>
       </div>
