@@ -1,8 +1,10 @@
+import Reveal from './Reveal'
+
 export default function Sobre() {
   return (
     <section className="sobre" id="sobre">
       <div className="container">
-        <div className="sobre-texto">
+        <Reveal className="sobre-texto">
           <span className="section-tag">Sobre nosotros</span>
           <h2 className="section-title">El oficio primero</h2>
           <p>
@@ -14,7 +16,7 @@ export default function Sobre() {
             Somos tres barberos con estilos propios y una sola regla: que te
             vayas mejor de lo que llegaste.
           </p>
-        </div>
+        </Reveal>
       </div>
     </section>
   )

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NEGOCIO } from '../data/negocio'
 import { useCatalogo } from '../lib/catalogo'
+import Reveal from './Reveal'
 
 export default function Galeria() {
   const { galeria } = useCatalogo()
@@ -24,13 +25,17 @@ export default function Galeria() {
   return (
     <section className="galeria" id="galeria">
       <div className="container">
-        <span className="section-tag">Trabajos reales</span>
-        <h2 className="section-title">Los cortes hablan</h2>
+        <Reveal>
+          <span className="section-tag">Trabajos reales</span>
+          <h2 className="section-title">Los cortes hablan</h2>
+        </Reveal>
         <div className="galeria-grid">
-          {galeria.map((f) => (
-            <figure
+          {galeria.map((f, i) => (
+            <Reveal
+              as="figure"
               className="galeria-item"
               key={f.id}
+              delay={Math.min(i * 60, 360)}
               role="button"
               tabIndex={0}
               onClick={() => setGrande(f)}
@@ -39,7 +44,7 @@ export default function Galeria() {
               }}
             >
               <img src={f.foto_url} alt={f.alt || ''} loading="lazy" />
-            </figure>
+            </Reveal>
           ))}
         </div>
         <div className="galeria-cta">

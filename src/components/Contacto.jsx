@@ -1,13 +1,16 @@
 import { NEGOCIO } from '../data/negocio'
+import Reveal from './Reveal'
 
 export default function Contacto({ onReservar, onCancelar }) {
   return (
     <section id="contacto">
       <div className="container">
-        <span className="section-tag">Hablemos</span>
-        <h2 className="section-title">Contacto</h2>
+        <Reveal>
+          <span className="section-tag">Hablemos</span>
+          <h2 className="section-title">Contacto</h2>
+        </Reveal>
         <div className="contacto-grid">
-          <article className="contacto-card">
+          <Reveal as="article" className="contacto-card">
             <div className="contacto-icono">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="5" />
@@ -28,9 +31,9 @@ export default function Contacto({ onReservar, onCancelar }) {
             >
               @{NEGOCIO.instagram}
             </a>
-          </article>
+          </Reveal>
 
-          <article className="contacto-card">
+          <Reveal as="article" className="contacto-card" delay={90}>
             <div className="contacto-icono">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" />
@@ -47,9 +50,9 @@ export default function Contacto({ onReservar, onCancelar }) {
             >
               Cómo llegar
             </a>
-          </article>
+          </Reveal>
 
-          <article className="contacto-card">
+          <Reveal as="article" className="contacto-card" delay={180}>
             <div className="contacto-icono">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="5" width="18" height="16" rx="3" />
@@ -69,7 +72,7 @@ export default function Contacto({ onReservar, onCancelar }) {
                 Cancelar turno
               </button>
             </div>
-          </article>
+          </Reveal>
         </div>
       </div>
     </section>
