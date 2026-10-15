@@ -1,5 +1,6 @@
 import { useCatalogo } from '../lib/catalogo'
 import Reveal from './Reveal'
+import { onTiltMove, onTiltLeave } from '../lib/tilt'
 
 const iniciales = (nombre) =>
   nombre
@@ -29,6 +30,8 @@ export default function Barberos({ onReservar }) {
               role="button"
               tabIndex={0}
               onClick={() => reservar(b.id)}
+              onMouseMove={onTiltMove}
+              onMouseLeave={onTiltLeave}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()

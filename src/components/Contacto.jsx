@@ -1,5 +1,6 @@
 import { NEGOCIO } from '../data/negocio'
 import Reveal from './Reveal'
+import { onTiltMove, onTiltLeave } from '../lib/tilt'
 
 export default function Contacto({ onReservar, onCancelar }) {
   return (
@@ -10,7 +11,7 @@ export default function Contacto({ onReservar, onCancelar }) {
           <h2 className="section-title">Contacto</h2>
         </Reveal>
         <div className="contacto-grid">
-          <Reveal as="article" className="contacto-card">
+          <Reveal as="article" className="contacto-card" onMouseMove={onTiltMove} onMouseLeave={onTiltLeave}>
             <div className="contacto-icono">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="5" />
@@ -33,7 +34,7 @@ export default function Contacto({ onReservar, onCancelar }) {
             </a>
           </Reveal>
 
-          <Reveal as="article" className="contacto-card" delay={90}>
+          <Reveal as="article" className="contacto-card" delay={90} onMouseMove={onTiltMove} onMouseLeave={onTiltLeave}>
             <div className="contacto-icono">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" />
@@ -52,7 +53,7 @@ export default function Contacto({ onReservar, onCancelar }) {
             </a>
           </Reveal>
 
-          <Reveal as="article" className="contacto-card" delay={180}>
+          <Reveal as="article" className="contacto-card" delay={180} onMouseMove={onTiltMove} onMouseLeave={onTiltLeave}>
             <div className="contacto-icono">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="5" width="18" height="16" rx="3" />

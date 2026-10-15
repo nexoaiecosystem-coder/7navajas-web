@@ -48,7 +48,11 @@
 }
 
 .reveal-visible {
-  animation: reveal-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* sin fill-mode: al terminar, el transform/opacity vuelven a mandarlos
+     las reglas normales (incluido :hover), en vez de quedar pisados por la animación */
+  opacity: 1;
+  transform: none;
+  animation: reveal-in 0.75s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes reveal-in {
@@ -83,6 +87,24 @@ body {
   font-weight: 300;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Textura de grano sobre toda la web ---------- */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  pointer-events: none;
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    display: none;
+  }
 }
 
 .container {
@@ -419,10 +441,27 @@ section {
 }
 
 .hero-title .num {
-  background: var(--grad-oro);
+  background: linear-gradient(100deg, #a8823c 0%, #e6ca85 25%, #c9a24a 50%, #e6ca85 75%, #a8823c 100%);
+  background-size: 260% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  animation: oro-vivo 6s ease-in-out infinite;
+}
+
+@keyframes oro-vivo {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title .num {
+    animation: none;
+  }
 }
 
 @keyframes corte-navaja {
@@ -516,6 +555,58 @@ section {
   }
 }
 
+/* motitas de luz flotando, puro ambiente */
+.motas {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.motas span {
+  position: absolute;
+  bottom: -10px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--bronce-claro);
+  box-shadow: 0 0 6px rgba(201, 162, 74, 0.8);
+  opacity: 0;
+  animation: mota-sube 8s linear infinite;
+}
+
+.motas span:nth-child(1) { left: 6%; animation-delay: 0s; animation-duration: 7.5s; }
+.motas span:nth-child(2) { left: 18%; animation-delay: 1.3s; animation-duration: 9s; }
+.motas span:nth-child(3) { left: 32%; animation-delay: 2.6s; animation-duration: 8.2s; }
+.motas span:nth-child(4) { left: 48%; animation-delay: 0.7s; animation-duration: 7s; }
+.motas span:nth-child(5) { left: 63%; animation-delay: 3.4s; animation-duration: 9.5s; }
+.motas span:nth-child(6) { left: 77%; animation-delay: 1.9s; animation-duration: 8.6s; }
+.motas span:nth-child(7) { left: 88%; animation-delay: 2.2s; animation-duration: 7.8s; }
+
+@keyframes mota-sube {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  85% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateY(-360px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motas {
+    display: none;
+  }
+}
+
 /* ---------- Botones ---------- */
 .btn {
   display: inline-block;
@@ -564,6 +655,38 @@ section {
 .btn-primary:hover::after,
 .nav-cta:hover::after {
   left: 130%;
+}
+
+/* brillo automático, de tanto en tanto, sin necesidad de pasar el mouse */
+.btn-primary::before,
+.nav-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 35%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  animation: brillo-idle 5s ease-in-out infinite;
+}
+
+@keyframes brillo-idle {
+  0%, 60%, 100% {
+    left: -60%;
+  }
+  80% {
+    left: 130%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary::before,
+  .nav-cta::before {
+    animation: none;
+    display: none;
+  }
 }
 
 .btn-outline {
@@ -739,7 +862,7 @@ section {
 .servicio-card:hover,
 .servicio-card:focus-visible {
   border-color: rgba(201, 162, 74, 0.55);
-  transform: translateY(-4px);
+  transform: translateY(-4px) perspective(700px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   box-shadow: var(--sombra-2), var(--sombra-oro);
   outline: none;
 }
@@ -862,7 +985,7 @@ section {
 .barbero-card:hover,
 .barbero-card:focus-visible {
   border-color: rgba(201, 162, 74, 0.55);
-  transform: translateY(-4px);
+  transform: translateY(-4px) perspective(700px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   box-shadow: var(--sombra-2), var(--sombra-oro);
   outline: none;
 }
@@ -1448,7 +1571,7 @@ section {
 
 .contacto-card:hover {
   border-color: rgba(201, 162, 74, 0.55);
-  transform: translateY(-4px);
+  transform: translateY(-4px) perspective(700px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   box-shadow: var(--sombra-2), var(--sombra-oro);
 }
 

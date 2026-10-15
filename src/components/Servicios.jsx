@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useCatalogo } from '../lib/catalogo'
 import { fotoServicio } from '../data/fotosServicios'
 import Reveal from './Reveal'
+import { onTiltMove, onTiltLeave } from '../lib/tilt'
 
 const plata = (n) => '$' + (n || 0).toLocaleString('es-UY')
 
@@ -63,6 +64,8 @@ export default function Servicios({ onReservar }) {
                   role="button"
                   tabIndex={abierto ? 0 : -1}
                   onClick={() => reservar(s.id)}
+                  onMouseMove={onTiltMove}
+                  onMouseLeave={onTiltLeave}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault()
