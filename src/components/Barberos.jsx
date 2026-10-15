@@ -1,6 +1,6 @@
 import { useCatalogo } from '../lib/catalogo'
 import Reveal from './Reveal'
-import { onTiltMove, onTiltLeave } from '../lib/tilt'
+import ImgFade from './ImgFade'
 
 const iniciales = (nombre) =>
   nombre
@@ -30,8 +30,6 @@ export default function Barberos({ onReservar }) {
               role="button"
               tabIndex={0}
               onClick={() => reservar(b.id)}
-              onMouseMove={onTiltMove}
-              onMouseLeave={onTiltLeave}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
@@ -41,7 +39,7 @@ export default function Barberos({ onReservar }) {
             >
               <div className="barbero-retrato">
                 {b.foto_url ? (
-                  <img src={b.foto_url} alt={b.nombre} loading="lazy" />
+                  <ImgFade src={b.foto_url} alt={b.nombre} />
                 ) : (
                   <span className="barbero-retrato-iniciales">{iniciales(b.nombre)}</span>
                 )}

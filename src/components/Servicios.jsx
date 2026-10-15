@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useCatalogo } from '../lib/catalogo'
 import { fotoServicio } from '../data/fotosServicios'
 import Reveal from './Reveal'
-import { onTiltMove, onTiltLeave } from '../lib/tilt'
+import ImgFade from './ImgFade'
 
 const plata = (n) => '$' + (n || 0).toLocaleString('es-UY')
 
@@ -64,8 +64,6 @@ export default function Servicios({ onReservar }) {
                   role="button"
                   tabIndex={abierto ? 0 : -1}
                   onClick={() => reservar(s.id)}
-                  onMouseMove={onTiltMove}
-                  onMouseLeave={onTiltLeave}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault()
@@ -74,7 +72,7 @@ export default function Servicios({ onReservar }) {
                   }}
                 >
                   <div className="servicio-foto">
-                    <img src={fotoServicio(s)} alt={s.nombre} loading="lazy" />
+                    <ImgFade src={fotoServicio(s)} alt={s.nombre} />
                   </div>
                   <div className="servicio-cuerpo">
                     <h3 className="servicio-nombre">{s.nombre}</h3>

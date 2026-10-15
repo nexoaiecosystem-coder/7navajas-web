@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { NEGOCIO } from '../data/negocio'
 import { useCatalogo } from '../lib/catalogo'
 import Reveal from './Reveal'
+import ImgFade from './ImgFade'
 
 export default function Galeria() {
   const { galeria } = useCatalogo()
@@ -43,7 +44,7 @@ export default function Galeria() {
                 if (e.key === 'Enter') setGrande(f)
               }}
             >
-              <img src={f.foto_url} alt={f.alt || ''} loading="lazy" />
+              <ImgFade src={f.foto_url} alt={f.alt || ''} />
             </Reveal>
           ))}
         </div>

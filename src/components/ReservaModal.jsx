@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useCatalogo } from '../lib/catalogo'
 import { fotoServicio } from '../data/fotosServicios'
 import { HORARIOS } from '../data/negocio'
+import ImgFade from './ImgFade'
 
 // fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
 const hoy = () => {
@@ -254,7 +255,7 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                     className={form.servicio === s.id ? 'op-servicio activo' : 'op-servicio'}
                     onClick={() => elegirServicio(s.id)}
                   >
-                    <img src={fotoServicio(s)} alt="" loading="lazy" />
+                    <ImgFade src={fotoServicio(s)} alt="" />
                     <span className="op-texto">
                       <strong>{s.nombre}</strong>
                       {s.nota && <em>{s.nota}</em>}
@@ -274,7 +275,7 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                     onClick={() => elegirBarbero(b.id)}
                   >
                     {b.foto_url ? (
-                      <img className="op-foto-redonda" src={b.foto_url} alt="" loading="lazy" />
+                      <ImgFade className="op-foto-redonda" src={b.foto_url} alt="" />
                     ) : (
                       <span className="op-avatar">{iniciales(b.nombre)}</span>
                     )}
