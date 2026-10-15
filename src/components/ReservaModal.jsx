@@ -15,7 +15,7 @@ const horaActual = () => {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-// Horarios disponibles (cada 30 min) según el día de la semana
+// Horarios disponibles (cada 45 min) según el día de la semana
 function slotsParaFecha(fechaStr) {
   if (!fechaStr) return []
   const dia = new Date(fechaStr + 'T12:00:00').getDay()
@@ -23,9 +23,10 @@ function slotsParaFecha(fechaStr) {
   if (!rango) return []
   const [desde, hasta] = rango
   const slots = []
-  for (let h = desde; h < hasta; h++) {
-    slots.push(`${String(h).padStart(2, '0')}:00`)
-    slots.push(`${String(h).padStart(2, '0')}:30`)
+  for (let m = desde * 60; m < hasta * 60; m += 45) {
+    const h = Math.floor(m / 60)
+    const min = m % 60
+    slots.push(`${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`)
   }
   return slots
 }
