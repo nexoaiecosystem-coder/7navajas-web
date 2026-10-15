@@ -2561,12 +2561,31 @@ section {
   border-color: var(--bronce);
 }
 
+.panel-salir.activo {
+  color: var(--bronce);
+  border-color: rgba(201, 162, 74, 0.55);
+  background: rgba(201, 162, 74, 0.08);
+}
+
+.panel-salir:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .panel-barra {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.panel-barra-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .panel-barra .panel-volver {

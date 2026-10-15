@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useCatalogo } from '../lib/catalogo'
 import { fotoServicio } from '../data/fotosServicios'
+import { pushDisponible, suscripcionActual, activarPush, desactivarPush } from '../lib/push'
 
 // fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
 const hoy = () => {
@@ -146,6 +147,40 @@ export default function Panel({ usuario, onCuenta }) {
       vigente = false
     }
   }, [usuario])
+
+  // 'revisando' | 'no-disponible' | 'inactivo' | 'activo' | 'guardando'
+  const [push, setPush] = useState('revisando')
+
+  useEffect(() => {
+    if (acceso.estado !== 'ok') return
+    if (!pushDisponible()) {
+      setPush('no-disponible')
+      return
+    }
+    let vigente = true
+    suscripcionActual()
+      .then((sub) => vigente && setPush(sub ? 'activo' : 'inactivo'))
+      .catch(() => vigente && setPush('no-disponible'))
+    return () => {
+      vigente = false
+    }
+  }, [acceso.estado])
+
+  async function alternarPush() {
+    setPush('guardando')
+    try {
+      if (push === 'activo') {
+        await desactivarPush()
+        setPush('inactivo')
+      } else {
+        await activarPush(usuario.email)
+        setPush('activo')
+      }
+    } catch (err) {
+      window.alert(err.message || 'No se pudieron guardar las notificaciones.')
+      setPush(push === 'activo' ? 'activo' : 'inactivo')
+    }
+  }
 
   const esAdmin = acceso.esAdmin
   // el barbero común solo se ve a sí mismo; el dueño elige con las pestañas
@@ -674,9 +709,24 @@ export default function Panel({ usuario, onCuenta }) {
           <a className="panel-volver" href="#">
             ← Volver a la web
           </a>
-          <button className="panel-salir" onClick={salir}>
-            Cerrar sesión
-          </button>
+          <div className="panel-barra-acciones">
+            {(push === 'activo' || push === 'inactivo' || push === 'guardando') && (
+              <button
+                className={push === 'activo' ? 'panel-salir activo' : 'panel-salir'}
+                onClick={alternarPush}
+                disabled={push === 'guardando'}
+              >
+                {push === 'guardando'
+                  ? 'Un momento…'
+                  : push === 'activo'
+                    ? '🔔 Avisos activados'
+                    : '🔔 Avisarme por turno nuevo'}
+              </button>
+            )}
+            <button className="panel-salir" onClick={salir}>
+              Cerrar sesión
+            </button>
+          </div>
         </div>
 
         <header className="panel-head">
