@@ -282,7 +282,14 @@ export default function Panel({ usuario, onCuenta }) {
     const cambios = {}
     for (const c of campos) {
       const v = valorDe(item, c)
-      cambios[c] = c === 'precio' ? Number(v) || 0 : v === '' ? null : v
+      cambios[c] =
+        c === 'precio'
+          ? Number(v) || 0
+          : c === 'whatsapp'
+            ? v.replace(/\D/g, '') || null
+            : v === ''
+              ? null
+              : v
     }
     const { error: err } = await supabase.from(tabla).update(cambios).eq('id', item.id)
     setMsgContenido(
@@ -536,7 +543,7 @@ export default function Panel({ usuario, onCuenta }) {
   }
 
   async function guardarBarbero(b) {
-    await guardarFila('barberos', b, ['nombre', 'apodo'])
+    await guardarFila('barberos', b, ['nombre', 'apodo', 'whatsapp'])
     await sincronizarAccesoBarbero(b)
   }
 
@@ -1209,6 +1216,13 @@ export default function Panel({ usuario, onCuenta }) {
                             value={emailDe(b)}
                             onChange={(e) => editar(b.id, 'email', e.target.value)}
                             aria-label="Mail de acceso al panel"
+                          />
+                          <input
+                            type="tel"
+                            placeholder="WhatsApp (ej. 099123456)"
+                            value={valorDe(b, 'whatsapp')}
+                            onChange={(e) => editar(b.id, 'whatsapp', e.target.value)}
+                            aria-label="WhatsApp del barbero"
                           />
                         </div>
                       </div>

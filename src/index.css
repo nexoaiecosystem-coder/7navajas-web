@@ -1952,7 +1952,12 @@ section {
 
 .editor-linea2 {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
+}
+
+.editor-linea2 input {
+  flex: 1 1 140px;
 }
 
 .editor-precio {
