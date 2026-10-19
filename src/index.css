@@ -1623,7 +1623,7 @@ section {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   padding-right: 2.25rem;
 }
 
@@ -1666,7 +1666,7 @@ section {
 }
 
 .modal-reserva .section-title {
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 
 .paso-elegidos {
@@ -1783,7 +1783,7 @@ section {
 
 .paso-horario {
   display: grid;
-  gap: 1rem;
+  gap: 0.6rem;
 }
 
 .paso-nota {
@@ -1798,30 +1798,30 @@ section {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(201, 162, 74, 0.18);
   border-radius: var(--radio-m);
-  padding: 0.9rem;
+  padding: 0.55rem;
 }
 
 .calendario-cabecera {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.4rem;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--hueso);
 }
 
 .calendario-mes-btn {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   border-radius: var(--radio-s);
   border: 1px solid rgba(201, 162, 74, 0.3);
   background: rgba(255, 255, 255, 0.03);
   color: var(--hueso);
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
@@ -1840,13 +1840,13 @@ section {
 .calendario-dias-semana {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.15rem;
 }
 
 .calendario-dias-semana span {
   text-align: center;
   color: var(--hueso-tenue);
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -1854,11 +1854,11 @@ section {
 .calendario-grilla {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
+  gap: 2px;
 }
 
 .calendario-celda {
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 0.78;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1867,7 +1867,7 @@ section {
   border-radius: var(--radio-s);
   color: var(--hueso);
   font-family: var(--font-cuerpo);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1876,7 +1876,7 @@ section {
   cursor: default;
 }
 
-.calendario-celda:not(.vacia):not(:disabled):hover {
+.calendario-celda:not(.vacia):not(.activa):not(:disabled):hover {
   border-color: var(--bronce);
   color: var(--bronce);
 }
@@ -1895,8 +1895,8 @@ section {
 
 .chips-horas {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
-  gap: 0.45rem;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 0.35rem;
 }
 
 .chip {
@@ -1906,8 +1906,8 @@ section {
   color: var(--hueso);
   font-family: var(--font-cuerpo);
   font-weight: 500;
-  font-size: 0.95rem;
-  padding: 0.6rem 0.4rem;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.3rem;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -2436,8 +2436,8 @@ section {
 @media (max-width: 520px) {
   .modal {
     max-width: none;
-    max-height: 90vh;
-    padding: 2.25rem 1.25rem 1.5rem;
+    max-height: 92vh;
+    padding: 1.75rem 1.25rem 1.25rem;
   }
 }
 
