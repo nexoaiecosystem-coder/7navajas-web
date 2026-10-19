@@ -101,9 +101,12 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
   const datosListos = Boolean(usuario && form.nombre && form.telefono)
 
   const diaCerrado = Boolean(form.fecha) && slotsParaFecha(form.fecha).length === 0
-  const slots = slotsParaFecha(form.fecha).filter(
-    (s) => form.fecha !== hoy() || s > horaActual(),
-  )
+  const diaLibreBarbero =
+    Boolean(form.fecha) &&
+    (barberoElegido?.dias_no_laborales || []).includes(new Date(form.fecha + 'T12:00:00').getDay())
+  const slots = diaLibreBarbero
+    ? []
+    : slotsParaFecha(form.fecha).filter((s) => form.fecha !== hoy() || s > horaActual())
 
   function elegirServicio(id) {
     setForm((f) => ({ ...f, servicio: id }))
@@ -306,6 +309,11 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                   <p className="paso-nota">Elegí una fecha para ver los horarios libres.</p>
                 ) : diaCerrado ? (
                   <p className="paso-nota">Ese día la barbería está cerrada. Probá con otro.</p>
+                ) : diaLibreBarbero ? (
+                  <p className="paso-nota">
+                    Ese día no atiende {barberoElegido?.apodo || barberoElegido?.nombre}. Probá
+                    otro día o elegí otro barbero.
+                  </p>
                 ) : slots.length === 0 ? (
                   <p className="paso-nota">Ya no quedan horarios hoy. Probá mañana.</p>
                 ) : (
