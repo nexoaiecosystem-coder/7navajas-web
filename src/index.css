@@ -2432,23 +2432,12 @@ section {
   margin-bottom: 0.75rem;
 }
 
-/* En el celular, el modal sube desde abajo tipo hoja */
+/* En el celular, el modal queda centrado igual que en desktop */
 @media (max-width: 520px) {
-  .modal-backdrop {
-    padding: 0;
-    align-items: flex-end;
-  }
-
   .modal {
     max-width: none;
-    max-height: 94vh;
+    max-height: 90vh;
     padding: 2.25rem 1.25rem 1.5rem;
-    animation: modal-sube 0.4s cubic-bezier(0.32, 0.72, 0, 1) both;
-  }
-
-  @keyframes modal-sube {
-    from { transform: translateY(100%); }
-    to { transform: none; }
   }
 }
 
@@ -3108,6 +3097,12 @@ section {
   color: var(--hueso);
   font-family: var(--font-cuerpo);
   padding: 0.4rem 0.7rem;
+  color-scheme: dark;
+}
+
+.panel-fecha input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
 }
 
 .panel-tabs {
