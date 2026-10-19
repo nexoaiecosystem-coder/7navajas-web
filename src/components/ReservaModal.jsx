@@ -32,6 +32,92 @@ function slotsParaFecha(fechaStr) {
   return slots
 }
 
+const DIAS_SEMANA = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
+const MESES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+]
+
+// Calendario propio: los días cerrados (o que ese barbero no atiende) no se pueden ni tocar
+function Calendario({ fechaElegida, onElegir, diasNoLaborales = [] }) {
+  const hoyStr = hoy()
+  const hoyDate = new Date(hoyStr + 'T12:00:00')
+  const base = fechaElegida ? new Date(fechaElegida + 'T12:00:00') : hoyDate
+  const [mesVisible, setMesVisible] = useState(new Date(base.getFullYear(), base.getMonth(), 1))
+
+  const primerDiaSemana = new Date(mesVisible.getFullYear(), mesVisible.getMonth(), 1).getDay()
+  const diasEnMes = new Date(mesVisible.getFullYear(), mesVisible.getMonth() + 1, 0).getDate()
+
+  const fechaDe = (d) =>
+    `${mesVisible.getFullYear()}-${String(mesVisible.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+
+  function deshabilitado(d) {
+    const fechaStr = fechaDe(d)
+    if (fechaStr < hoyStr) return true
+    const diaSemana = new Date(fechaStr + 'T12:00:00').getDay()
+    if (!HORARIOS[diaSemana]) return true
+    if (diasNoLaborales.includes(diaSemana)) return true
+    if (fechaStr === hoyStr) {
+      return !slotsParaFecha(fechaStr).some((s) => s > horaActual())
+    }
+    return false
+  }
+
+  const esMesActual =
+    mesVisible.getFullYear() === hoyDate.getFullYear() && mesVisible.getMonth() === hoyDate.getMonth()
+
+  const celdas = [...Array(primerDiaSemana).fill(null), ...Array.from({ length: diasEnMes }, (_, i) => i + 1)]
+
+  return (
+    <div className="calendario">
+      <div className="calendario-cabecera">
+        <button
+          type="button"
+          className="calendario-mes-btn"
+          disabled={esMesActual}
+          onClick={() => setMesVisible(new Date(mesVisible.getFullYear(), mesVisible.getMonth() - 1, 1))}
+          aria-label="Mes anterior"
+        >
+          ‹
+        </button>
+        <strong>
+          {MESES[mesVisible.getMonth()]} {mesVisible.getFullYear()}
+        </strong>
+        <button
+          type="button"
+          className="calendario-mes-btn"
+          onClick={() => setMesVisible(new Date(mesVisible.getFullYear(), mesVisible.getMonth() + 1, 1))}
+          aria-label="Mes siguiente"
+        >
+          ›
+        </button>
+      </div>
+      <div className="calendario-dias-semana">
+        {DIAS_SEMANA.map((d, i) => (
+          <span key={i}>{d}</span>
+        ))}
+      </div>
+      <div className="calendario-grilla">
+        {celdas.map((d, i) =>
+          d === null ? (
+            <span key={i} className="calendario-celda vacia" />
+          ) : (
+            <button
+              type="button"
+              key={i}
+              disabled={deshabilitado(d)}
+              className={fechaDe(d) === fechaElegida ? 'calendario-celda activa' : 'calendario-celda'}
+              onClick={() => onElegir(fechaDe(d))}
+            >
+              {d}
+            </button>
+          ),
+        )}
+      </div>
+    </div>
+  )
+}
+
 const plata = (n) => '$' + (n || 0).toLocaleString('es-UY')
 
 const iniciales = (nombre) =>
@@ -100,7 +186,7 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
   const barberoElegido = barberos.find((b) => b.id === form.barbero)
   const datosListos = Boolean(usuario && form.nombre && form.telefono)
 
-  const diaCerrado = Boolean(form.fecha) && slotsParaFecha(form.fecha).length === 0
+  // defensa extra: el calendario ya impide elegir estos días, esto es solo por las dudas
   const diaLibreBarbero =
     Boolean(form.fecha) &&
     (barberoElegido?.dias_no_laborales || []).includes(new Date(form.fecha + 'T12:00:00').getDay())
@@ -294,28 +380,13 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
 
             {paso === 'horario' && (
               <div className="paso-horario">
-                <div className="campo">
-                  <label htmlFor="r-fecha">Fecha</label>
-                  <input
-                    id="r-fecha"
-                    type="date"
-                    required
-                    min={hoy()}
-                    value={form.fecha}
-                    onChange={(e) => setForm((f) => ({ ...f, fecha: e.target.value, hora: '' }))}
-                  />
-                </div>
+                <Calendario
+                  fechaElegida={form.fecha}
+                  diasNoLaborales={barberoElegido?.dias_no_laborales}
+                  onElegir={(f) => setForm((frm) => ({ ...frm, fecha: f, hora: '' }))}
+                />
                 {!form.fecha ? (
                   <p className="paso-nota">Elegí una fecha para ver los horarios libres.</p>
-                ) : diaCerrado ? (
-                  <p className="paso-nota">Ese día la barbería está cerrada. Probá con otro.</p>
-                ) : diaLibreBarbero ? (
-                  <p className="paso-nota">
-                    Ese día no atiende {barberoElegido?.apodo || barberoElegido?.nombre}. Probá
-                    otro día o elegí otro barbero.
-                  </p>
-                ) : slots.length === 0 ? (
-                  <p className="paso-nota">Ya no quedan horarios hoy. Probá mañana.</p>
                 ) : (
                   <div className="chips-horas">
                     {slots.map((s) => (

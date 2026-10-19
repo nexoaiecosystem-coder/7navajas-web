@@ -1793,6 +1793,106 @@ section {
   font-size: 0.95rem;
 }
 
+/* ---------- Calendario propio del asistente de reserva ---------- */
+.calendario {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(201, 162, 74, 0.18);
+  border-radius: var(--radio-m);
+  padding: 0.9rem;
+}
+
+.calendario-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--hueso);
+}
+
+.calendario-mes-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radio-s);
+  border: 1px solid rgba(201, 162, 74, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--hueso);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.calendario-mes-btn:hover:not(:disabled) {
+  color: var(--bronce);
+  border-color: var(--bronce);
+}
+
+.calendario-mes-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.calendario-dias-semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.3rem;
+}
+
+.calendario-dias-semana span {
+  text-align: center;
+  color: var(--hueso-tenue);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.calendario-grilla {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.calendario-celda {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radio-s);
+  color: var(--hueso);
+  font-family: var(--font-cuerpo);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.calendario-celda.vacia {
+  cursor: default;
+}
+
+.calendario-celda:not(.vacia):not(:disabled):hover {
+  border-color: var(--bronce);
+  color: var(--bronce);
+}
+
+.calendario-celda:disabled {
+  color: rgba(236, 231, 221, 0.2);
+  cursor: default;
+}
+
+.calendario-celda.activa {
+  background: var(--grad-oro);
+  border-color: transparent;
+  color: var(--carbon);
+  font-weight: 700;
+}
+
 .chips-horas {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
