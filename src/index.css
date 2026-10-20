@@ -1072,11 +1072,26 @@ section {
   outline: none;
   transition: border-color 0.2s;
   width: 100%;
+  /* sin esto, Android a veces dibuja su propio estilo nativo (incluidas
+     las esquinas) por encima del redondeado que le pedimos acá */
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .campo input:focus,
 .campo select:focus {
   border-color: var(--bronce);
+}
+
+/* el autocompletado de Chrome pinta su propio fondo (celeste/blanco) por
+   encima del nuestro; esto lo fuerza a seguir el tema oscuro */
+.campo input:-webkit-autofill,
+.campo input:-webkit-autofill:hover,
+.campo input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--hueso);
+  -webkit-box-shadow: 0 0 0 1000px var(--carbon-2) inset;
+  box-shadow: 0 0 0 1000px var(--carbon-2) inset;
+  transition: background-color 9999s ease-in-out 0s;
 }
 
 .campo select option {
