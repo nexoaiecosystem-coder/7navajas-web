@@ -34,7 +34,12 @@ export default function CuentaModal({ abierto, usuario, onCerrar }) {
       document.body.style.overflow = ''
       window.removeEventListener('keydown', onKey)
     }
-  }, [abierto, usuario, onCerrar])
+    // Solo se re-ejecuta al abrir/cerrar: si entrara "usuario" u "onCerrar"
+    // como dependencias, el auth listener de App (que actualiza "usuario"
+    // justo después de guardar) dispararía este efecto de nuevo y pisaría
+    // el estado "guardadoOk" antes de que el tic llegue a mostrarse.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abierto])
 
   if (!abierto) return null
 
