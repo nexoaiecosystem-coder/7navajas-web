@@ -825,6 +825,8 @@ section {
 .servicio-foto {
   height: 150px;
   overflow: hidden;
+  border-top-left-radius: var(--radio-m);
+  border-top-right-radius: var(--radio-m);
 }
 
 .servicio-foto img {
@@ -843,6 +845,9 @@ section {
   padding: 0.8rem 1rem 1rem;
   display: grid;
   gap: 0.5rem;
+  background: var(--grad-tarjeta);
+  border-bottom-left-radius: var(--radio-m);
+  border-bottom-right-radius: var(--radio-m);
 }
 
 .servicio-chips {
@@ -967,6 +972,8 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-top-left-radius: var(--radio-m);
+  border-top-right-radius: var(--radio-m);
 }
 
 .barbero-retrato img {
@@ -996,6 +1003,9 @@ section {
   display: grid;
   gap: 0.25rem;
   text-align: left;
+  background: var(--grad-tarjeta);
+  border-bottom-left-radius: var(--radio-m);
+  border-bottom-right-radius: var(--radio-m);
 }
 
 .barbero-card:hover,
