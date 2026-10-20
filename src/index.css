@@ -816,6 +816,10 @@ section {
   overflow: hidden;
   cursor: pointer;
   transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  /* crea la capa compuesta desde el arranque; si no, Chrome/Android a veces
+     recorta mal las esquinas de abajo al combinar overflow+radio+transform */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .servicio-foto {
@@ -952,6 +956,8 @@ section {
   flex-direction: column;
   cursor: pointer;
   transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .barbero-retrato {
