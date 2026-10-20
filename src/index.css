@@ -3448,6 +3448,15 @@ section {
   border-radius: var(--radio-m);
 }
 
+/* en algunos navegadores (sobre todo iOS) el overflow:hidden de una tarjeta
+   flex no recorta bien las esquinas de abajo; esto fuerza el recorte real */
+.servicio-card,
+.barbero-card,
+.contacto-card,
+.resenia {
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
 .galeria-item {
   overflow: hidden;
 }
