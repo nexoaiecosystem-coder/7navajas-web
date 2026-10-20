@@ -3503,9 +3503,3 @@ section {
   border-radius: 999px;
 }
 
-@media (max-width: 520px) {
-  /* en el celular el modal es una hoja: redondear solo arriba */
-  .modal {
-    border-radius: var(--radio-l) var(--radio-l) 0 0;
-  }
-}
