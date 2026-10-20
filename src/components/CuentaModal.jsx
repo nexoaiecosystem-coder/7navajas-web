@@ -8,10 +8,12 @@ export default function CuentaModal({ abierto, usuario, onCerrar }) {
   const [form, setForm] = useState(FORM_VACIO)
   const [msg, setMsg] = useState(null)
   const [cargando, setCargando] = useState(false)
+  const [guardadoOk, setGuardadoOk] = useState(false)
 
   useEffect(() => {
     if (!abierto) return
     setMsg(null)
+    setGuardadoOk(false)
     setModo('ingresar')
     setForm(
       usuario
@@ -109,7 +111,7 @@ export default function CuentaModal({ abierto, usuario, onCerrar }) {
         data: { nombre: form.nombre, telefono: form.telefono.replace(/\D/g, '') },
       })
       if (error) throw error
-      setMsg({ tipo: 'ok', texto: '¡Datos guardados! ✓' })
+      setGuardadoOk(true)
       setTimeout(onCerrar, 1100)
     } catch (err) {
       console.error(err)
@@ -137,7 +139,13 @@ export default function CuentaModal({ abierto, usuario, onCerrar }) {
         </button>
 
         {usuario ? (
-          <>
+          <div className="cuenta-area">
+            {guardadoOk && (
+              <div className="cuenta-exito-overlay">
+                <div className="exito-icono verde">✓</div>
+                <p className="exito-texto">¡Guardado con éxito!</p>
+              </div>
+            )}
             <span className="section-tag">Tu cuenta</span>
             <h2 className="section-title">
               Hola, {usuario.user_metadata?.nombre?.split(' ')[0] || 'cliente'}
@@ -164,7 +172,7 @@ export default function CuentaModal({ abierto, usuario, onCerrar }) {
                 </button>
               </div>
             </form>
-          </>
+          </div>
         ) : (
           <>
             <span className="section-tag">Clientes</span>

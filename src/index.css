@@ -2405,8 +2405,41 @@ section {
   justify-content: center;
 }
 
+.exito-icono.verde {
+  border-color: #58b368;
+  color: #58b368;
+  box-shadow: 0 0 0 6px rgba(88, 179, 104, 0.12);
+}
+
 .exito-texto {
   font-size: 1.05rem;
+}
+
+/* ---------- Overlay de éxito sobre "Tu cuenta" ---------- */
+.cuenta-area {
+  position: relative;
+}
+
+.cuenta-exito-overlay {
+  position: absolute;
+  inset: -2.5rem -2rem -2rem -2rem;
+  z-index: 5;
+  background: var(--grad-tarjeta);
+  border-radius: var(--radio-m);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: modal-fade 0.2s ease both;
+}
+
+.cuenta-exito-overlay .exito-texto {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--hueso);
 }
 
 .exito-nota {
