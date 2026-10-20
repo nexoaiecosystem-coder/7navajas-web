@@ -2491,6 +2491,12 @@ section {
     max-height: 92vh;
     padding: 1.75rem 1.25rem 1.25rem;
   }
+
+  /* el overlay de éxito tiene que tapar exactamente el padding del modal
+     de acá arriba; si no, se pasa de esos bordes y aparece un scroll de más */
+  .cuenta-exito-overlay {
+    inset: -1.75rem -1.25rem -1.25rem -1.25rem;
+  }
 }
 
 /* ---------- Ubicación ---------- */
