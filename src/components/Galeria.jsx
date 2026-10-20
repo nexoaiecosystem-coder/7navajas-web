@@ -31,12 +31,10 @@ export default function Galeria() {
           <h2 className="section-title">Los cortes hablan</h2>
         </Reveal>
         <div className="galeria-grid">
-          {galeria.map((f, i) => (
-            <Reveal
-              as="figure"
+          {galeria.map((f) => (
+            <figure
               className="galeria-item"
               key={f.id}
-              delay={Math.min(i * 60, 360)}
               role="button"
               tabIndex={0}
               onClick={() => setGrande(f)}
@@ -45,7 +43,7 @@ export default function Galeria() {
               }}
             >
               <ImgFade src={f.foto_url} alt={f.alt || ''} />
-            </Reveal>
+            </figure>
           ))}
         </div>
         <div className="galeria-cta">

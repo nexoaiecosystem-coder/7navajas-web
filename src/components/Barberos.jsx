@@ -21,12 +21,10 @@ export default function Barberos({ onReservar }) {
           <h2 className="section-title">Barberos</h2>
         </Reveal>
         <div className="barberos-grid">
-          {barberos.map((b, i) => (
-            <Reveal
-              as="article"
+          {barberos.map((b) => (
+            <article
               className="barbero-card"
               key={b.id}
-              delay={Math.min(i * 80, 400)}
               role="button"
               tabIndex={0}
               onClick={() => reservar(b.id)}
@@ -49,7 +47,7 @@ export default function Barberos({ onReservar }) {
                 <p className="barbero-apodo">Barbero</p>
                 <span className="card-reservar">Reservar turno →</span>
               </div>
-            </Reveal>
+            </article>
           ))}
         </div>
       </div>

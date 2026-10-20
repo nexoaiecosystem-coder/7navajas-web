@@ -55,12 +55,10 @@ export default function Servicios({ onReservar }) {
           <div className="servicios-inner">
             <p className="section-nota">Tocá un servicio para reservarlo.</p>
             <div className="servicios-grid">
-              {servicios.map((s, i) => (
-                <Reveal
-                  as="article"
+              {servicios.map((s) => (
+                <article
                   className="servicio-card"
                   key={s.id}
-                  delay={Math.min(i * 70, 420)}
                   role="button"
                   tabIndex={abierto ? 0 : -1}
                   onClick={() => reservar(s.id)}
@@ -81,7 +79,7 @@ export default function Servicios({ onReservar }) {
                       {s.nota && <span className="chip-nota">{s.nota}</span>}
                     </div>
                   </div>
-                </Reveal>
+                </article>
               ))}
             </div>
           </div>
