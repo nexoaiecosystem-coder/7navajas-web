@@ -111,6 +111,7 @@ export default function CuentaModal({ abierto, usuario, onCerrar }) {
         data: { nombre: form.nombre, telefono: form.telefono.replace(/\D/g, '') },
       })
       if (error) throw error
+      document.activeElement?.blur()
       setGuardadoOk(true)
       setTimeout(onCerrar, 2000)
     } catch (err) {
