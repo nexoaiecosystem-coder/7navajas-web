@@ -104,15 +104,19 @@ export default function CuentaModal({ abierto, usuario, onCerrar }) {
     e.preventDefault()
     setCargando(true)
     setMsg(null)
-    const { error } = await supabase.auth.updateUser({
-      data: { nombre: form.nombre, telefono: form.telefono.replace(/\D/g, '') },
-    })
-    setCargando(false)
-    setMsg(
-      error
-        ? { tipo: 'error', texto: 'No se pudieron guardar los cambios.' }
-        : { tipo: 'ok', texto: 'Datos guardados.' },
-    )
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { nombre: form.nombre, telefono: form.telefono.replace(/\D/g, '') },
+      })
+      if (error) throw error
+      setMsg({ tipo: 'ok', texto: '¡Datos guardados! ✓' })
+      setTimeout(onCerrar, 1100)
+    } catch (err) {
+      console.error(err)
+      setMsg({ tipo: 'error', texto: 'No se pudieron guardar los cambios. Probá de nuevo en un rato.' })
+    } finally {
+      setCargando(false)
+    }
   }
 
   async function salir() {
@@ -153,7 +157,7 @@ export default function CuentaModal({ abierto, usuario, onCerrar }) {
               {msg && <p className={`reserva-msg ${msg.tipo}`}>{msg.texto}</p>}
               <div className="cuenta-acciones">
                 <button type="submit" className="btn btn-primary" disabled={cargando}>
-                  Guardar cambios
+                  {cargando ? 'Guardando…' : 'Guardar cambios'}
                 </button>
                 <button type="button" className="btn btn-outline" onClick={salir}>
                   Cerrar sesión
