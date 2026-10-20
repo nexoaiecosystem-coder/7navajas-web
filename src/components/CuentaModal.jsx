@@ -112,7 +112,7 @@ export default function CuentaModal({ abierto, usuario, onCerrar }) {
       })
       if (error) throw error
       setGuardadoOk(true)
-      setTimeout(onCerrar, 1100)
+      setTimeout(onCerrar, 2000)
     } catch (err) {
       console.error(err)
       setMsg({ tipo: 'error', texto: 'No se pudieron guardar los cambios. Probá de nuevo en un rato.' })
