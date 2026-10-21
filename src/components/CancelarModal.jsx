@@ -52,13 +52,10 @@ export default function CancelarModal({ abierto, usuario, onCerrar }) {
     e.preventDefault()
     setMsg(null)
     setBuscando(true)
-    const { data, error } = await supabase
-      .from('turnos')
-      .select('*')
-      .eq('cliente_telefono', soloDigitos(telefono))
-      .gte('fecha', hoy())
-      .order('fecha')
-      .order('hora')
+    const { data, error } = await supabase.rpc('turnos_por_telefono', {
+      p_telefono: soloDigitos(telefono),
+      p_desde: hoy(),
+    })
     setBuscando(false)
     if (error) {
       setMsg({ tipo: 'error', texto: 'No pudimos buscar tus turnos. Probá de nuevo.' })
@@ -72,8 +69,11 @@ export default function CancelarModal({ abierto, usuario, onCerrar }) {
       `¿Cancelar tu turno del ${fechaLinda(t.fecha)} a las ${t.hora.slice(0, 5)}?`,
     )
     if (!seguro) return
-    const { error } = await supabase.from('turnos').delete().eq('id', t.id)
-    if (error) {
+    const { data: cancelado, error } = await supabase.rpc('turnos_cancelar', {
+      p_id: t.id,
+      p_telefono: soloDigitos(telefono),
+    })
+    if (error || !cancelado) {
       setMsg({ tipo: 'error', texto: 'No se pudo cancelar el turno. Probá de nuevo.' })
       return
     }

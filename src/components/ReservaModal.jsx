@@ -191,13 +191,12 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
     let cancelado = false
     setBuscandoHoras(true)
     supabase
-      .from('turnos')
-      .select('hora')
-      .eq('barbero', form.barbero)
-      .eq('fecha', form.fecha)
+      .rpc('turnos_horas_ocupadas', { p_barbero: form.barbero, p_fecha: form.fecha })
       .then(({ data, error }) => {
         if (cancelado) return
-        if (!error) setHorasOcupadas((data || []).map((t) => t.hora.slice(0, 5)))
+        if (!error) {
+          setHorasOcupadas((data || []).map((t) => (typeof t === 'string' ? t : t.hora).slice(0, 5)))
+        }
         setBuscandoHoras(false)
       })
       .catch(() => {
@@ -258,24 +257,9 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
     }
     setEnviando(true)
     try {
-      const { data: ocupados, error: errorConsulta } = await supabase
-        .from('turnos')
-        .select('id')
-        .eq('barbero', form.barbero)
-        .eq('fecha', form.fecha)
-        .eq('hora', form.hora)
-        .limit(1)
-      if (errorConsulta) throw errorConsulta
-      if (ocupados && ocupados.length > 0) {
-        setEstado({
-          tipo: 'error',
-          texto: 'Ese horario se acaba de ocupar. Elegí otra hora.',
-        })
-        setHorasOcupadas((h) => [...h, form.hora])
-        setPaso('horario')
-        setForm((f) => ({ ...f, hora: '' }))
-        return
-      }
+      // el chequeo real y atómico lo hace la restricción única en la base de
+      // datos (ver el catch del código 23505 más abajo): acá no hace falta
+      // consultar antes, total la base rechaza el insert si ya está ocupado
       const { error: errorInsert } = await supabase.from('turnos').insert({
         cliente_nombre: form.nombre,
         cliente_telefono: form.telefono.replace(/\D/g, ''),
