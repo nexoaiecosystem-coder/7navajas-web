@@ -158,6 +158,8 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
   const [paso, setPaso] = useState('servicio')
   const [estado, setEstado] = useState({ tipo: null, texto: '' })
   const [enviando, setEnviando] = useState(false)
+  const [horasOcupadas, setHorasOcupadas] = useState([])
+  const [buscandoHoras, setBuscandoHoras] = useState(false)
 
   useEffect(() => {
     if (!abierto) return
@@ -180,6 +182,32 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
     }
   }, [abierto, preseleccion, usuario, onCerrar])
 
+  // Qué horas ya tiene ocupadas ese barbero ese día, para no ofrecerlas de nuevo
+  useEffect(() => {
+    if (!abierto || !supabase || !form.barbero || !form.fecha) {
+      setHorasOcupadas([])
+      return
+    }
+    let cancelado = false
+    setBuscandoHoras(true)
+    supabase
+      .from('turnos')
+      .select('hora')
+      .eq('barbero', form.barbero)
+      .eq('fecha', form.fecha)
+      .then(({ data, error }) => {
+        if (cancelado) return
+        if (!error) setHorasOcupadas((data || []).map((t) => t.hora.slice(0, 5)))
+        setBuscandoHoras(false)
+      })
+      .catch(() => {
+        if (!cancelado) setBuscandoHoras(false)
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [abierto, form.barbero, form.fecha])
+
   if (!abierto) return null
 
   const servicioElegido = servicios.find((s) => s.id === form.servicio)
@@ -192,7 +220,9 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
     (barberoElegido?.dias_no_laborales || []).includes(new Date(form.fecha + 'T12:00:00').getDay())
   const slots = diaLibreBarbero
     ? []
-    : slotsParaFecha(form.fecha).filter((s) => form.fecha !== hoy() || s > horaActual())
+    : slotsParaFecha(form.fecha)
+        .filter((s) => form.fecha !== hoy() || s > horaActual())
+        .filter((s) => !horasOcupadas.includes(s))
 
   function elegirServicio(id) {
     setForm((f) => ({ ...f, servicio: id }))
@@ -241,6 +271,7 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
           tipo: 'error',
           texto: 'Ese horario se acaba de ocupar. Elegí otra hora.',
         })
+        setHorasOcupadas((h) => [...h, form.hora])
         setPaso('horario')
         setForm((f) => ({ ...f, hora: '' }))
         return
@@ -254,7 +285,20 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
         fecha: form.fecha,
         hora: form.hora,
       })
-      if (errorInsert) throw errorInsert
+      if (errorInsert) {
+        // 23505 = esa hora ya quedó ocupada justo ahora (lo bloqueó la base de datos)
+        if (errorInsert.code === '23505') {
+          setEstado({
+            tipo: 'error',
+            texto: 'Ese horario se acaba de ocupar. Elegí otra hora.',
+          })
+          setHorasOcupadas((h) => [...h, form.hora])
+          setPaso('horario')
+          setForm((f) => ({ ...f, hora: '' }))
+          return
+        }
+        throw errorInsert
+      }
       const [anio, mes, dia] = form.fecha.split('-')
       setEstado({
         tipo: 'ok',
@@ -387,6 +431,10 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                 />
                 {!form.fecha ? (
                   <p className="paso-nota">Elegí una fecha para ver los horarios libres.</p>
+                ) : buscandoHoras ? (
+                  <p className="paso-nota">Buscando horarios libres…</p>
+                ) : slots.length === 0 ? (
+                  <p className="paso-nota">No quedan horarios libres ese día. Probá otra fecha.</p>
                 ) : (
                   <div className="chips-horas">
                     {slots.map((s) => (
