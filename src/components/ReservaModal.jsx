@@ -32,7 +32,7 @@ function slotsParaFecha(fechaStr) {
   return slots
 }
 
-const DIAS_SEMANA = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
+const DIAS_SEMANA = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 const MESES = [
   'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
