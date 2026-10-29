@@ -120,6 +120,7 @@ export default function Panel({ usuario, onCuenta }) {
   }, [])
   const [error, setError] = useState('')
   const [refresco, setRefresco] = useState(0)
+  const [telefonosNoAsistieron, setTelefonosNoAsistieron] = useState(new Set())
 
   // ¿Esta cuenta es de un barbero? ¿Es el dueño?
   useEffect(() => {
@@ -249,6 +250,23 @@ export default function Panel({ usuario, onCuenta }) {
     }
   }, [acceso.estado, esAdmin, acceso.barbero, refresco])
 
+  // Teléfonos con al menos un turno marcado como "no asistió", para avisar
+  // apenas ese cliente vuelve a agendar
+  useEffect(() => {
+    if (acceso.estado !== 'ok') return
+    let vigente = true
+    supabase
+      .from('turnos')
+      .select('cliente_telefono')
+      .eq('no_asistio', true)
+      .then(({ data }) => {
+        if (vigente) setTelefonosNoAsistieron(new Set((data || []).map((t) => t.cliente_telefono)))
+      })
+    return () => {
+      vigente = false
+    }
+  }, [acceso.estado, refresco])
+
   async function cancelar(t) {
     const seguro = window.confirm(
       `¿Cancelar el turno de ${t.cliente_nombre} (${t.hora.slice(0, 5)} con ${nombreBarbero(t.barbero)})?`,
@@ -257,6 +275,18 @@ export default function Panel({ usuario, onCuenta }) {
     const { error: err } = await supabase.from('turnos').delete().eq('id', t.id)
     if (err) {
       setError('No se pudo cancelar el turno.')
+      return
+    }
+    setRefresco((r) => r + 1)
+  }
+
+  async function marcarNoAsistio(t, valor) {
+    const { error: err } = await supabase
+      .from('turnos')
+      .update({ no_asistio: valor })
+      .eq('id', t.id)
+    if (err) {
+      setError('No se pudo guardar. Probá de nuevo.')
       return
     }
     setRefresco((r) => r + 1)
@@ -763,6 +793,74 @@ export default function Panel({ usuario, onCuenta }) {
 
         {error && <p className="reserva-msg error">{error}</p>}
 
+        {/* ---------- Agenda ---------- */}
+        <section className="panel-seccion panel-seccion-agenda">
+          <div className="panel-seccion-head">
+            <h2 className="panel-sub">{fecha === hoy() ? 'Agenda de hoy' : 'Agenda'}</h2>
+            <span className="panel-seccion-nota">
+              {fechaLinda(fecha)} · {statDia.cantidad}{' '}
+              {statDia.cantidad === 1 ? 'turno' : 'turnos'} · {plata(statDia.total)}
+            </span>
+          </div>
+
+          <div className="panel-fecha">
+            <button className="btn btn-outline btn-small" onClick={() => setFecha(moverDia(fecha, -1))}>
+              ‹
+            </button>
+            <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+            <button className="btn btn-outline btn-small" onClick={() => setFecha(moverDia(fecha, 1))}>
+              ›
+            </button>
+            <button className="btn btn-outline btn-small" onClick={() => setFecha(hoy())}>
+              Hoy
+            </button>
+          </div>
+
+          {cargando ? (
+            <p className="panel-vacio">Cargando turnos…</p>
+          ) : visibles.length === 0 ? (
+            <p className="panel-vacio">
+              No hay turnos {filtro !== 'todos' ? `para ${nombreBarbero(filtro)} ` : ''}este día.
+            </p>
+          ) : (
+            <ul className="panel-lista">
+              {visibles.map((t) => {
+                const avisoNoAsistio = !t.no_asistio && telefonosNoAsistieron.has(t.cliente_telefono)
+                return (
+                  <li className={avisoNoAsistio ? 'turno turno-alerta' : 'turno'} key={t.id}>
+                    <span className="turno-hora">{t.hora.slice(0, 5)}</span>
+                    <div className="turno-datos">
+                      <strong>{t.cliente_nombre}</strong>
+                      <span>
+                        {nombreServicio(t.servicio)} · con {nombreBarbero(t.barbero)}
+                      </span>
+                      <a href={`tel:${t.cliente_telefono}`}>{t.cliente_telefono}</a>
+                      {avisoNoAsistio && (
+                        <span className="turno-alerta-aviso">
+                          ⚠ No asistió a su turno anterior
+                        </span>
+                      )}
+                    </div>
+                    <span className="turno-precio">{plata(t.precio)}</span>
+                    <div className="turno-acciones">
+                      <button
+                        className="turno-no-asistio"
+                        onClick={() => marcarNoAsistio(t, true)}
+                        title="Marcar que no vino a este turno"
+                      >
+                        No asistió
+                      </button>
+                      <button className="turno-cancelar" onClick={() => cancelar(t)}>
+                        Cancelar
+                      </button>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </section>
+
         {/* ---------- Los números ---------- */}
         <section className="panel-seccion">
           <div className="panel-seccion-head">
@@ -964,57 +1062,6 @@ export default function Panel({ usuario, onCuenta }) {
           )}
         </section>
 
-        {/* ---------- Agenda ---------- */}
-        <section className="panel-seccion">
-          <div className="panel-seccion-head">
-            <h2 className="panel-sub">Agenda</h2>
-            <span className="panel-seccion-nota">
-              {fechaLinda(fecha)} · {statDia.cantidad}{' '}
-              {statDia.cantidad === 1 ? 'turno' : 'turnos'} · {plata(statDia.total)}
-            </span>
-          </div>
-
-          <div className="panel-fecha">
-            <button className="btn btn-outline btn-small" onClick={() => setFecha(moverDia(fecha, -1))}>
-              ‹
-            </button>
-            <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-            <button className="btn btn-outline btn-small" onClick={() => setFecha(moverDia(fecha, 1))}>
-              ›
-            </button>
-            <button className="btn btn-outline btn-small" onClick={() => setFecha(hoy())}>
-              Hoy
-            </button>
-          </div>
-
-          {cargando ? (
-            <p className="panel-vacio">Cargando turnos…</p>
-          ) : visibles.length === 0 ? (
-            <p className="panel-vacio">
-              No hay turnos {filtro !== 'todos' ? `para ${nombreBarbero(filtro)} ` : ''}este día.
-            </p>
-          ) : (
-            <ul className="panel-lista">
-              {visibles.map((t) => (
-                <li className="turno" key={t.id}>
-                  <span className="turno-hora">{t.hora.slice(0, 5)}</span>
-                  <div className="turno-datos">
-                    <strong>{t.cliente_nombre}</strong>
-                    <span>
-                      {nombreServicio(t.servicio)} · con {nombreBarbero(t.barbero)}
-                    </span>
-                    <a href={`tel:${t.cliente_telefono}`}>{t.cliente_telefono}</a>
-                  </div>
-                  <span className="turno-precio">{plata(t.precio)}</span>
-                  <button className="turno-cancelar" onClick={() => cancelar(t)}>
-                    Cancelar
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
         {/* ---------- Registro de trabajos ---------- */}
         <section className="panel-seccion">
           <div className="panel-seccion-head">
@@ -1055,7 +1102,7 @@ export default function Panel({ usuario, onCuenta }) {
                     <h3 className="hist-fecha">{fechaLinda(g.fecha)}</h3>
                     <ul className="panel-lista">
                       {g.items.map((t) => (
-                        <li className="turno historial" key={t.id}>
+                        <li className={t.no_asistio ? 'turno historial no-asistio' : 'turno historial'} key={t.id}>
                           <span className="turno-hora">{t.hora.slice(0, 5)}</span>
                           <div className="turno-datos">
                             <strong>{t.cliente_nombre}</strong>
@@ -1063,8 +1110,15 @@ export default function Panel({ usuario, onCuenta }) {
                               {nombreServicio(t.servicio)}
                               {esAdmin ? ` · ${nombreBarbero(t.barbero)}` : ''}
                             </span>
+                            {t.no_asistio && <span className="turno-no-asistio-badge">No asistió</span>}
                           </div>
                           <span className="turno-precio">{plata(t.precio)}</span>
+                          <button
+                            className={t.no_asistio ? 'turno-no-asistio activo' : 'turno-no-asistio'}
+                            onClick={() => marcarNoAsistio(t, !t.no_asistio)}
+                          >
+                            {t.no_asistio ? 'Sí asistió' : 'No asistió'}
+                          </button>
                         </li>
                       ))}
                     </ul>
