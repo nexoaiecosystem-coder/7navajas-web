@@ -3227,6 +3227,20 @@ section {
   flex: 1 1 auto;
 }
 
+@media (max-width: 520px) {
+  .panel-vistas,
+  .panel-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .panel-vistas button,
+  .panel-tabs button {
+    width: 100%;
+    white-space: normal;
+  }
+}
+
 .panel-tabs button {
   background: var(--carbon-2);
   border: 1px solid var(--acero);
