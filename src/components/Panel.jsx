@@ -100,6 +100,7 @@ export default function Panel({ usuario, onCuenta }) {
 
   const [fecha, setFecha] = useState(hoy())
   const [tab, setTab] = useState('todos')
+  const [vista, setVista] = useState('agenda')
   const [turnos, setTurnos] = useState([])
   const [statsFilas, setStatsFilas] = useState([])
   const [historial, setHistorial] = useState([])
@@ -774,7 +775,29 @@ export default function Panel({ usuario, onCuenta }) {
           </p>
         </header>
 
-        {esAdmin && (
+        <div className="panel-vistas">
+          <button className={vista === 'agenda' ? 'activo' : ''} onClick={() => setVista('agenda')}>
+            Agenda de hoy
+          </button>
+          <button className={vista === 'numeros' ? 'activo' : ''} onClick={() => setVista('numeros')}>
+            Números
+          </button>
+          <button className={vista === 'historial' ? 'activo' : ''} onClick={() => setVista('historial')}>
+            Historial
+          </button>
+          {esAdmin && (
+            <button className={vista === 'contenido' ? 'activo' : ''} onClick={() => setVista('contenido')}>
+              Contenido
+            </button>
+          )}
+          {esAdmin && (
+            <button className={vista === 'accesos' ? 'activo' : ''} onClick={() => setVista('accesos')}>
+              Accesos
+            </button>
+          )}
+        </div>
+
+        {esAdmin && ['agenda', 'numeros', 'historial'].includes(vista) && (
           <div className="panel-tabs">
             <button className={tab === 'todos' ? 'activo' : ''} onClick={() => setTab('todos')}>
               Todos
@@ -794,6 +817,7 @@ export default function Panel({ usuario, onCuenta }) {
         {error && <p className="reserva-msg error">{error}</p>}
 
         {/* ---------- Agenda ---------- */}
+        {vista === 'agenda' && (
         <section className="panel-seccion panel-seccion-agenda">
           <div className="panel-seccion-head">
             <h2 className="panel-sub">{fecha === hoy() ? 'Agenda de hoy' : 'Agenda'}</h2>
@@ -860,8 +884,10 @@ export default function Panel({ usuario, onCuenta }) {
             </ul>
           )}
         </section>
+        )}
 
         {/* ---------- Los números ---------- */}
+        {vista === 'numeros' && (
         <section className="panel-seccion">
           <div className="panel-seccion-head">
             <h2 className="panel-sub">Los números</h2>
@@ -1061,8 +1087,10 @@ export default function Panel({ usuario, onCuenta }) {
             </>
           )}
         </section>
+        )}
 
         {/* ---------- Registro de trabajos ---------- */}
+        {vista === 'historial' && (
         <section className="panel-seccion">
           <div className="panel-seccion-head">
             <h2 className="panel-sub">
@@ -1128,9 +1156,10 @@ export default function Panel({ usuario, onCuenta }) {
             </div>
           </div>
         </section>
+        )}
 
         {/* ---------- Editar contenido (solo dueño) ---------- */}
-        {esAdmin && (
+        {esAdmin && vista === 'contenido' && (
           <section className="panel-seccion">
             <div className="panel-seccion-head">
               <h2 className="panel-sub">Editar contenido</h2>
@@ -1383,7 +1412,7 @@ export default function Panel({ usuario, onCuenta }) {
         )}
 
         {/* ---------- Accesos al panel (solo dueño) ---------- */}
-        {esAdmin && (
+        {esAdmin && vista === 'accesos' && (
           <section className="panel-seccion">
             <div className="panel-seccion-head">
               <h2 className="panel-sub">Accesos al panel</h2>

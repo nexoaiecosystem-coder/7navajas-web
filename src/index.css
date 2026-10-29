@@ -3180,6 +3180,41 @@ section {
   cursor: pointer;
 }
 
+.panel-vistas {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  border-bottom: 1px solid rgba(201, 162, 74, 0.2);
+  padding-bottom: 1rem;
+}
+
+.panel-vistas button {
+  background: none;
+  border: 1px solid var(--acero);
+  color: var(--hueso-tenue);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radio-s);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.panel-vistas button:hover {
+  border-color: var(--bronce);
+  color: var(--bronce);
+}
+
+.panel-vistas button.activo {
+  background: var(--bronce);
+  border-color: var(--bronce);
+  color: var(--carbon);
+}
+
 .panel-tabs {
   display: flex;
   gap: 0.4rem;
