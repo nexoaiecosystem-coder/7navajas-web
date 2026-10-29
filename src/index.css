@@ -3181,9 +3181,9 @@ section {
 }
 
 .panel-vistas {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
   margin-top: 1.5rem;
   border-bottom: 1px solid rgba(201, 162, 74, 0.2);
   padding-bottom: 1rem;
@@ -3202,6 +3202,13 @@ section {
   border-radius: var(--radio-s);
   cursor: pointer;
   transition: all 0.2s;
+}
+
+/* "Agenda de hoy" va grande y sola arriba; las otras 4, en par abajo */
+.panel-vistas button:first-child {
+  grid-column: 1 / -1;
+  font-size: 1.2rem;
+  padding: 1.1rem;
 }
 
 .panel-vistas button:hover {
@@ -3227,14 +3234,16 @@ section {
   flex: 1 1 auto;
 }
 
+.panel-vistas button {
+  white-space: normal;
+}
+
 @media (max-width: 520px) {
-  .panel-vistas,
   .panel-tabs {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .panel-vistas button,
   .panel-tabs button {
     width: 100%;
     white-space: normal;
