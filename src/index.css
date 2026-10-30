@@ -3177,10 +3177,11 @@ section {
 .panel-bienvenido-nombre {
   display: block;
   font-weight: 900;
-  font-size: clamp(1.9rem, 5.5vw, 2.7rem);
+  font-size: clamp(1.4rem, 4.5vw, 2.5rem);
   text-transform: uppercase;
   line-height: 1.15;
   letter-spacing: 0.01em;
+  white-space: nowrap;
   background: linear-gradient(100deg, #a8823c 0%, #e6ca85 25%, #c9a24a 50%, #e6ca85 75%, #a8823c 100%);
   background-size: 260% 100%;
   -webkit-background-clip: text;
