@@ -2788,7 +2788,7 @@ section {
   font-family: var(--font-detalle);
   font-style: italic;
   font-size: 0.95rem;
-  margin-top: -0.75rem;
+  margin: 0;
 }
 
 .panel-seccion {
@@ -3157,19 +3157,54 @@ section {
 
 .panel-head {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.panel-head-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: var(--hueso);
+  background: linear-gradient(135deg, var(--acero), var(--carbon-2));
+  border: 2px solid var(--bronce);
+}
+
+.panel-head-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.panel-head-texto .section-tag {
+  margin-bottom: 0;
 }
 
 .panel-head .section-title {
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
-  margin-bottom: 1.5rem;
+  font-size: clamp(1.5rem, 4vw, 2.4rem);
+  margin-bottom: 0;
+  line-height: 1.15;
 }
 
-.panel-head .panel-volver {
-  margin-top: 0.5rem;
+@media (max-width: 480px) {
+  .panel-head {
+    gap: 0.9rem;
+  }
+
+  .panel-head-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 1.05rem;
+  }
 }
 
 .panel-controles {
