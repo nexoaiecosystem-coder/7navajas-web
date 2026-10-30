@@ -772,14 +772,13 @@ export default function Panel({ usuario, onCuenta }) {
         </div>
 
         <header className="panel-head">
-          <div className="panel-head-avatar">{iniciales(nombreBarbero(acceso.barbero))}</div>
-          <div className="panel-head-texto">
-            <span className="section-tag">Panel · 7 Navajas</span>
-            <h1 className="section-title">Hola, {nombreBarbero(acceso.barbero)}</h1>
-            <p className="panel-rol">
-              {esAdmin ? 'Dueño · ves todo el negocio' : 'Tus turnos y tus números'}
-            </p>
-          </div>
+          <span className="section-tag panel-bienvenida-anim">Panel · 7 Navajas</span>
+          <h1 className="panel-bienvenido panel-bienvenida-anim retraso-1">
+            Bienvenido, <span className="panel-bienvenido-nombre">{nombreBarbero(acceso.barbero)}</span>
+          </h1>
+          <p className="panel-rol panel-bienvenida-anim retraso-2">
+            {esAdmin ? 'Dueño · ves todo el negocio' : 'Tus turnos y tus números'}
+          </p>
         </header>
 
         <div className="panel-vistas">
