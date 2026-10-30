@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useCatalogo } from '../lib/catalogo'
 import { fotoServicio } from '../data/fotosServicios'
@@ -122,6 +122,36 @@ export default function Panel({ usuario, onCuenta }) {
   const [error, setError] = useState('')
   const [refresco, setRefresco] = useState(0)
   const [telefonosNoAsistieron, setTelefonosNoAsistieron] = useState(new Set())
+
+  // el nombre de bienvenida se agranda o achica para ocupar siempre todo el renglón
+  const nombreRef = useRef(null)
+  useLayoutEffect(() => {
+    const el = nombreRef.current
+    if (!el) return
+    const TAMANIO_BASE = 16
+    const TAMANIO_MAX = 44
+    function ajustar() {
+      // medimos el ancho real del texto con el elemento achicado a su contenido
+      // (si no, al ser "block" ya ocupa todo el ancho y scrollWidth no sirve)
+      el.style.display = 'inline-block'
+      el.style.fontSize = `${TAMANIO_BASE}px`
+      const anchoTexto = el.scrollWidth
+      const anchoDisponible = el.parentElement.clientWidth
+      el.style.display = 'block'
+      if (!anchoTexto) return
+      const nuevo = Math.min((TAMANIO_BASE * anchoDisponible) / anchoTexto, TAMANIO_MAX)
+      el.style.fontSize = `${nuevo}px`
+    }
+    ajustar()
+    const ro = new ResizeObserver(ajustar)
+    ro.observe(el.parentElement)
+    window.addEventListener('resize', ajustar)
+    document.fonts?.ready?.then(ajustar)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', ajustar)
+    }
+  }, [acceso.barbero])
 
   // ¿Esta cuenta es de un barbero? ¿Es el dueño?
   useEffect(() => {
@@ -774,7 +804,10 @@ export default function Panel({ usuario, onCuenta }) {
         <header className="panel-head">
           <span className="section-tag panel-bienvenida-anim">Panel · 7 Navajas</span>
           <h1 className="panel-bienvenido panel-bienvenida-anim retraso-1">
-            Bienvenido, <span className="panel-bienvenido-nombre">{nombreBarbero(acceso.barbero)}</span>
+            Bienvenido,{' '}
+            <span ref={nombreRef} className="panel-bienvenido-nombre">
+              {nombreBarbero(acceso.barbero)}
+            </span>
           </h1>
           <p className="panel-rol panel-bienvenida-anim retraso-2">
             {esAdmin ? 'Dueño · ves todo el negocio' : 'Tus turnos y tus números'}
