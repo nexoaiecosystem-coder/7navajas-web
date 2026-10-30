@@ -757,8 +757,12 @@ export default function Panel({ usuario, onCuenta }) {
                 {push === 'guardando'
                   ? 'Un momento…'
                   : push === 'activo'
-                    ? '🔔 Avisos activados'
-                    : '🔔 Avisarme por turno nuevo'}
+                    ? compacto
+                      ? '🔔 Avisos'
+                      : '🔔 Avisos activados'
+                    : compacto
+                      ? '🔔 Avisarme'
+                      : '🔔 Avisarme por turno nuevo'}
               </button>
             )}
             <button className="panel-salir" onClick={salir}>
