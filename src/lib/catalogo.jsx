@@ -4,15 +4,23 @@ import { SERVICIOS, BARBEROS } from '../data/negocio'
 
 // Catálogo vivo: servicios y barberos salen de la base (editables por el
 // dueño desde el panel). Si la base no responde, se usan los de negocio.js.
+const RECARGO_EXTRA_POR_DEFECTO = 20
+
 const CatalogoContext = createContext({
   servicios: SERVICIOS,
   barberos: BARBEROS,
   galeria: [],
+  recargoExtra: RECARGO_EXTRA_POR_DEFECTO,
   recargar: () => {},
 })
 
 export function CatalogoProvider({ children }) {
-  const [catalogo, setCatalogo] = useState({ servicios: SERVICIOS, barberos: BARBEROS, galeria: [] })
+  const [catalogo, setCatalogo] = useState({
+    servicios: SERVICIOS,
+    barberos: BARBEROS,
+    galeria: [],
+    recargoExtra: RECARGO_EXTRA_POR_DEFECTO,
+  })
   const [version, setVersion] = useState(0)
 
   useEffect(() => {
@@ -22,12 +30,14 @@ export function CatalogoProvider({ children }) {
       supabase.from('servicios').select('*').eq('activo', true).order('orden'),
       supabase.from('barberos').select('*').eq('activo', true).order('orden'),
       supabase.from('galeria').select('*').eq('activo', true).order('orden'),
-    ]).then(([s, b, g]) => {
+      supabase.from('configuracion_negocio').select('recargo_extra_porcentaje').eq('id', 1).maybeSingle(),
+    ]).then(([s, b, g, c]) => {
       if (!vigente) return
       setCatalogo({
         servicios: s.data && s.data.length ? s.data : SERVICIOS,
         barberos: b.data && b.data.length ? b.data : BARBEROS,
         galeria: g.data || [],
+        recargoExtra: c.data?.recargo_extra_porcentaje ?? RECARGO_EXTRA_POR_DEFECTO,
       })
     })
     return () => {

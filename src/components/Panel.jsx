@@ -88,7 +88,7 @@ function Delta({ valor }) {
 }
 
 export default function Panel({ usuario, onCuenta }) {
-  const { servicios, barberos, galeria, recargar } = useCatalogo()
+  const { servicios, barberos, galeria, recargoExtra, recargar } = useCatalogo()
   const nombreServicio = (id) => servicios.find((s) => s.id === id)?.nombre || id
   const nombreBarbero = (id) => {
     const b = barberos.find((x) => x.id === id)
@@ -122,6 +122,7 @@ export default function Panel({ usuario, onCuenta }) {
   const [error, setError] = useState('')
   const [refresco, setRefresco] = useState(0)
   const [telefonosNoAsistieron, setTelefonosNoAsistieron] = useState(new Set())
+  const [solicitudesExtra, setSolicitudesExtra] = useState([])
 
   // el nombre de bienvenida se agranda o achica para ocupar siempre todo el renglón
   const nombreRef = useRef(null)
@@ -228,6 +229,7 @@ export default function Panel({ usuario, onCuenta }) {
       .from('turnos')
       .select('*')
       .eq('fecha', fecha)
+      .eq('estado', 'confirmado')
       .order('hora')
       .then(({ data, error: err }) => {
         if (!vigente) return
@@ -251,6 +253,7 @@ export default function Panel({ usuario, onCuenta }) {
     supabase
       .from('turnos')
       .select('barbero, precio, fecha, servicio')
+      .eq('estado', 'confirmado')
       .gte('fecha', desde)
       .lte('fecha', hasta)
       .then(({ data }) => {
@@ -268,6 +271,7 @@ export default function Panel({ usuario, onCuenta }) {
     let q = supabase
       .from('turnos')
       .select('*')
+      .eq('estado', 'confirmado')
       .lt('fecha', hoy())
       .order('fecha', { ascending: false })
       .order('hora', { ascending: false })
@@ -298,6 +302,26 @@ export default function Panel({ usuario, onCuenta }) {
     }
   }, [acceso.estado, refresco])
 
+  // Pedidos de corte extra: pendientes de confirmar + las últimas resueltas
+  useEffect(() => {
+    if (acceso.estado !== 'ok') return
+    let vigente = true
+    let q = supabase
+      .from('turnos')
+      .select('*')
+      .eq('es_extra', true)
+      .gte('fecha', moverDia(hoy(), -30))
+      .order('fecha', { ascending: false })
+      .order('hora', { ascending: false })
+    if (!esAdmin) q = q.eq('barbero', acceso.barbero)
+    q.then(({ data }) => {
+      if (vigente) setSolicitudesExtra(data || [])
+    })
+    return () => {
+      vigente = false
+    }
+  }, [acceso.estado, esAdmin, acceso.barbero, refresco])
+
   async function cancelar(t) {
     const seguro = window.confirm(
       `¿Cancelar el turno de ${t.cliente_nombre} (${t.hora.slice(0, 5)} con ${nombreBarbero(t.barbero)})?`,
@@ -323,6 +347,20 @@ export default function Panel({ usuario, onCuenta }) {
     setRefresco((r) => r + 1)
   }
 
+  async function responderSolicitudExtra(t, nuevoEstado) {
+    if (nuevoEstado === 'rechazada' && !window.confirm('¿Rechazar este pedido de corte extra?')) return
+    const { error: err } = await supabase.from('turnos').update({ estado: nuevoEstado }).eq('id', t.id)
+    if (err) {
+      setError(
+        err.code === '23505'
+          ? 'Ese horario ya quedó confirmado en otro turno. Rechazá este pedido.'
+          : 'No se pudo guardar. Probá de nuevo.',
+      )
+      return
+    }
+    setRefresco((r) => r + 1)
+  }
+
   async function salir() {
     await supabase.auth.signOut()
   }
@@ -333,10 +371,31 @@ export default function Panel({ usuario, onCuenta }) {
   const [edicion, setEdicion] = useState({})
   const [msgContenido, setMsgContenido] = useState(null)
   const [subiendo, setSubiendo] = useState(null)
+  const [recargoExtraInput, setRecargoExtraInput] = useState(recargoExtra)
+
+  useEffect(() => {
+    setRecargoExtraInput(recargoExtra)
+  }, [recargoExtra])
 
   const valorDe = (item, campo) => edicion[item.id]?.[campo] ?? (item[campo] ?? '')
   const editar = (id, campo, valor) =>
     setEdicion((e) => ({ ...e, [id]: { ...e[id], [campo]: valor } }))
+
+  async function guardarRecargoExtra(e) {
+    e.preventDefault()
+    setMsgContenido(null)
+    const valor = Math.max(0, Number(recargoExtraInput) || 0)
+    const { error: err } = await supabase
+      .from('configuracion_negocio')
+      .update({ recargo_extra_porcentaje: valor })
+      .eq('id', 1)
+    setMsgContenido(
+      err
+        ? { tipo: 'error', texto: 'No se pudo guardar el recargo.' }
+        : { tipo: 'ok', texto: 'Recargo actualizado ✓' },
+    )
+    if (!err) recargar()
+  }
 
   async function guardarFila(tabla, item, campos) {
     setMsgContenido(null)
@@ -716,6 +775,17 @@ export default function Panel({ usuario, onCuenta }) {
   /* ---------- datos calculados ---------- */
 
   const visibles = filtro === 'todos' ? turnos : turnos.filter((t) => t.barbero === filtro)
+
+  // pedidos de corte extra: los pendientes (para actuar) y los ya resueltos (historial)
+  const solicitudesExtraVisibles =
+    filtro === 'todos' ? solicitudesExtra : solicitudesExtra.filter((t) => t.barbero === filtro)
+  const extraPendientes = solicitudesExtraVisibles.filter((t) => t.estado === 'solicitud_pendiente')
+  const extraResueltas = solicitudesExtraVisibles
+    .filter((t) => t.estado !== 'solicitud_pendiente')
+    .slice(0, 20)
+  const cantidadExtraPendiente = (
+    esAdmin ? solicitudesExtra : solicitudesExtra.filter((t) => t.barbero === acceso.barbero)
+  ).filter((t) => t.estado === 'solicitud_pendiente').length
   const filasFiltradas =
     filtro === 'todos' ? statsFilas : statsFilas.filter((t) => t.barbero === filtro)
 
@@ -818,6 +888,12 @@ export default function Panel({ usuario, onCuenta }) {
           <button className={vista === 'agenda' ? 'activo' : ''} onClick={() => setVista('agenda')}>
             Agenda de hoy
           </button>
+          <button className={vista === 'extra' ? 'activo' : ''} onClick={() => setVista('extra')}>
+            Solicitudes extra
+            {cantidadExtraPendiente > 0 && (
+              <span className="panel-vistas-badge">{cantidadExtraPendiente}</span>
+            )}
+          </button>
           <button className={vista === 'numeros' ? 'activo' : ''} onClick={() => setVista('numeros')}>
             Números
           </button>
@@ -836,7 +912,7 @@ export default function Panel({ usuario, onCuenta }) {
           )}
         </div>
 
-        {esAdmin && ['agenda', 'numeros', 'historial'].includes(vista) && (
+        {esAdmin && ['agenda', 'extra', 'numeros', 'historial'].includes(vista) && (
           <div className="panel-tabs">
             <button className={tab === 'todos' ? 'activo' : ''} onClick={() => setTab('todos')}>
               Todos
@@ -893,7 +969,10 @@ export default function Panel({ usuario, onCuenta }) {
                   <li className={avisoNoAsistio ? 'turno turno-alerta' : 'turno'} key={t.id}>
                     <span className="turno-hora">{t.hora.slice(0, 5)}</span>
                     <div className="turno-datos">
-                      <strong>{t.cliente_nombre}</strong>
+                      <strong>
+                        {t.cliente_nombre}
+                        {t.es_extra && <span className="turno-estado-badge confirmada">Extra</span>}
+                      </strong>
                       <span>
                         {nombreServicio(t.servicio)} · con {nombreBarbero(t.barbero)}
                       </span>
@@ -920,6 +999,87 @@ export default function Panel({ usuario, onCuenta }) {
                   </li>
                 )
               })}
+            </ul>
+          )}
+        </section>
+        )}
+
+        {/* ---------- Solicitudes de corte extra ---------- */}
+        {vista === 'extra' && (
+        <section className="panel-seccion">
+          <div className="panel-seccion-head">
+            <h2 className="panel-sub">Solicitudes extra</h2>
+            <span className="panel-seccion-nota">jueves, viernes y sábado fuera de horario</span>
+          </div>
+
+          {extraPendientes.length === 0 ? (
+            <p className="panel-vacio">No hay pedidos de corte extra pendientes.</p>
+          ) : (
+            <ul className="panel-lista">
+              {extraPendientes.map((t) => (
+                <li className="turno" key={t.id}>
+                  <span className="turno-hora">{t.hora.slice(0, 5)}</span>
+                  <div className="turno-datos">
+                    <strong>{t.cliente_nombre}</strong>
+                    <span>
+                      {nombreServicio(t.servicio)} · {fechaLinda(t.fecha)}
+                      {esAdmin ? ` · con ${nombreBarbero(t.barbero)}` : ''}
+                    </span>
+                    <a href={`tel:${t.cliente_telefono}`}>{t.cliente_telefono}</a>
+                  </div>
+                  <span className="turno-precio">{plata(t.precio)}</span>
+                  <div className="turno-acciones">
+                    <button
+                      className="turno-confirmar"
+                      onClick={() => responderSolicitudExtra(t, 'confirmado')}
+                    >
+                      Confirmar
+                    </button>
+                    <button
+                      className="turno-cancelar"
+                      onClick={() => responderSolicitudExtra(t, 'rechazada')}
+                    >
+                      Rechazar
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <h3 className="editor-titulo">Resueltas últimamente</h3>
+          {extraResueltas.length === 0 ? (
+            <p className="panel-vacio">Todavía no hay pedidos resueltos.</p>
+          ) : (
+            <ul className="panel-lista">
+              {extraResueltas.map((t) => (
+                <li className="turno" key={t.id}>
+                  <span className="turno-hora">{t.hora.slice(0, 5)}</span>
+                  <div className="turno-datos">
+                    <strong>{t.cliente_nombre}</strong>
+                    <span>
+                      {nombreServicio(t.servicio)} · {fechaLinda(t.fecha)}
+                      {esAdmin ? ` · con ${nombreBarbero(t.barbero)}` : ''}
+                    </span>
+                    <span
+                      className={`turno-estado-badge ${
+                        t.estado === 'confirmado'
+                          ? 'confirmada'
+                          : t.estado === 'rechazada'
+                            ? 'rechazada'
+                            : 'vencida'
+                      }`}
+                    >
+                      {t.estado === 'confirmado'
+                        ? 'Confirmado'
+                        : t.estado === 'rechazada'
+                          ? 'Rechazado'
+                          : 'Venció sin respuesta'}
+                    </span>
+                  </div>
+                  <span className="turno-precio">{plata(t.precio)}</span>
+                </li>
+              ))}
             </ul>
           )}
         </section>
@@ -1231,6 +1391,23 @@ export default function Panel({ usuario, onCuenta }) {
                   <p className={`reserva-msg ${msgContenido.tipo}`}>{msgContenido.texto}</p>
                 )}
 
+                <h3 className="editor-titulo">Horario extra (jueves a sábado)</h3>
+                <form className="editor-nuevo" onSubmit={guardarRecargoExtra}>
+                  <input
+                    type="number"
+                    min="0"
+                    max="200"
+                    className="editor-precio"
+                    value={recargoExtraInput}
+                    onChange={(e) => setRecargoExtraInput(e.target.value)}
+                    aria-label="Recargo de corte extra en porcentaje"
+                  />
+                  <span className="editor-ayuda">% de recargo sobre el precio normal</span>
+                  <button type="submit" className="editor-agregar">
+                    Guardar recargo
+                  </button>
+                </form>
+
                 <h3 className="editor-titulo">Servicios</h3>
                 <div className="editor-lista">
                   {servicios.map((s) => (
@@ -1257,6 +1434,14 @@ export default function Panel({ usuario, onCuenta }) {
                             aria-label="Nota"
                           />
                         </div>
+                        <label className="acceso-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(valorDe(s, 'disponible_extra'))}
+                            onChange={(e) => editar(s.id, 'disponible_extra', e.target.checked)}
+                          />
+                          Se puede pedir como corte extra
+                        </label>
                       </div>
                       <div className="editor-acciones">
                         <label className="editor-foto-btn">
@@ -1270,7 +1455,9 @@ export default function Panel({ usuario, onCuenta }) {
                         </label>
                         <button
                           className="editor-guardar"
-                          onClick={() => guardarFila('servicios', s, ['nombre', 'precio', 'nota'])}
+                          onClick={() =>
+                            guardarFila('servicios', s, ['nombre', 'precio', 'nota', 'disponible_extra'])
+                          }
                         >
                           Guardar
                         </button>
@@ -1443,7 +1630,9 @@ export default function Panel({ usuario, onCuenta }) {
                   Los cambios se ven al instante en la web. Las fotos ideales: cuadradas o
                   verticales, de menos de 2&nbsp;MB. Eliminar un servicio o barbero no borra los
                   turnos que ya tiene reservados. Si a un barbero le ponés su mail, cuando él se
-                  cree la cuenta con ese mail ya va a poder entrar al panel.
+                  cree la cuenta con ese mail ya va a poder entrar al panel. Un servicio solo
+                  aparece para pedir como corte extra si le tildás "Se puede pedir como corte
+                  extra".
                 </p>
               </div>
             )}

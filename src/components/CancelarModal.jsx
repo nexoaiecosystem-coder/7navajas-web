@@ -17,6 +17,15 @@ function fechaLinda(fechaStr) {
   })
 }
 
+// estado de un pedido de corte extra (los turnos normales son siempre "confirmado")
+function estadoExtra(t) {
+  if (!t.es_extra) return null
+  if (t.estado === 'solicitud_pendiente') return { texto: 'Pendiente de confirmación', clase: 'pendiente' }
+  if (t.estado === 'rechazada') return { texto: 'No se pudo confirmar', clase: 'rechazada' }
+  if (t.estado === 'vencida') return { texto: 'Venció sin respuesta', clase: 'vencida' }
+  return { texto: 'Corte extra confirmado', clase: 'confirmada' }
+}
+
 export default function CancelarModal({ abierto, usuario, onCerrar }) {
   const { servicios, barberos } = useCatalogo()
   const nombreServicio = (id) => servicios.find((s) => s.id === id)?.nombre || id
@@ -94,6 +103,9 @@ export default function CancelarModal({ abierto, usuario, onCerrar }) {
         </button>
         <span className="section-tag">¿No podés venir?</span>
         <h2 className="section-title">Cancelar un turno</h2>
+        <p className="paso-nota">
+          Acá también podés ver si tu pedido de corte extra ya fue confirmado.
+        </p>
         <form className="reserva-form" onSubmit={buscar}>
           <div className="campo">
             <label htmlFor="c-telefono">Teléfono con el que reservaste</label>
@@ -122,20 +134,29 @@ export default function CancelarModal({ abierto, usuario, onCerrar }) {
 
         {turnos && turnos.length > 0 && (
           <ul className="cancelar-lista">
-            {turnos.map((t) => (
-              <li className="turno" key={t.id}>
-                <span className="turno-hora">{t.hora.slice(0, 5)}</span>
-                <div className="turno-datos">
-                  <strong>{fechaLinda(t.fecha)}</strong>
-                  <span>
-                    {nombreServicio(t.servicio)} · con {nombreBarbero(t.barbero)}
-                  </span>
-                </div>
-                <button className="turno-cancelar" onClick={() => cancelar(t)}>
-                  Cancelar
-                </button>
-              </li>
-            ))}
+            {turnos.map((t) => {
+              const estadoInfo = estadoExtra(t)
+              const sePuedeCancelar = t.estado === 'confirmado' || t.estado === 'solicitud_pendiente'
+              return (
+                <li className="turno" key={t.id}>
+                  <span className="turno-hora">{t.hora.slice(0, 5)}</span>
+                  <div className="turno-datos">
+                    <strong>{fechaLinda(t.fecha)}</strong>
+                    <span>
+                      {nombreServicio(t.servicio)} · con {nombreBarbero(t.barbero)}
+                    </span>
+                    {estadoInfo && (
+                      <span className={`turno-estado-badge ${estadoInfo.clase}`}>{estadoInfo.texto}</span>
+                    )}
+                  </div>
+                  {sePuedeCancelar && (
+                    <button className="turno-cancelar" onClick={() => cancelar(t)}>
+                      Cancelar
+                    </button>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         )}
       </div>

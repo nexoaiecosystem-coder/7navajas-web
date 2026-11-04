@@ -2173,6 +2173,12 @@ section {
   min-width: 0;
 }
 
+.editor-ayuda {
+  color: var(--hueso-tenue);
+  font-size: 0.82rem;
+  flex: 1 1 160px;
+}
+
 .editor-agregar {
   background: var(--grad-oro);
   border: none;
@@ -3295,6 +3301,28 @@ section {
   color: var(--carbon);
 }
 
+/* si el último botón queda solo en su fila (cantidad par de no-primeros),
+   que ocupe todo el ancho en vez de quedar pegado a la izquierda */
+.panel-vistas button:last-child:nth-child(even) {
+  grid-column: 1 / -1;
+}
+
+.panel-vistas-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  margin-left: 0.4rem;
+  background: var(--rojo);
+  color: var(--hueso);
+  font-family: var(--font-cuerpo);
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0 0.35rem;
+}
+
 .panel-tabs {
   display: flex;
   gap: 0.4rem;
@@ -3474,6 +3502,55 @@ section {
   padding: 0.12rem 0.5rem;
   border-radius: 999px;
   margin-top: 0.15rem;
+}
+
+.turno-confirmar {
+  background: var(--bronce);
+  border: 1px solid var(--bronce);
+  color: var(--carbon);
+  font-family: var(--font-cuerpo);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: var(--radio-s);
+}
+
+.turno-confirmar:hover {
+  filter: brightness(1.1);
+}
+
+/* estado de un pedido de corte extra (en "Cancelar un turno" y en el panel) */
+.turno-estado-badge {
+  display: inline-block;
+  width: fit-content;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  margin-top: 0.15rem;
+  color: var(--hueso);
+}
+
+.turno-estado-badge.pendiente {
+  background: var(--acero);
+}
+
+.turno-estado-badge.confirmada {
+  background: var(--bronce);
+  color: var(--carbon);
+  margin-left: 0.4rem;
+}
+
+.turno-estado-badge.rechazada,
+.turno-estado-badge.vencida {
+  background: var(--rojo);
 }
 
 /* turno con aviso: el cliente no vino la vez anterior */

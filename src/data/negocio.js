@@ -20,6 +20,11 @@ export const HORARIOS = [
   [11, 20],  // sábado
 ]
 
+// Días en que se puede pedir un corte "extra" fuera de horario: jue, vie, sáb
+export const DIAS_EXTRA = [4, 5, 6]
+// Cuántas horas más allá del cierre normal dura esa ventana extra
+export const VENTANA_EXTRA_HORAS = 2
+
 export const HORARIOS_TEXTO = [
   { dias: 'Lunes', horas: '12:00 – 19:00' },
   { dias: 'Martes a sábado', horas: '11:00 – 20:00' },

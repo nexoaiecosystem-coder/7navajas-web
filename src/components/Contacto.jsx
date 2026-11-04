@@ -1,7 +1,7 @@
 import { NEGOCIO } from '../data/negocio'
 import Reveal from './Reveal'
 
-export default function Contacto({ onReservar, onCancelar }) {
+export default function Contacto({ onReservar, onCancelar, onCorteExtra }) {
   return (
     <section id="contacto">
       <div className="container">
@@ -70,6 +70,24 @@ export default function Contacto({ onReservar, onCancelar }) {
               </button>
               <button className="btn btn-outline btn-small" onClick={onCancelar}>
                 Cancelar turno
+              </button>
+            </div>
+          </Reveal>
+
+          <Reveal as="article" className="contacto-card" delay={270}>
+            <div className="contacto-icono">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
+              </svg>
+            </div>
+            <h3>¿Corte urgente?</h3>
+            <p>
+              Jueves, viernes y sábado podés pedir un corte fuera de horario (con recargo). El
+              barbero tiene que confirmarlo.
+            </p>
+            <div className="contacto-acciones">
+              <button className="btn btn-outline btn-small" onClick={onCorteExtra}>
+                Pedir corte extra
               </button>
             </div>
           </Reveal>
