@@ -30,6 +30,29 @@ function primeroMesAnterior(fechaStr) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`
 }
 
+// Helpers para navegar meses en "Los números" (independiente del día de la Agenda)
+function mesMas(mesClave, delta) {
+  const [a, m] = mesClave.split('-').map(Number)
+  const d = new Date(a, m - 1 + delta, 1)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+function primerDiaDeMes(mesClave) {
+  return `${mesClave}-01`
+}
+function ultimoDiaDeMes(mesClave) {
+  const [a, m] = mesClave.split('-').map(Number)
+  const d = new Date(a, m, 0)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+const NOMBRES_MES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+]
+function mesLindo(mesClave) {
+  const [a, m] = mesClave.split('-').map(Number)
+  return `${NOMBRES_MES[m - 1]} ${a}`
+}
+
 const resumen = (filas) => ({
   cantidad: filas.length,
   total: filas.reduce((s, t) => s + (t.precio || 0), 0),
@@ -103,6 +126,8 @@ export default function Panel({ usuario, onCuenta }) {
   const [vista, setVista] = useState('agenda')
   const [turnos, setTurnos] = useState([])
   const [statsFilas, setStatsFilas] = useState([])
+  const [mesVisible, setMesVisible] = useState(() => hoy().slice(0, 7))
+  const [statsMesVisible, setStatsMesVisible] = useState([])
   const [historial, setHistorial] = useState([])
   const [cargando, setCargando] = useState(false)
   const [compAbierta, setCompAbierta] = useState(false)
@@ -263,6 +288,25 @@ export default function Panel({ usuario, onCuenta }) {
       vigente = false
     }
   }, [acceso.estado, fecha, refresco])
+
+  // Mes que se está mirando en "Los números" (navegable, no depende del
+  // día elegido en la Agenda) + el mes anterior, para la comparativa
+  useEffect(() => {
+    if (acceso.estado !== 'ok') return
+    let vigente = true
+    supabase
+      .from('turnos')
+      .select('barbero, precio, fecha, servicio')
+      .eq('estado', 'confirmado')
+      .gte('fecha', primerDiaDeMes(mesMas(mesVisible, -1)))
+      .lte('fecha', ultimoDiaDeMes(mesVisible))
+      .then(({ data }) => {
+        if (vigente) setStatsMesVisible(data || [])
+      })
+    return () => {
+      vigente = false
+    }
+  }, [acceso.estado, mesVisible, refresco])
 
   // Registro de trabajos ya hechos (turnos pasados)
   useEffect(() => {
@@ -806,16 +850,20 @@ export default function Panel({ usuario, onCuenta }) {
 
   const [semIni, semFin] = rangoSemana(fecha)
   const [semAntIni, semAntFin] = [moverDia(semIni, -7), moverDia(semIni, -1)]
-  const mesClave = fecha.slice(0, 7)
-  const mesAntClave = primeroMesAnterior(fecha).slice(0, 7)
+  const mesAntVisible = mesMas(mesVisible, -1)
+  const esMesActualVisible = mesVisible === hoy().slice(0, 7)
 
   const enRango = (t, ini, fin) => t.fecha >= ini && t.fecha <= fin
 
   const statDia = resumen(visibles)
   const statSemana = resumen(filasFiltradas.filter((t) => enRango(t, semIni, semFin)))
   const statSemanaAnt = resumen(filasFiltradas.filter((t) => enRango(t, semAntIni, semAntFin)))
-  const statMes = resumen(filasFiltradas.filter((t) => t.fecha.slice(0, 7) === mesClave))
-  const statMesAnt = resumen(filasFiltradas.filter((t) => t.fecha.slice(0, 7) === mesAntClave))
+
+  // "Los números" del mes que se está mirando (navegable con mesVisible)
+  const filasMesFiltradas =
+    filtro === 'todos' ? statsMesVisible : statsMesVisible.filter((t) => t.barbero === filtro)
+  const statMes = resumen(filasMesFiltradas.filter((t) => t.fecha.slice(0, 7) === mesVisible))
+  const statMesAnt = resumen(filasMesFiltradas.filter((t) => t.fecha.slice(0, 7) === mesAntVisible))
 
   // gráfica: ingresos por día en el rango elegido (7, 14 o 30 días)
   const diasSerie = Array.from({ length: diasGrafica }, (_, i) =>
@@ -831,7 +879,7 @@ export default function Panel({ usuario, onCuenta }) {
   const cadaCuanto = diasGrafica === 30 ? (compacto ? 5 : 3) : diasGrafica === 14 && compacto ? 2 : 1
 
   // el mes por barbero (vista del dueño: siempre todos)
-  const mesFilas = statsFilas.filter((t) => t.fecha.slice(0, 7) === mesClave)
+  const mesFilas = statsMesVisible.filter((t) => t.fecha.slice(0, 7) === mesVisible)
   const porBarbero = barberos.map((b) => ({
     ...b,
     ...resumen(mesFilas.filter((t) => t.barbero === b.id)),
@@ -1024,7 +1072,7 @@ export default function Panel({ usuario, onCuenta }) {
         <section className="panel-seccion">
           <div className="panel-seccion-head">
             <h2 className="panel-sub">Solicitudes extra</h2>
-            <span className="panel-seccion-nota">jueves, viernes y sábado fuera de horario</span>
+            <span className="panel-seccion-nota">pedidos fuera del horario normal</span>
           </div>
 
           {extraPendientes.length === 0 ? (
@@ -1125,10 +1173,38 @@ export default function Panel({ usuario, onCuenta }) {
               </span>
             </div>
             <div className="stat">
-              <span className="stat-label">Este mes</span>
+              <div className="mes-nav">
+                <button
+                  type="button"
+                  className="mes-nav-btn"
+                  onClick={() => setMesVisible((m) => mesMas(m, -1))}
+                  aria-label="Mes anterior"
+                >
+                  ‹
+                </button>
+                <span className="stat-label">{mesLindo(mesVisible)}</span>
+                <button
+                  type="button"
+                  className="mes-nav-btn"
+                  disabled={esMesActualVisible}
+                  onClick={() => setMesVisible((m) => mesMas(m, 1))}
+                  aria-label="Mes siguiente"
+                >
+                  ›
+                </button>
+              </div>
               <strong>{plata(statMes.total)}</strong>
               <span className="stat-detalle">
                 {statMes.cantidad} {statMes.cantidad === 1 ? 'turno' : 'turnos'}
+                {!esMesActualVisible && (
+                  <button
+                    type="button"
+                    className="mes-nav-hoy"
+                    onClick={() => setMesVisible(hoy().slice(0, 7))}
+                  >
+                    volver al mes actual
+                  </button>
+                )}
               </span>
             </div>
           </div>
@@ -1264,7 +1340,9 @@ export default function Panel({ usuario, onCuenta }) {
 
               <div className="admin-grid">
                 <div className="tabla-marco">
-                  <h3>El mes por barbero</h3>
+                  <h3>
+                    {esMesActualVisible ? 'El mes por barbero' : `Por barbero · ${mesLindo(mesVisible)}`}
+                  </h3>
                   {porBarbero.map((b) => (
                     <div className="fila-barbero" key={b.id}>
                       <div className="fila-barbero-texto">
@@ -1281,9 +1359,13 @@ export default function Panel({ usuario, onCuenta }) {
                   ))}
                 </div>
                 <div className="tabla-marco">
-                  <h3>Servicios más pedidos del mes</h3>
+                  <h3>
+                    {esMesActualVisible
+                      ? 'Servicios más pedidos del mes'
+                      : `Servicios más pedidos · ${mesLindo(mesVisible)}`}
+                  </h3>
                   {topServicios.length === 0 ? (
-                    <p className="panel-vacio">Todavía no hay turnos este mes.</p>
+                    <p className="panel-vacio">Todavía no hay turnos ese mes.</p>
                   ) : (
                     <table className="tabla-mes">
                       <tbody>

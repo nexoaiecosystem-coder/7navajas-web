@@ -1417,6 +1417,52 @@ section {
   font-size: 0.85rem;
 }
 
+/* navegador de mes dentro de la tarjeta "Este mes" de Los números */
+.mes-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.mes-nav .stat-label {
+  white-space: nowrap;
+}
+
+.mes-nav-btn {
+  background: none;
+  border: 1px solid rgba(201, 162, 74, 0.3);
+  color: var(--hueso-tenue);
+  width: 1.4rem;
+  height: 1.4rem;
+  line-height: 1;
+  border-radius: var(--radio-s);
+  cursor: pointer;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.mes-nav-btn:hover:not(:disabled) {
+  border-color: var(--bronce);
+  color: var(--bronce);
+}
+
+.mes-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.mes-nav-hoy {
+  background: none;
+  border: none;
+  color: var(--bronce);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.4rem;
+}
+
 /* en el celular, los números como filas compactas de un vistazo */
 @media (max-width: 520px) {
   .panel {
