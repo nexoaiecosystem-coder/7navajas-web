@@ -1463,7 +1463,7 @@ section {
   padding: 0;
 }
 
-/* "Este mes" queda en 2 filas compactas: [‹ mes ›] + $, y turnos + volver */
+/* "Este mes": [‹ mes ›] junto al $, debajo los turnos, y al final "volver" */
 .stat.stat-mes {
   display: flex;
   flex-direction: column;

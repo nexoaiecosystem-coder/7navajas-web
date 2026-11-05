@@ -1196,20 +1196,18 @@ export default function Panel({ usuario, onCuenta }) {
                 </div>
                 <strong>{plata(statMes.total)}</strong>
               </div>
-              <div className="mes-fila">
-                <span className="stat-detalle">
-                  {statMes.cantidad} {statMes.cantidad === 1 ? 'turno' : 'turnos'}
-                </span>
-                {!esMesActualVisible && (
-                  <button
-                    type="button"
-                    className="mes-nav-hoy"
-                    onClick={() => setMesVisible(hoy().slice(0, 7))}
-                  >
-                    volver al mes actual
-                  </button>
-                )}
-              </div>
+              <span className="stat-detalle">
+                {statMes.cantidad} {statMes.cantidad === 1 ? 'turno' : 'turnos'}
+              </span>
+              {!esMesActualVisible && (
+                <button
+                  type="button"
+                  className="mes-nav-hoy"
+                  onClick={() => setMesVisible(hoy().slice(0, 7))}
+                >
+                  volver al mes actual
+                </button>
+              )}
             </div>
           </div>
 
