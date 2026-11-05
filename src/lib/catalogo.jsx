@@ -11,6 +11,7 @@ const CatalogoContext = createContext({
   barberos: BARBEROS,
   galeria: [],
   recargoExtra: RECARGO_EXTRA_POR_DEFECTO,
+  extraActivo: false,
   recargar: () => {},
 })
 
@@ -20,6 +21,7 @@ export function CatalogoProvider({ children }) {
     barberos: BARBEROS,
     galeria: [],
     recargoExtra: RECARGO_EXTRA_POR_DEFECTO,
+    extraActivo: false,
   })
   const [version, setVersion] = useState(0)
 
@@ -30,7 +32,7 @@ export function CatalogoProvider({ children }) {
       supabase.from('servicios').select('*').eq('activo', true).order('orden'),
       supabase.from('barberos').select('*').eq('activo', true).order('orden'),
       supabase.from('galeria').select('*').eq('activo', true).order('orden'),
-      supabase.from('configuracion_negocio').select('recargo_extra_porcentaje').eq('id', 1).maybeSingle(),
+      supabase.from('configuracion_negocio').select('recargo_extra_porcentaje, extra_activo').eq('id', 1).maybeSingle(),
     ]).then(([s, b, g, c]) => {
       if (!vigente) return
       setCatalogo({
@@ -38,6 +40,7 @@ export function CatalogoProvider({ children }) {
         barberos: b.data && b.data.length ? b.data : BARBEROS,
         galeria: g.data || [],
         recargoExtra: c.data?.recargo_extra_porcentaje ?? RECARGO_EXTRA_POR_DEFECTO,
+        extraActivo: c.data?.extra_activo ?? false,
       })
     })
     return () => {

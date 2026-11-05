@@ -184,7 +184,7 @@ const FORM_VACIO = {
 }
 
 export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar }) {
-  const { servicios, barberos, recargoExtra } = useCatalogo()
+  const { servicios, barberos, recargoExtra, extraActivo } = useCatalogo()
   const [form, setForm] = useState(FORM_VACIO)
   const [paso, setPaso] = useState('servicio')
   const [estado, setEstado] = useState({ tipo: null, texto: '' })
@@ -255,9 +255,10 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
     : slotsParaFecha(form.fecha)
         .filter((s) => !enElPasado(s))
         .filter((s) => !horasOcupadas.includes(s))
-  // los horarios extra (fuera de hora, con recargo) solo si el servicio elegido los admite
+  // los horarios extra (fuera de hora, con recargo) solo si el interruptor general
+  // está activo y además el servicio elegido los admite
   const horasExtra =
-    diaLibreBarbero || !servicioElegido?.disponible_extra
+    !extraActivo || diaLibreBarbero || !servicioElegido?.disponible_extra
       ? []
       : slotsExtraParaFecha(form.fecha)
           .filter((s) => !enElPasado(s))
@@ -468,7 +469,7 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                 <Calendario
                   fechaElegida={form.fecha}
                   diasNoLaborales={barberoElegido?.dias_no_laborales}
-                  incluirExtra={Boolean(servicioElegido?.disponible_extra)}
+                  incluirExtra={Boolean(extraActivo && servicioElegido?.disponible_extra)}
                   onElegir={(f) => setForm((frm) => ({ ...frm, fecha: f, hora: '' }))}
                 />
                 {!form.fecha ? (

@@ -88,7 +88,7 @@ function Delta({ valor }) {
 }
 
 export default function Panel({ usuario, onCuenta }) {
-  const { servicios, barberos, galeria, recargoExtra, recargar } = useCatalogo()
+  const { servicios, barberos, galeria, recargoExtra, extraActivo, recargar } = useCatalogo()
   const nombreServicio = (id) => servicios.find((s) => s.id === id)?.nombre || id
   const nombreBarbero = (id) => {
     const b = barberos.find((x) => x.id === id)
@@ -393,6 +393,21 @@ export default function Panel({ usuario, onCuenta }) {
       err
         ? { tipo: 'error', texto: 'No se pudo guardar el recargo.' }
         : { tipo: 'ok', texto: 'Recargo actualizado ✓' },
+    )
+    if (!err) recargar()
+  }
+
+  async function alternarExtraActivo(e) {
+    const valor = e.target.checked
+    setMsgContenido(null)
+    const { error: err } = await supabase
+      .from('configuracion_negocio')
+      .update({ extra_activo: valor })
+      .eq('id', 1)
+    setMsgContenido(
+      err
+        ? { tipo: 'error', texto: 'No se pudo guardar.' }
+        : { tipo: 'ok', texto: valor ? 'Corte extra activado ✓' : 'Corte extra desactivado ✓' },
     )
     if (!err) recargar()
   }
@@ -1391,7 +1406,12 @@ export default function Panel({ usuario, onCuenta }) {
                   <p className={`reserva-msg ${msgContenido.tipo}`}>{msgContenido.texto}</p>
                 )}
 
-                <h3 className="editor-titulo">Horario extra (jueves a sábado)</h3>
+                <h3 className="editor-titulo">Corte extra fuera de horario</h3>
+                <label className="acceso-checkbox">
+                  <input type="checkbox" checked={Boolean(extraActivo)} onChange={alternarExtraActivo} />
+                  Activar los horarios extra en la web (si está destildado, nadie los ve ni puede
+                  pedirlos, aunque el servicio esté habilitado más abajo)
+                </label>
                 <form className="editor-nuevo" onSubmit={guardarRecargoExtra}>
                   <input
                     type="number"
