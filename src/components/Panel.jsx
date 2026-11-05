@@ -272,7 +272,9 @@ export default function Panel({ usuario, onCuenta }) {
     if (acceso.estado !== 'ok') return
     let vigente = true
     const [, semFin] = rangoSemana(fecha)
-    const finMes = rangoSemana(fecha) && fecha.slice(0, 8) + '31'
+    // día 31 no existe en todos los meses (abril, junio, septiembre, noviembre
+    // tienen 30; febrero menos): había que calcularlo bien, no asumir "31"
+    const finMes = ultimoDiaDeMes(fecha.slice(0, 7))
     const desde = [primeroMesAnterior(fecha), moverDia(hoy(), -29)].sort()[0]
     const hasta = [semFin, finMes, hoy()].sort().slice(-1)[0]
     supabase
