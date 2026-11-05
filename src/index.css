@@ -1453,7 +1453,6 @@ section {
 }
 
 .mes-nav-hoy {
-  display: block;
   background: none;
   border: none;
   color: var(--bronce);
@@ -1462,7 +1461,20 @@ section {
   white-space: nowrap;
   cursor: pointer;
   padding: 0;
-  margin: 0.2rem 0 0;
+}
+
+/* "Este mes" queda en 2 filas compactas: [‹ mes ›] + $, y turnos + volver */
+.stat.stat-mes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.mes-fila {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
 }
 
 /* en el celular, los números como filas compactas de un vistazo */
@@ -1498,19 +1510,7 @@ section {
     text-align: right;
   }
 
-  /* la tarjeta de "Este mes" tiene su propio navegador arriba: en vez de
-     apretar todo en una fila, se apila para que nada quede sin espacio */
-  .stat.stat-mes {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.25rem;
-  }
-
   .stat.stat-mes .stat-detalle {
-    text-align: left;
-  }
-
-  .stat.stat-mes .mes-nav-hoy {
     text-align: left;
   }
 

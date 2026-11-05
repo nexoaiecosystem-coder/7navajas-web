@@ -1173,29 +1173,33 @@ export default function Panel({ usuario, onCuenta }) {
               </span>
             </div>
             <div className="stat stat-mes">
-              <div className="mes-nav">
-                <button
-                  type="button"
-                  className="mes-nav-btn"
-                  onClick={() => setMesVisible((m) => mesMas(m, -1))}
-                  aria-label="Mes anterior"
-                >
-                  ‹
-                </button>
-                <span className="stat-label">{mesLindo(mesVisible)}</span>
-                <button
-                  type="button"
-                  className="mes-nav-btn"
-                  disabled={esMesActualVisible}
-                  onClick={() => setMesVisible((m) => mesMas(m, 1))}
-                  aria-label="Mes siguiente"
-                >
-                  ›
-                </button>
+              <div className="mes-fila">
+                <div className="mes-nav">
+                  <button
+                    type="button"
+                    className="mes-nav-btn"
+                    onClick={() => setMesVisible((m) => mesMas(m, -1))}
+                    aria-label="Mes anterior"
+                  >
+                    ‹
+                  </button>
+                  <span className="stat-label">{mesLindo(mesVisible)}</span>
+                  <button
+                    type="button"
+                    className="mes-nav-btn"
+                    disabled={esMesActualVisible}
+                    onClick={() => setMesVisible((m) => mesMas(m, 1))}
+                    aria-label="Mes siguiente"
+                  >
+                    ›
+                  </button>
+                </div>
+                <strong>{plata(statMes.total)}</strong>
               </div>
-              <strong>{plata(statMes.total)}</strong>
-              <span className="stat-detalle">
-                {statMes.cantidad} {statMes.cantidad === 1 ? 'turno' : 'turnos'}
+              <div className="mes-fila">
+                <span className="stat-detalle">
+                  {statMes.cantidad} {statMes.cantidad === 1 ? 'turno' : 'turnos'}
+                </span>
                 {!esMesActualVisible && (
                   <button
                     type="button"
@@ -1205,7 +1209,7 @@ export default function Panel({ usuario, onCuenta }) {
                     volver al mes actual
                   </button>
                 )}
-              </span>
+              </div>
             </div>
           </div>
 
