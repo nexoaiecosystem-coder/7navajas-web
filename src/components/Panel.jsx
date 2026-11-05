@@ -1158,61 +1158,57 @@ export default function Panel({ usuario, onCuenta }) {
             </span>
           </div>
           <div className="panel-stats">
-            <div className="stat">
-              <span className="stat-label">Este día</span>
-              <div className="stat-valor-fila">
+            <div className="resumen-numeros">
+              <div className="resumen-seg">
+                <span className="stat-label">Día</span>
                 <strong>{plata(statDia.total)}</strong>
                 <span className="stat-detalle">
                   {statDia.cantidad} {statDia.cantidad === 1 ? 'turno' : 'turnos'}
                 </span>
               </div>
-            </div>
-            <div className="stat">
-              <span className="stat-label">Esta semana</span>
-              <div className="stat-valor-fila">
+              <div className="resumen-seg">
+                <span className="stat-label">Semana</span>
                 <strong>{plata(statSemana.total)}</strong>
                 <span className="stat-detalle">
                   {statSemana.cantidad} {statSemana.cantidad === 1 ? 'turno' : 'turnos'}
                 </span>
               </div>
-            </div>
-            <div className="stat stat-mes">
-              <div className="mes-nav">
-                <button
-                  type="button"
-                  className="mes-nav-btn"
-                  onClick={() => setMesVisible((m) => mesMas(m, -1))}
-                  aria-label="Mes anterior"
-                >
-                  ‹
-                </button>
-                <span className="stat-label">{mesLindo(mesVisible)}</span>
-                <button
-                  type="button"
-                  className="mes-nav-btn"
-                  disabled={esMesActualVisible}
-                  onClick={() => setMesVisible((m) => mesMas(m, 1))}
-                  aria-label="Mes siguiente"
-                >
-                  ›
-                </button>
-              </div>
-              <div className="stat-valor-fila">
+              <div className="resumen-seg">
+                <div className="resumen-mes-nav">
+                  <button
+                    type="button"
+                    className="mes-nav-btn"
+                    onClick={() => setMesVisible((m) => mesMas(m, -1))}
+                    aria-label="Mes anterior"
+                  >
+                    ‹
+                  </button>
+                  <span className="stat-label">{mesLindo(mesVisible).split(' ')[0].slice(0, 3)}</span>
+                  <button
+                    type="button"
+                    className="mes-nav-btn"
+                    disabled={esMesActualVisible}
+                    onClick={() => setMesVisible((m) => mesMas(m, 1))}
+                    aria-label="Mes siguiente"
+                  >
+                    ›
+                  </button>
+                </div>
                 <strong>{plata(statMes.total)}</strong>
                 <span className="stat-detalle">
                   {statMes.cantidad} {statMes.cantidad === 1 ? 'turno' : 'turnos'}
                 </span>
               </div>
-              {!esMesActualVisible && (
-                <button
-                  type="button"
-                  className="mes-nav-hoy"
-                  onClick={() => setMesVisible(hoy().slice(0, 7))}
-                >
-                  volver al mes actual
-                </button>
-              )}
             </div>
+            {!esMesActualVisible && (
+              <button
+                type="button"
+                className="mes-nav-hoy resumen-volver"
+                onClick={() => setMesVisible(hoy().slice(0, 7))}
+              >
+                volver al mes actual
+              </button>
+            )}
           </div>
 
           <div className="tabla-marco comparativa">
