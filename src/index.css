@@ -1464,18 +1464,18 @@ section {
   padding: 0;
 }
 
-/* "Este mes": [‹ mes ›] junto al $, debajo los turnos, y al final "volver" */
+/* etiqueta (o mes) arriba, $ y turnos juntos en la fila de abajo */
+.stat-valor-fila {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+/* "Este mes" suma el navegador de mes arriba de todo, y el "volver" al final */
 .stat.stat-mes {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-}
-
-.mes-fila {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.6rem;
 }
 
 /* en el celular, los números como filas compactas de un vistazo */
