@@ -1475,6 +1475,7 @@ section {
 
 .resumen-volver {
   display: block;
+  width: 100%;
   text-align: right;
   margin: 0.5rem 0 0;
 }
