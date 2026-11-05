@@ -1172,7 +1172,7 @@ export default function Panel({ usuario, onCuenta }) {
                 {statSemana.cantidad} {statSemana.cantidad === 1 ? 'turno' : 'turnos'}
               </span>
             </div>
-            <div className="stat">
+            <div className="stat stat-mes">
               <div className="mes-nav">
                 <button
                   type="button"

@@ -1453,14 +1453,16 @@ section {
 }
 
 .mes-nav-hoy {
+  display: block;
   background: none;
   border: none;
   color: var(--bronce);
   font-size: 0.78rem;
   text-decoration: underline;
+  white-space: nowrap;
   cursor: pointer;
   padding: 0;
-  margin-left: 0.4rem;
+  margin: 0.2rem 0 0;
 }
 
 /* en el celular, los números como filas compactas de un vistazo */
@@ -1494,6 +1496,22 @@ section {
   .stat-detalle {
     font-size: 0.78rem;
     text-align: right;
+  }
+
+  /* la tarjeta de "Este mes" tiene su propio navegador arriba: en vez de
+     apretar todo en una fila, se apila para que nada quede sin espacio */
+  .stat.stat-mes {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+
+  .stat.stat-mes .stat-detalle {
+    text-align: left;
+  }
+
+  .stat.stat-mes .mes-nav-hoy {
+    text-align: left;
   }
 
   .grafica-marco,
