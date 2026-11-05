@@ -1941,6 +1941,22 @@ section {
   font-weight: 700;
 }
 
+/* horarios fuera de hora normal: con recargo y a confirmar por el barbero */
+.chip.chip-extra {
+  border-color: rgba(184, 48, 59, 0.5);
+  color: var(--rojo-claro);
+}
+
+.chip.chip-extra:hover {
+  border-color: var(--rojo-claro);
+  color: var(--rojo-claro);
+}
+
+.chip.chip-extra.activo {
+  background: var(--rojo);
+  color: var(--hueso);
+}
+
 .resumen {
   display: grid;
   gap: 0.4rem;

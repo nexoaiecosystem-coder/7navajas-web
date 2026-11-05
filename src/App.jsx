@@ -9,7 +9,6 @@ import Galeria from './components/Galeria'
 import Resenias from './components/Resenias'
 import ReservaModal from './components/ReservaModal'
 import CancelarModal from './components/CancelarModal'
-import SolicitudExtraModal from './components/SolicitudExtraModal'
 import CuentaModal from './components/CuentaModal'
 import { supabase } from './lib/supabase'
 import Ubicacion from './components/Ubicacion'
@@ -20,7 +19,6 @@ import Separador from './components/Separador'
 export default function App() {
   const [modal, setModal] = useState({ abierto: false, preseleccion: null })
   const [cancelarAbierto, setCancelarAbierto] = useState(false)
-  const [extraAbierto, setExtraAbierto] = useState(false)
   const [cuentaAbierta, setCuentaAbierta] = useState(false)
   const [usuario, setUsuario] = useState(null)
   const [ruta, setRuta] = useState(window.location.hash)
@@ -107,11 +105,7 @@ export default function App() {
         <Separador />
         <Ubicacion />
         <Separador />
-        <Contacto
-          onReservar={abrirReserva}
-          onCancelar={() => setCancelarAbierto(true)}
-          onCorteExtra={() => setExtraAbierto(true)}
-        />
+        <Contacto onReservar={abrirReserva} onCancelar={() => setCancelarAbierto(true)} />
       </main>
       <Footer onCancelar={() => setCancelarAbierto(true)} />
       {/* botón flotante de reserva, solo en celular */}
@@ -153,11 +147,6 @@ export default function App() {
         abierto={cancelarAbierto}
         usuario={usuario}
         onCerrar={() => setCancelarAbierto(false)}
-      />
-      <SolicitudExtraModal
-        abierto={extraAbierto}
-        usuario={usuario}
-        onCerrar={() => setExtraAbierto(false)}
       />
       <CuentaModal
         abierto={cuentaAbierta}

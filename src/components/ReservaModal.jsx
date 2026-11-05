@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useCatalogo } from '../lib/catalogo'
 import { fotoServicio } from '../data/fotosServicios'
-import { HORARIOS } from '../data/negocio'
+import { HORARIOS, SLOTS_EXTRA } from '../data/negocio'
 import ImgFade from './ImgFade'
 
 // fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
@@ -32,6 +32,36 @@ function slotsParaFecha(fechaStr) {
   return slots
 }
 
+// Horarios "extra" fuera de hora normal: 4 turnos de 45 min arrancando
+// justo en el cierre de ese día (cualquier día que la barbería trabaje)
+function slotsExtraParaFecha(fechaStr) {
+  if (!fechaStr) return []
+  const dia = new Date(fechaStr + 'T12:00:00').getDay()
+  const rango = HORARIOS[dia]
+  if (!rango) return []
+  const [, cierre] = rango
+  const slots = []
+  for (let i = 0; i < SLOTS_EXTRA; i++) {
+    const m = cierre * 60 + i * 45
+    const h = Math.floor(m / 60)
+    const min = m % 60
+    slots.push(`${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`)
+  }
+  return slots
+}
+
+// Momento en que una solicitud extra vence sola si el barbero no responde:
+// al terminar la ventana extra de ese día (el último de los SLOTS_EXTRA)
+function venceDe(fechaStr) {
+  const dia = new Date(fechaStr + 'T12:00:00').getDay()
+  const rango = HORARIOS[dia]
+  const cierre = rango ? rango[1] : 20
+  const finMin = cierre * 60 + SLOTS_EXTRA * 45
+  const h = Math.floor(finMin / 60)
+  const min = finMin % 60
+  return new Date(`${fechaStr}T${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}:00`).toISOString()
+}
+
 const DIAS_SEMANA = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 const MESES = [
   'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -39,7 +69,7 @@ const MESES = [
 ]
 
 // Calendario propio: los días cerrados (o que ese barbero no atiende) no se pueden ni tocar
-function Calendario({ fechaElegida, onElegir, diasNoLaborales = [] }) {
+function Calendario({ fechaElegida, onElegir, diasNoLaborales = [], incluirExtra = false }) {
   const hoyStr = hoy()
   const hoyDate = new Date(hoyStr + 'T12:00:00')
   const base = fechaElegida ? new Date(fechaElegida + 'T12:00:00') : hoyDate
@@ -58,7 +88,8 @@ function Calendario({ fechaElegida, onElegir, diasNoLaborales = [] }) {
     if (!HORARIOS[diaSemana]) return true
     if (diasNoLaborales.includes(diaSemana)) return true
     if (fechaStr === hoyStr) {
-      return !slotsParaFecha(fechaStr).some((s) => s > horaActual())
+      const disponibles = slotsParaFecha(fechaStr).concat(incluirExtra ? slotsExtraParaFecha(fechaStr) : [])
+      return !disponibles.some((s) => s > horaActual())
     }
     return false
   }
@@ -153,7 +184,7 @@ const FORM_VACIO = {
 }
 
 export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar }) {
-  const { servicios, barberos } = useCatalogo()
+  const { servicios, barberos, recargoExtra } = useCatalogo()
   const [form, setForm] = useState(FORM_VACIO)
   const [paso, setPaso] = useState('servicio')
   const [estado, setEstado] = useState({ tipo: null, texto: '' })
@@ -212,16 +243,26 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
   const servicioElegido = servicios.find((s) => s.id === form.servicio)
   const barberoElegido = barberos.find((b) => b.id === form.barbero)
   const datosListos = Boolean(usuario && form.nombre && form.telefono)
+  const precioConRecargo = (base) => Math.round((base || 0) * (1 + recargoExtra / 100))
 
   // defensa extra: el calendario ya impide elegir estos días, esto es solo por las dudas
   const diaLibreBarbero =
     Boolean(form.fecha) &&
     (barberoElegido?.dias_no_laborales || []).includes(new Date(form.fecha + 'T12:00:00').getDay())
-  const slots = diaLibreBarbero
+  const enElPasado = (s) => form.fecha === hoy() && s <= horaActual()
+  const horasNormales = diaLibreBarbero
     ? []
     : slotsParaFecha(form.fecha)
-        .filter((s) => form.fecha !== hoy() || s > horaActual())
+        .filter((s) => !enElPasado(s))
         .filter((s) => !horasOcupadas.includes(s))
+  // los horarios extra (fuera de hora, con recargo) solo si el servicio elegido los admite
+  const horasExtra =
+    diaLibreBarbero || !servicioElegido?.disponible_extra
+      ? []
+      : slotsExtraParaFecha(form.fecha)
+          .filter((s) => !enElPasado(s))
+          .filter((s) => !horasOcupadas.includes(s))
+  const esHoraExtra = horasExtra.includes(form.hora)
 
   function elegirServicio(id) {
     setForm((f) => ({ ...f, servicio: id }))
@@ -256,6 +297,10 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
       return
     }
     setEnviando(true)
+    // se guarda antes de insertar: después del insert, si llega a pasar la
+    // hora elegida mientras se arma la respuesta, "esHoraExtra" recalculado
+    // podría dar otro resultado y mostrar el cartel equivocado
+    const eraExtra = esHoraExtra
     try {
       // el chequeo real y atómico lo hace la restricción única en la base de
       // datos (ver el catch del código 23505 más abajo): acá no hace falta
@@ -265,9 +310,12 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
         cliente_telefono: form.telefono.replace(/\D/g, ''),
         barbero: form.barbero,
         servicio: form.servicio,
-        precio: servicioElegido?.precio ?? 0,
+        precio: eraExtra ? precioConRecargo(servicioElegido?.precio) : (servicioElegido?.precio ?? 0),
         fecha: form.fecha,
         hora: form.hora,
+        ...(eraExtra
+          ? { es_extra: true, estado: 'solicitud_pendiente', vence_at: venceDe(form.fecha) }
+          : {}),
       })
       if (errorInsert) {
         // 23505 = esa hora ya quedó ocupada justo ahora (lo bloqueó la base de datos)
@@ -284,9 +332,13 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
         throw errorInsert
       }
       const [anio, mes, dia] = form.fecha.split('-')
+      const nombreB = barberoElegido ? barberoElegido.apodo || barberoElegido.nombre : 'el barbero elegido'
       setEstado({
         tipo: 'ok',
-        texto: `${dia}/${mes}/${anio} a las ${form.hora} con ${barberoElegido ? barberoElegido.apodo || barberoElegido.nombre : 'el barbero elegido'}.`,
+        esExtra: eraExtra,
+        texto: eraExtra
+          ? `${dia}/${mes}/${anio} a las ${form.hora}.`
+          : `${dia}/${mes}/${anio} a las ${form.hora} con ${nombreB}.`,
       })
     } catch (err) {
       console.error(err)
@@ -316,13 +368,18 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
         {estado.tipo === 'ok' ? (
           <div className="modal-exito">
             <div className="exito-icono">✓</div>
-            <h2 className="section-title">¡Turno confirmado!</h2>
+            <h2 className="section-title">
+              {estado.esExtra ? '¡Pedido enviado!' : '¡Turno confirmado!'}
+            </h2>
             <p className="exito-texto">
-              {form.nombre}, te esperamos el {estado.texto}
+              {estado.esExtra
+                ? `${form.nombre}, le avisamos a ${barberoElegido ? barberoElegido.apodo || barberoElegido.nombre : 'tu barbero'} que querés venir el ${estado.texto}`
+                : `${form.nombre}, te esperamos el ${estado.texto}`}
             </p>
             <p className="exito-nota">
-              Si no podés venir, cancelalo desde "Cancelar un turno" al pie de la página,
-              con tu número de teléfono.
+              {estado.esExtra
+                ? 'Ese horario es fuera de hora, así que todavía no está confirmado: tiene que aceptarlo el barbero. Fijate si lo confirmó buscando tu turno con tu teléfono en "Cancelar un turno", al pie de la página.'
+                : 'Si no podés venir, cancelalo desde "Cancelar un turno" al pie de la página, con tu número de teléfono.'}
             </p>
             <button className="btn btn-primary" onClick={onCerrar}>
               Listo
@@ -411,26 +468,45 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                 <Calendario
                   fechaElegida={form.fecha}
                   diasNoLaborales={barberoElegido?.dias_no_laborales}
+                  incluirExtra={Boolean(servicioElegido?.disponible_extra)}
                   onElegir={(f) => setForm((frm) => ({ ...frm, fecha: f, hora: '' }))}
                 />
                 {!form.fecha ? (
                   <p className="paso-nota">Elegí una fecha para ver los horarios libres.</p>
                 ) : buscandoHoras ? (
                   <p className="paso-nota">Buscando horarios libres…</p>
-                ) : slots.length === 0 ? (
+                ) : horasNormales.length === 0 && horasExtra.length === 0 ? (
                   <p className="paso-nota">No quedan horarios libres ese día. Probá otra fecha.</p>
                 ) : (
-                  <div className="chips-horas">
-                    {slots.map((s) => (
-                      <button
-                        key={s}
-                        className={form.hora === s ? 'chip activo' : 'chip'}
-                        onClick={() => elegirHora(s)}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
+                  <>
+                    <div className="chips-horas">
+                      {horasNormales.map((s) => (
+                        <button
+                          key={s}
+                          className={form.hora === s ? 'chip activo' : 'chip'}
+                          onClick={() => elegirHora(s)}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                      {horasExtra.map((s) => (
+                        <button
+                          key={s}
+                          className={form.hora === s ? 'chip chip-extra activo' : 'chip chip-extra'}
+                          onClick={() => elegirHora(s)}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                    {horasExtra.length > 0 && (
+                      <p className="paso-nota">
+                        Los horarios en rojo son fuera de hora normal, con un recargo del{' '}
+                        {recargoExtra}%. El barbero tiene que confirmarlos: no son una reserva
+                        asegurada.
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -441,7 +517,8 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                   <button type="button" className="resumen-fila" onClick={() => setPaso('servicio')}>
                     <span>Servicio</span>
                     <strong>
-                      {servicioElegido?.nombre} · {plata(servicioElegido?.precio)}
+                      {servicioElegido?.nombre} ·{' '}
+                      {plata(esHoraExtra ? precioConRecargo(servicioElegido?.precio) : servicioElegido?.precio)}
                     </strong>
                   </button>
                   <button type="button" className="resumen-fila" onClick={() => setPaso('barbero')}>
@@ -452,9 +529,16 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                     <span>Cuándo</span>
                     <strong>
                       {form.fecha ? fechaLinda(form.fecha) : ''} · {form.hora}
+                      {esHoraExtra && ' (fuera de hora)'}
                     </strong>
                   </button>
                 </div>
+
+                {esHoraExtra && (
+                  <p className="paso-nota">
+                    Esto no queda confirmado al toque: el barbero tiene que aceptar tu pedido.
+                  </p>
+                )}
 
                 {datosListos ? (
                   <p className="reserva-como">
@@ -490,7 +574,13 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                 {estado.tipo === 'error' && <p className="reserva-msg error">{estado.texto}</p>}
 
                 <button type="submit" className="btn btn-primary" disabled={enviando}>
-                  {enviando ? 'Reservando…' : 'Confirmar reserva'}
+                  {esHoraExtra
+                    ? enviando
+                      ? 'Enviando…'
+                      : 'Enviar pedido'
+                    : enviando
+                      ? 'Reservando…'
+                      : 'Confirmar reserva'}
                 </button>
               </form>
             )}
