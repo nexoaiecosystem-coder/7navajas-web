@@ -3496,6 +3496,31 @@ section {
   text-decoration: underline;
 }
 
+.turno-contacto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.turno-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 162, 74, 0.35);
+  color: var(--bronce);
+  transition: all 0.15s;
+}
+
+.turno-whatsapp:hover {
+  background: var(--bronce);
+  border-color: var(--bronce);
+  color: var(--carbon);
+  text-decoration: none;
+}
+
 .turno-precio {
   font-family: var(--font-display);
   font-weight: 700;
