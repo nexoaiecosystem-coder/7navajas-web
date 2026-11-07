@@ -89,8 +89,8 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [telefonoUsuario])
 
-  const turnoProximoConfirmado = (misTurnos || []).some(
-    (t) => t.fecha >= hoy() && t.estado === 'confirmado',
+  const hayTurnoAgendado = (misTurnos || []).some(
+    (t) => t.fecha >= hoy() && (t.estado === 'confirmado' || t.estado === 'solicitud_pendiente'),
   )
 
   // Los botones "reservar" abren el modal, opcionalmente con servicio/barbero precargado
@@ -121,7 +121,10 @@ export default function App() {
       <Header
         onReservar={abrirReserva}
         onCuenta={() => setCuentaAbierta(true)}
+        onMisTurnos={() => setMisTurnosAbierto(true)}
         usuario={usuario}
+        tieneTelefono={Boolean(telefonoUsuario)}
+        hayTurnoAgendado={hayTurnoAgendado}
       />
       <main>
         <Hero onReservar={abrirReserva} />
@@ -145,22 +148,6 @@ export default function App() {
       <button className="fab-reservar" onClick={() => abrirReserva()}>
         Reservar turno
       </button>
-      {/* botón flotante "Mis turnos": para que un cliente con cuenta no
-          pierda de vista su turno, con aviso si tiene uno próximo confirmado */}
-      {telefonoUsuario && (
-        <button
-          className={turnoProximoConfirmado ? 'fab-mis-turnos alarma' : 'fab-mis-turnos'}
-          onClick={() => setMisTurnosAbierto(true)}
-          aria-label="Mis turnos"
-          title="Mis turnos"
-        >
-          {turnoProximoConfirmado && <span className="fab-punto" aria-hidden="true" />}
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 3a6 6 0 0 0-6 6v3.1c0 .62-.24 1.22-.68 1.66L4 15h16l-1.32-1.24a2.35 2.35 0 0 1-.68-1.66V9a6 6 0 0 0-6-6Z" />
-            <path d="M9.5 19a2.5 2.5 0 0 0 5 0" />
-          </svg>
-        </button>
-      )}
       {/* flotantes: subir al inicio + redes */}
       <div className="flotantes">
         <button

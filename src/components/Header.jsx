@@ -11,7 +11,7 @@ const SECCIONES = [
   { href: '#contacto', label: 'Contacto' },
 ]
 
-export default function Header({ onReservar, onCuenta, usuario }) {
+export default function Header({ onReservar, onCuenta, onMisTurnos, usuario, tieneTelefono, hayTurnoAgendado }) {
   const [menuAbierto, setMenuAbierto] = useState(false)
 
   useEffect(() => {
@@ -64,6 +64,14 @@ export default function Header({ onReservar, onCuenta, usuario }) {
             </button>
           </div>
         </div>
+        {tieneTelefono && (
+          <button
+            className={hayTurnoAgendado ? 'mis-turnos-tag tintineo' : 'mis-turnos-tag'}
+            onClick={onMisTurnos}
+          >
+            Mis turnos
+          </button>
+        )}
       </header>
 
       {menuAbierto && (

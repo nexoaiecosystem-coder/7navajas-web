@@ -3785,57 +3785,57 @@ section {
   transform: translateX(-50%) scale(0.96);
 }
 
-/* botón flotante "Mis turnos": siempre visible si hay sesión con teléfono */
-.fab-mis-turnos {
-  position: fixed;
-  left: 1rem;
-  bottom: 1rem;
-  z-index: 78;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(21, 21, 23, 0.9);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(201, 162, 74, 0.4);
-  color: var(--bronce);
-  cursor: pointer;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
-  transition: border-color 0.2s, transform 0.2s;
-}
-
-.fab-mis-turnos:hover {
-  border-color: var(--bronce);
-  transform: translateY(-2px);
-}
-
-.fab-punto {
+/* "Mis turnos": cartel que cuelga del borde inferior de la barra superior.
+   Es hijo de .header (position: sticky), así que sube y baja con ella. */
+.mis-turnos-tag {
   position: absolute;
-  top: 3px;
-  right: 3px;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: var(--rojo-claro);
-  border: 2px solid var(--carbon-2);
+  top: 100%;
+  right: 1.25rem;
+  background: var(--grad-oro);
+  color: var(--carbon);
+  border: none;
+  border-top: none;
+  border-radius: 0 0 var(--radio-s) var(--radio-s);
+  padding: 0.45rem 1rem;
+  font-family: var(--font-cuerpo);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  transform-origin: top center;
+  transition: filter 0.2s;
 }
 
-.fab-mis-turnos.alarma {
-  border-color: var(--rojo-claro);
-  color: var(--rojo-claro);
-  animation: fab-alarma-anillo 1.8s ease-in-out infinite;
+.mis-turnos-tag:hover {
+  filter: brightness(1.08);
 }
 
-@keyframes fab-alarma-anillo {
-  0%, 100% { box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 0 0 rgba(184, 48, 59, 0.45); }
-  50% { box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 0 10px rgba(184, 48, 59, 0); }
+.mis-turnos-tag.tintineo {
+  animation: mis-turnos-tintineo 2.6s ease-in-out infinite;
+}
+
+@keyframes mis-turnos-tintineo {
+  0%, 55%, 100% { transform: rotate(0deg); }
+  60% { transform: rotate(-9deg); }
+  67% { transform: rotate(8deg); }
+  74% { transform: rotate(-6deg); }
+  81% { transform: rotate(4deg); }
+  88% { transform: rotate(-2deg); }
+  95% { transform: rotate(0deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fab-mis-turnos.alarma { animation: none; }
+  .mis-turnos-tag.tintineo { animation: none; }
+}
+
+@media (max-width: 640px) {
+  .mis-turnos-tag {
+    right: 0.9rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.72rem;
+  }
 }
 
 /* flotantes: subir al inicio + redes, abajo a la derecha */
@@ -3883,14 +3883,6 @@ section {
     height: 42px;
   }
 
-  /* con el botón de reservar centrado abajo en celular, "Mis turnos"
-     sube un poco para no quedar pegado al borde */
-  .fab-mis-turnos {
-    left: 0.8rem;
-    bottom: 4.6rem;
-    width: 46px;
-    height: 46px;
-  }
 }
 
 /* feedback táctil: las tarjetas y botones responden al toque */
