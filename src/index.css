@@ -1052,6 +1052,28 @@ section {
   margin-bottom: 0.9rem;
 }
 
+.barbero-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: fit-content;
+  color: var(--hueso-tenue);
+  font-size: 0.85rem;
+  text-decoration: none;
+  margin-top: -0.5rem;
+  margin-bottom: 0.4rem;
+  transition: color 0.2s;
+}
+
+.barbero-whatsapp svg {
+  color: var(--bronce);
+  flex-shrink: 0;
+}
+
+.barbero-whatsapp:hover {
+  color: var(--bronce);
+}
+
 /* ---------- Reserva ---------- */
 .reserva-form {
   max-width: 560px;
