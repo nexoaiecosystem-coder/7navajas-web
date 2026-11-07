@@ -1379,6 +1379,54 @@ section {
   font-size: 0.95rem;
 }
 
+.mis-turnos-vacio {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: start;
+  margin-top: 1.25rem;
+}
+
+.mis-turnos-vacio .cancelar-vacio {
+  margin-top: 0;
+}
+
+/* ---------- Fidelidad: 6 cortes, el 6° gratis ---------- */
+.fidelidad {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(201, 162, 74, 0.2);
+}
+
+.fidelidad-circulos {
+  display: flex;
+  gap: 0.55rem;
+  margin: 0.9rem 0;
+  flex-wrap: wrap;
+}
+
+.fidelidad-circulo {
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 50%;
+  border: 2px solid var(--acero);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.fidelidad-circulo.lleno {
+  background: var(--hueso);
+  border-color: var(--hueso);
+  color: var(--carbon);
+}
+
+.fidelidad-nota {
+  color: var(--hueso-tenue);
+  font-size: 0.82rem;
+}
+
 /* ---------- Estadísticas del panel ---------- */
 .panel-stats {
   margin-bottom: 1.5rem;
@@ -3721,6 +3769,59 @@ section {
   transform: translateX(-50%) scale(0.96);
 }
 
+/* botón flotante "Mis turnos": siempre visible si hay sesión con teléfono */
+.fab-mis-turnos {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 78;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(21, 21, 23, 0.9);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(201, 162, 74, 0.4);
+  color: var(--bronce);
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.fab-mis-turnos:hover {
+  border-color: var(--bronce);
+  transform: translateY(-2px);
+}
+
+.fab-punto {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--rojo-claro);
+  border: 2px solid var(--carbon-2);
+}
+
+.fab-mis-turnos.alarma {
+  border-color: var(--rojo-claro);
+  color: var(--rojo-claro);
+  animation: fab-alarma-anillo 1.8s ease-in-out infinite;
+}
+
+@keyframes fab-alarma-anillo {
+  0%, 100% { box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 0 0 rgba(184, 48, 59, 0.45); }
+  50% { box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 0 10px rgba(184, 48, 59, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fab-mis-turnos.alarma { animation: none; }
+}
+
 /* flotantes: subir al inicio + redes, abajo a la derecha */
 .flotantes {
   position: fixed;
@@ -3764,6 +3865,15 @@ section {
   .flotante {
     width: 42px;
     height: 42px;
+  }
+
+  /* con el botón de reservar centrado abajo en celular, "Mis turnos"
+     sube un poco para no quedar pegado al borde */
+  .fab-mis-turnos {
+    left: 0.8rem;
+    bottom: 4.6rem;
+    width: 46px;
+    height: 46px;
   }
 }
 

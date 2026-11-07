@@ -9,6 +9,7 @@ import Galeria from './components/Galeria'
 import Resenias from './components/Resenias'
 import ReservaModal from './components/ReservaModal'
 import CancelarModal from './components/CancelarModal'
+import MisTurnosModal from './components/MisTurnosModal'
 import CuentaModal from './components/CuentaModal'
 import { supabase } from './lib/supabase'
 import Ubicacion from './components/Ubicacion'
@@ -16,12 +17,21 @@ import Contacto from './components/Contacto'
 import Footer from './components/Footer'
 import Separador from './components/Separador'
 
+// fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
+const hoy = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 export default function App() {
   const [modal, setModal] = useState({ abierto: false, preseleccion: null })
   const [cancelarAbierto, setCancelarAbierto] = useState(false)
   const [cuentaAbierta, setCuentaAbierta] = useState(false)
+  const [misTurnosAbierto, setMisTurnosAbierto] = useState(false)
+  const [misTurnos, setMisTurnos] = useState(null)
   const [usuario, setUsuario] = useState(null)
   const [ruta, setRuta] = useState(window.location.hash)
+  const telefonoUsuario = usuario?.user_metadata?.telefono || ''
 
   useEffect(() => {
     const alCambiar = () => setRuta(window.location.hash)
@@ -59,6 +69,29 @@ export default function App() {
     })
     return () => sub.subscription.unsubscribe()
   }, [])
+
+  // Turnos del cliente logueado: para el botón flotante "Mis turnos" (con
+  // aviso si tiene uno próximo) y para la fidelidad (6 cortes = el 6° gratis)
+  async function cargarMisTurnos() {
+    if (!supabase || !telefonoUsuario) {
+      setMisTurnos(null)
+      return
+    }
+    const { data } = await supabase.rpc('turnos_por_telefono', {
+      p_telefono: telefonoUsuario,
+      p_desde: '2000-01-01',
+    })
+    setMisTurnos(data || [])
+  }
+
+  useEffect(() => {
+    cargarMisTurnos()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [telefonoUsuario])
+
+  const turnoProximoConfirmado = (misTurnos || []).some(
+    (t) => t.fecha >= hoy() && t.estado === 'confirmado',
+  )
 
   // Los botones "reservar" abren el modal, opcionalmente con servicio/barbero precargado
   function abrirReserva(datos = null) {
@@ -112,6 +145,22 @@ export default function App() {
       <button className="fab-reservar" onClick={() => abrirReserva()}>
         Reservar turno
       </button>
+      {/* botón flotante "Mis turnos": para que un cliente con cuenta no
+          pierda de vista su turno, con aviso si tiene uno próximo confirmado */}
+      {telefonoUsuario && (
+        <button
+          className={turnoProximoConfirmado ? 'fab-mis-turnos alarma' : 'fab-mis-turnos'}
+          onClick={() => setMisTurnosAbierto(true)}
+          aria-label="Mis turnos"
+          title="Mis turnos"
+        >
+          {turnoProximoConfirmado && <span className="fab-punto" aria-hidden="true" />}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3a6 6 0 0 0-6 6v3.1c0 .62-.24 1.22-.68 1.66L4 15h16l-1.32-1.24a2.35 2.35 0 0 1-.68-1.66V9a6 6 0 0 0-6-6Z" />
+            <path d="M9.5 19a2.5 2.5 0 0 0 5 0" />
+          </svg>
+        </button>
+      )}
       {/* flotantes: subir al inicio + redes */}
       <div className="flotantes">
         <button
@@ -147,6 +196,14 @@ export default function App() {
         abierto={cancelarAbierto}
         usuario={usuario}
         onCerrar={() => setCancelarAbierto(false)}
+      />
+      <MisTurnosModal
+        abierto={misTurnosAbierto}
+        usuario={usuario}
+        turnos={misTurnos}
+        onReservar={abrirReserva}
+        onActualizar={cargarMisTurnos}
+        onCerrar={() => setMisTurnosAbierto(false)}
       />
       <CuentaModal
         abierto={cuentaAbierta}
