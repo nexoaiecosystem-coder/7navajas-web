@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useCatalogo } from '../lib/catalogo'
+import { CICLO_FIDELIDAD } from '../data/negocio'
 
 // fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
 const hoy = () => {
@@ -24,8 +25,6 @@ function estadoExtra(t) {
   if (t.estado === 'vencida') return { texto: 'Venció sin respuesta', clase: 'vencida' }
   return { texto: 'Corte extra confirmado', clase: 'confirmada' }
 }
-
-const CICLO_FIDELIDAD = 6
 
 export default function MisTurnosModal({ abierto, usuario, turnos, onReservar, onActualizar, onCerrar }) {
   const { servicios, barberos } = useCatalogo()

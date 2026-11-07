@@ -2612,6 +2612,22 @@ section {
   margin-bottom: 0.75rem;
 }
 
+/* ---------- Fidelidad: corte gratis ---------- */
+.resumen-gratis {
+  color: var(--bronce-claro);
+  font-weight: 900;
+}
+
+.resumen-gratis-nota {
+  color: var(--bronce-claro) !important;
+}
+
+.exito-gratis {
+  color: var(--bronce-claro);
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
 /* En el celular, el modal queda centrado igual que en desktop */
 @media (max-width: 520px) {
   .modal {

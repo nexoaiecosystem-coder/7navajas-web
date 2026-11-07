@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useCatalogo } from '../lib/catalogo'
 import { fotoServicio } from '../data/fotosServicios'
-import { HORARIOS, SLOTS_EXTRA } from '../data/negocio'
+import { HORARIOS, SLOTS_EXTRA, CICLO_FIDELIDAD } from '../data/negocio'
 import ImgFade from './ImgFade'
 
 // fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
@@ -238,6 +238,28 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
     }
   }, [abierto, form.barbero, form.fecha])
 
+  // Fidelidad: cuántos cortes confirmados lleva ese teléfono (para avisar,
+  // antes de confirmar, si este turno le va a salir gratis). El precio real
+  // se recalcula de nuevo justo antes de guardar, por las dudas.
+  const [cicloFidelidad, setCicloFidelidad] = useState(null)
+  useEffect(() => {
+    const telefonoDigitos = form.telefono.replace(/\D/g, '')
+    if (!abierto || paso !== 'confirmar' || !supabase || telefonoDigitos.length < 8) {
+      setCicloFidelidad(null)
+      return
+    }
+    let cancelado = false
+    supabase
+      .rpc('turnos_por_telefono', { p_telefono: telefonoDigitos, p_desde: '2000-01-01' })
+      .then(({ data, error }) => {
+        if (cancelado || error) return
+        setCicloFidelidad((data || []).filter((t) => t.estado === 'confirmado' && !t.no_asistio).length)
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [abierto, paso, form.telefono])
+
   if (!abierto) return null
 
   const servicioElegido = servicios.find((s) => s.id === form.servicio)
@@ -264,6 +286,7 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
           .filter((s) => !enElPasado(s))
           .filter((s) => !horasOcupadas.includes(s))
   const esHoraExtra = horasExtra.includes(form.hora)
+  const esSextoGratis = cicloFidelidad !== null && (cicloFidelidad + 1) % CICLO_FIDELIDAD === 0
 
   function elegirServicio(id) {
     setForm((f) => ({ ...f, servicio: id }))
@@ -303,15 +326,29 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
     // podría dar otro resultado y mostrar el cartel equivocado
     const eraExtra = esHoraExtra
     try {
+      // la fidelidad se recalcula de nuevo acá, fresca, justo antes de
+      // guardar: lo que se mostró antes en el resumen es solo un adelanto
+      const telefonoDigitos = form.telefono.replace(/\D/g, '')
+      let eraSextoGratis = false
+      const { data: historial } = await supabase.rpc('turnos_por_telefono', {
+        p_telefono: telefonoDigitos,
+        p_desde: '2000-01-01',
+      })
+      if (historial) {
+        const confirmados = historial.filter((t) => t.estado === 'confirmado' && !t.no_asistio).length
+        eraSextoGratis = (confirmados + 1) % CICLO_FIDELIDAD === 0
+      }
+      const precioBase = eraExtra ? precioConRecargo(servicioElegido?.precio) : (servicioElegido?.precio ?? 0)
+
       // el chequeo real y atómico lo hace la restricción única en la base de
       // datos (ver el catch del código 23505 más abajo): acá no hace falta
       // consultar antes, total la base rechaza el insert si ya está ocupado
       const { error: errorInsert } = await supabase.from('turnos').insert({
         cliente_nombre: form.nombre,
-        cliente_telefono: form.telefono.replace(/\D/g, ''),
+        cliente_telefono: telefonoDigitos,
         barbero: form.barbero,
         servicio: form.servicio,
-        precio: eraExtra ? precioConRecargo(servicioElegido?.precio) : (servicioElegido?.precio ?? 0),
+        precio: eraSextoGratis ? 0 : precioBase,
         fecha: form.fecha,
         hora: form.hora,
         ...(eraExtra
@@ -337,6 +374,7 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
       setEstado({
         tipo: 'ok',
         esExtra: eraExtra,
+        esGratis: eraSextoGratis,
         texto: eraExtra
           ? `${dia}/${mes}/${anio} a las ${form.hora}.`
           : `${dia}/${mes}/${anio} a las ${form.hora} con ${nombreB}.`,
@@ -382,6 +420,9 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                 ? 'Ese horario es fuera de hora, así que todavía no está confirmado: tiene que aceptarlo el barbero. Fijate si lo confirmó buscando tu turno con tu teléfono en "Cancelar un turno", al pie de la página.'
                 : 'Si no podés venir, cancelalo desde "Cancelar un turno" al pie de la página, con tu número de teléfono.'}
             </p>
+            {estado.esGratis && (
+              <p className="exito-gratis">🎉 ¡Completaste tu fidelidad! Este corte te sale gratis.</p>
+            )}
             <button className="btn btn-primary" onClick={onCerrar}>
               Listo
             </button>
@@ -519,7 +560,11 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                     <span>Servicio</span>
                     <strong>
                       {servicioElegido?.nombre} ·{' '}
-                      {plata(esHoraExtra ? precioConRecargo(servicioElegido?.precio) : servicioElegido?.precio)}
+                      {esSextoGratis ? (
+                        <span className="resumen-gratis">GRATIS 🎉</span>
+                      ) : (
+                        plata(esHoraExtra ? precioConRecargo(servicioElegido?.precio) : servicioElegido?.precio)
+                      )}
                     </strong>
                   </button>
                   <button type="button" className="resumen-fila" onClick={() => setPaso('barbero')}>
@@ -538,6 +583,12 @@ export default function ReservaModal({ abierto, preseleccion, usuario, onCerrar 
                 {esHoraExtra && (
                   <p className="paso-nota">
                     Esto no queda confirmado al toque: el barbero tiene que aceptar tu pedido.
+                  </p>
+                )}
+
+                {esSextoGratis && (
+                  <p className="paso-nota resumen-gratis-nota">
+                    🎉 ¡Completaste tu fidelidad! Este corte te sale gratis.
                   </p>
                 )}
 

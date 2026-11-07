@@ -24,6 +24,10 @@ export const HORARIOS = [
 // cualquier día que la barbería ya trabaje
 export const SLOTS_EXTRA = 4
 
+// Fidelidad: cada tantos cortes confirmados (y a los que el cliente fue), el
+// último de la tanda sale gratis
+export const CICLO_FIDELIDAD = 6
+
 export const HORARIOS_TEXTO = [
   { dias: 'Lunes', horas: '12:00 – 19:00' },
   { dias: 'Martes a sábado', horas: '11:00 – 20:00' },
