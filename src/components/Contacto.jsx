@@ -1,7 +1,7 @@
 import { NEGOCIO } from '../data/negocio'
 import Reveal from './Reveal'
 
-export default function Contacto({ onReservar, onCancelar }) {
+export default function Contacto({ onReservar, onCancelar, onMembresia }) {
   return (
     <section id="contacto">
       <div className="container">
@@ -72,6 +72,24 @@ export default function Contacto({ onReservar, onCancelar }) {
                 Cancelar turno
               </button>
             </div>
+          </Reveal>
+
+          <Reveal as="article" className="contacto-card" delay={270}>
+            <div className="contacto-icono">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 10a9 9 0 1 1 3 6.7" />
+                <path d="M3 10v5h5" />
+                <path d="M12 7v5l3 2" />
+              </svg>
+            </div>
+            <h3>Membresía mensual</h3>
+            <p>
+              Elegí tu día y hora fija, y quedá reservado todas las semanas del mes. Cancelala
+              cuando quieras.
+            </p>
+            <button className="btn btn-outline btn-small" onClick={onMembresia}>
+              Quiero membresía
+            </button>
           </Reveal>
         </div>
       </div>

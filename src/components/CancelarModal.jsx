@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useCatalogo } from '../lib/catalogo'
+import { NOMBRES_DIA } from '../data/negocio'
 
 // fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
 const hoy = () => {
@@ -35,6 +36,7 @@ export default function CancelarModal({ abierto, usuario, onCerrar }) {
   }
   const [telefono, setTelefono] = useState('')
   const [turnos, setTurnos] = useState(null) // null = todavía no se buscó
+  const [membresias, setMembresias] = useState([])
   const [buscando, setBuscando] = useState(false)
   const [msg, setMsg] = useState(null)
 
@@ -43,6 +45,7 @@ export default function CancelarModal({ abierto, usuario, onCerrar }) {
     // con sesión iniciada, el teléfono viene solo de la cuenta
     setTelefono(usuario?.user_metadata?.telefono || '')
     setTurnos(null)
+    setMembresias([])
     setMsg(null)
     document.body.style.overflow = 'hidden'
     const onKey = (e) => {
@@ -61,16 +64,34 @@ export default function CancelarModal({ abierto, usuario, onCerrar }) {
     e.preventDefault()
     setMsg(null)
     setBuscando(true)
-    const { data, error } = await supabase.rpc('turnos_por_telefono', {
-      p_telefono: soloDigitos(telefono),
-      p_desde: hoy(),
-    })
+    const [{ data, error }, { data: dataMembresias }] = await Promise.all([
+      supabase.rpc('turnos_por_telefono', { p_telefono: soloDigitos(telefono), p_desde: hoy() }),
+      supabase.rpc('membresias_por_telefono', { p_telefono: soloDigitos(telefono) }),
+    ])
     setBuscando(false)
     if (error) {
       setMsg({ tipo: 'error', texto: 'No pudimos buscar tus turnos. Probá de nuevo.' })
       return
     }
     setTurnos(data || [])
+    setMembresias(dataMembresias || [])
+  }
+
+  async function cancelarMembresia(m) {
+    const seguro = window.confirm(
+      `¿Cancelar tu membresía de los ${NOMBRES_DIA[m.dia_semana]} a las ${m.hora.slice(0, 5)}? Se van a liberar los turnos ya reservados de las próximas semanas.`,
+    )
+    if (!seguro) return
+    const { data: cancelada, error } = await supabase.rpc('membresia_cancelar', {
+      p_id: m.id,
+      p_telefono: soloDigitos(telefono),
+    })
+    if (error || !cancelada) {
+      setMsg({ tipo: 'error', texto: 'No se pudo cancelar la membresía. Probá de nuevo.' })
+      return
+    }
+    setMembresias((lista) => lista.filter((x) => x.id !== m.id))
+    setMsg({ tipo: 'ok', texto: 'Membresía cancelada. Los horarios quedaron libres.' })
   }
 
   async function cancelar(t) {
@@ -124,6 +145,25 @@ export default function CancelarModal({ abierto, usuario, onCerrar }) {
         </form>
 
         {msg && <p className={`reserva-msg ${msg.tipo}`}>{msg.texto}</p>}
+
+        {membresias.length > 0 && (
+          <div className="membresias-lista">
+            <h3 className="editor-titulo">Tu membresía</h3>
+            {membresias.map((m) => (
+              <div className="turno membresia-fila" key={m.id}>
+                <div className="turno-datos">
+                  <strong>
+                    Todos los {NOMBRES_DIA[m.dia_semana]} a las {m.hora.slice(0, 5)}
+                  </strong>
+                  <span>{nombreServicio(m.servicio)} · con {nombreBarbero(m.barbero)}</span>
+                </div>
+                <button className="turno-cancelar" onClick={() => cancelarMembresia(m)}>
+                  Cancelar membresía
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {turnos && turnos.length === 0 && !msg && (
           <p className="cancelar-vacio">

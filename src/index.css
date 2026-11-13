@@ -1393,6 +1393,24 @@ section {
   margin-top: 1.25rem;
 }
 
+.membresias-lista {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  padding: 0.9rem;
+  border: 1px solid rgba(201, 162, 74, 0.35);
+  border-radius: var(--radio-m);
+  background: rgba(201, 162, 74, 0.07);
+}
+
+.membresias-lista .editor-titulo {
+  margin: 0 0 0.3rem;
+}
+
+.membresia-fila {
+  background: var(--grad-tarjeta);
+}
+
 .cancelar-vacio {
   margin-top: 1.25rem;
   color: var(--hueso-tenue);

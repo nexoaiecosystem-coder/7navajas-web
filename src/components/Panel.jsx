@@ -180,6 +180,8 @@ export default function Panel({ usuario, onCuenta }) {
   const [refresco, setRefresco] = useState(0)
   const [telefonosNoAsistieron, setTelefonosNoAsistieron] = useState(new Set())
   const [solicitudesExtra, setSolicitudesExtra] = useState([])
+  const [membresiasActivas, setMembresiasActivas] = useState([])
+  const [conflictosMembresia, setConflictosMembresia] = useState([])
 
   // el nombre de bienvenida se agranda o achica para ocupar siempre todo el renglón
   const nombreRef = useRef(null)
@@ -400,6 +402,67 @@ export default function Panel({ usuario, onCuenta }) {
     }
   }, [acceso.estado, esAdmin, acceso.barbero, refresco])
 
+  // Membresías activas + conflictos "a reubicar" (una membresía chocó con un
+  // turno ya confirmado): el dueño ve todas, el barbero solo las suyas
+  useEffect(() => {
+    if (acceso.estado !== 'ok') return
+    let vigente = true
+    let q = supabase.from('membresias').select('*').eq('estado', 'activa').order('dia_semana')
+    if (!esAdmin) q = q.eq('barbero', acceso.barbero)
+    q.then(({ data }) => {
+      if (vigente) setMembresiasActivas(data || [])
+    })
+    return () => {
+      vigente = false
+    }
+  }, [acceso.estado, esAdmin, acceso.barbero, refresco])
+
+  useEffect(() => {
+    if (acceso.estado !== 'ok') return
+    let vigente = true
+    let q = supabase
+      .from('turnos')
+      .select('*')
+      .eq('estado', 'reubicar')
+      .gte('fecha', hoy())
+      .order('fecha')
+    if (!esAdmin) q = q.eq('barbero', acceso.barbero)
+    q.then(({ data }) => {
+      if (vigente) setConflictosMembresia(data || [])
+    })
+    return () => {
+      vigente = false
+    }
+  }, [acceso.estado, esAdmin, acceso.barbero, refresco])
+
+  async function cancelarMembresiaAdmin(m) {
+    const seguro = window.confirm(
+      `¿Cancelar la membresía de ${m.cliente_nombre} (${nombreBarbero(m.barbero)}, todos los ${['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][m.dia_semana]} a las ${m.hora.slice(0, 5)})? Se liberan sus horarios ya reservados.`,
+    )
+    if (!seguro) return
+    const { data: cancelada, error: err } = await supabase.rpc('membresia_cancelar_admin', {
+      p_id: m.id,
+    })
+    if (err || !cancelada) {
+      setError('No se pudo cancelar la membresía.')
+      return
+    }
+    setRefresco((r) => r + 1)
+  }
+
+  async function resolverConflicto(t) {
+    const seguro = window.confirm(
+      `¿Marcar como resuelto el conflicto de ${t.cliente_nombre} del ${fechaLinda(t.fecha)}? Esto solo borra el aviso: coordiná antes otro horario con el cliente.`,
+    )
+    if (!seguro) return
+    const { error: err } = await supabase.from('turnos').delete().eq('id', t.id)
+    if (err) {
+      setError('No se pudo resolver el conflicto.')
+      return
+    }
+    setRefresco((r) => r + 1)
+  }
+
   async function cancelar(t) {
     const seguro = window.confirm(
       `¿Cancelar el turno de ${t.cliente_nombre} (${t.hora.slice(0, 5)} con ${nombreBarbero(t.barbero)})?`,
@@ -498,11 +561,13 @@ export default function Panel({ usuario, onCuenta }) {
       cambios[c] =
         c === 'precio'
           ? Number(v) || 0
-          : c === 'whatsapp'
-            ? v.replace(/\D/g, '') || null
-            : v === ''
-              ? null
-              : v
+          : c === 'precio_mensual'
+            ? (v === '' ? null : Number(v) || 0)
+            : c === 'whatsapp'
+              ? v.replace(/\D/g, '') || null
+              : v === ''
+                ? null
+                : v
     }
     const { error: err } = await supabase.from(tabla).update(cambios).eq('id', item.id)
     setMsgContenido(
@@ -881,6 +946,10 @@ export default function Panel({ usuario, onCuenta }) {
   ).filter((t) => t.estado === 'solicitud_pendiente').length
   const filasFiltradas =
     filtro === 'todos' ? statsFilas : statsFilas.filter((t) => t.barbero === filtro)
+  const membresiasVisibles =
+    filtro === 'todos' ? membresiasActivas : membresiasActivas.filter((m) => m.barbero === filtro)
+  const conflictosVisibles =
+    filtro === 'todos' ? conflictosMembresia : conflictosMembresia.filter((t) => t.barbero === filtro)
 
   const [semIni, semFin] = rangoSemana(fecha)
   const [semAntIni, semAntFin] = [moverDia(semIni, -7), moverDia(semIni, -1)]
@@ -991,6 +1060,12 @@ export default function Panel({ usuario, onCuenta }) {
               <span className="panel-vistas-badge">{cantidadExtraPendiente}</span>
             )}
           </button>
+          <button className={vista === 'membresias' ? 'activo' : ''} onClick={() => setVista('membresias')}>
+            Membresías
+            {conflictosMembresia.length > 0 && (
+              <span className="panel-vistas-badge">{conflictosMembresia.length}</span>
+            )}
+          </button>
           <button className={vista === 'numeros' ? 'activo' : ''} onClick={() => setVista('numeros')}>
             Números
           </button>
@@ -1009,7 +1084,7 @@ export default function Panel({ usuario, onCuenta }) {
           )}
         </div>
 
-        {esAdmin && ['agenda', 'extra', 'numeros', 'historial'].includes(vista) && (
+        {esAdmin && ['agenda', 'extra', 'membresias', 'numeros', 'historial'].includes(vista) && (
           <div className="panel-tabs">
             <button className={tab === 'todos' ? 'activo' : ''} onClick={() => setTab('todos')}>
               Todos
@@ -1069,6 +1144,7 @@ export default function Panel({ usuario, onCuenta }) {
                       <strong>
                         {t.cliente_nombre}
                         {t.es_extra && <span className="turno-estado-badge confirmada">Extra</span>}
+                        {t.membresia_id && <span className="turno-estado-badge confirmada">Membresía</span>}
                       </strong>
                       <span>
                         {nombreServicio(t.servicio)} · con {nombreBarbero(t.barbero)}
@@ -1175,6 +1251,73 @@ export default function Panel({ usuario, onCuenta }) {
                     </span>
                   </div>
                   <span className="turno-precio">{plata(t.precio)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        )}
+
+        {/* ---------- Membresías ---------- */}
+        {vista === 'membresias' && (
+        <section className="panel-seccion">
+          <div className="panel-seccion-head">
+            <h2 className="panel-sub">Membresías</h2>
+            <span className="panel-seccion-nota">pagos mensuales con horario fijo</span>
+          </div>
+
+          {conflictosVisibles.length > 0 && (
+            <>
+              <h3 className="editor-titulo">⚠ Para reubicar</h3>
+              <p className="panel-vacio">
+                El horario fijo de una membresía chocó con un turno ya confirmado. Coordiná con
+                el cliente de la membresía otro horario para ese día.
+              </p>
+              <ul className="panel-lista">
+                {conflictosVisibles.map((t) => (
+                  <li className="turno turno-alerta" key={t.id}>
+                    <span className="turno-hora">{t.hora.slice(0, 5)}</span>
+                    <div className="turno-datos">
+                      <strong>{t.cliente_nombre}</strong>
+                      <span>
+                        {nombreServicio(t.servicio)} · {fechaLinda(t.fecha)}
+                        {esAdmin ? ` · con ${nombreBarbero(t.barbero)}` : ''}
+                      </span>
+                      <TelefonoContacto telefono={t.cliente_telefono} />
+                    </div>
+                    <button className="turno-cancelar" onClick={() => resolverConflicto(t)}>
+                      Marcar resuelto
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          <h3 className="editor-titulo">Activas</h3>
+          {membresiasVisibles.length === 0 ? (
+            <p className="panel-vacio">
+              No hay membresías activas {filtro !== 'todos' ? `para ${nombreBarbero(filtro)} ` : ''}
+              todavía.
+            </p>
+          ) : (
+            <ul className="panel-lista">
+              {membresiasVisibles.map((m) => (
+                <li className="turno" key={m.id}>
+                  <span className="turno-hora">{m.hora.slice(0, 5)}</span>
+                  <div className="turno-datos">
+                    <strong>{m.cliente_nombre}</strong>
+                    <span>
+                      {nombreServicio(m.servicio)} · todos los{' '}
+                      {['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][m.dia_semana]}
+                      {esAdmin ? ` · con ${nombreBarbero(m.barbero)}` : ''}
+                    </span>
+                    <TelefonoContacto telefono={m.cliente_telefono} />
+                  </div>
+                  <span className="turno-precio">{plata(m.precio_mensual)}/mes</span>
+                  <button className="turno-cancelar" onClick={() => cancelarMembresiaAdmin(m)}>
+                    Cancelar membresía
+                  </button>
                 </li>
               ))}
             </ul>
@@ -1580,6 +1723,19 @@ export default function Panel({ usuario, onCuenta }) {
                           />
                           Se puede pedir como corte extra
                         </label>
+                        <div className="editor-linea2">
+                          <input
+                            type="number"
+                            className="editor-precio"
+                            placeholder="Sin membresía"
+                            value={valorDe(s, 'precio_mensual')}
+                            onChange={(e) => editar(s.id, 'precio_mensual', e.target.value)}
+                            aria-label="Precio mensual de membresía"
+                          />
+                          <span className="editor-ayuda">
+                            $ por mes si tiene membresía (vacío = no se ofrece membresía)
+                          </span>
+                        </div>
                       </div>
                       <div className="editor-acciones">
                         <label className="editor-foto-btn">
@@ -1594,7 +1750,13 @@ export default function Panel({ usuario, onCuenta }) {
                         <button
                           className="editor-guardar"
                           onClick={() =>
-                            guardarFila('servicios', s, ['nombre', 'precio', 'nota', 'disponible_extra'])
+                            guardarFila('servicios', s, [
+                              'nombre',
+                              'precio',
+                              'nota',
+                              'disponible_extra',
+                              'precio_mensual',
+                            ])
                           }
                         >
                           Guardar

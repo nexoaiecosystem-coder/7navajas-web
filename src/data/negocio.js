@@ -28,6 +28,11 @@ export const SLOTS_EXTRA = 4
 // último de la tanda sale gratis
 export const CICLO_FIDELIDAD = 6
 
+// Nombres de día para la membresía (el mismo índice que HORARIOS: getDay())
+export const NOMBRES_DIA = [
+  'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado',
+]
+
 export const HORARIOS_TEXTO = [
   { dias: 'Lunes', horas: '12:00 – 19:00' },
   { dias: 'Martes a sábado', horas: '11:00 – 20:00' },

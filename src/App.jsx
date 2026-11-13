@@ -10,6 +10,7 @@ import Resenias from './components/Resenias'
 import ReservaModal from './components/ReservaModal'
 import CancelarModal from './components/CancelarModal'
 import MisTurnosModal from './components/MisTurnosModal'
+import MembresiaModal from './components/MembresiaModal'
 import CuentaModal from './components/CuentaModal'
 import { supabase } from './lib/supabase'
 import Ubicacion from './components/Ubicacion'
@@ -28,6 +29,7 @@ export default function App() {
   const [cancelarAbierto, setCancelarAbierto] = useState(false)
   const [cuentaAbierta, setCuentaAbierta] = useState(false)
   const [misTurnosAbierto, setMisTurnosAbierto] = useState(false)
+  const [membresiaAbierta, setMembresiaAbierta] = useState(false)
   const [misTurnos, setMisTurnos] = useState(null)
   const [usuario, setUsuario] = useState(null)
   const [ruta, setRuta] = useState(window.location.hash)
@@ -141,7 +143,11 @@ export default function App() {
         <Separador />
         <Ubicacion />
         <Separador />
-        <Contacto onReservar={abrirReserva} onCancelar={() => setCancelarAbierto(true)} />
+        <Contacto
+          onReservar={abrirReserva}
+          onCancelar={() => setCancelarAbierto(true)}
+          onMembresia={() => setMembresiaAbierta(true)}
+        />
       </main>
       <Footer onCancelar={() => setCancelarAbierto(true)} />
       {/* botón flotante de reserva, solo en celular */}
@@ -196,6 +202,11 @@ export default function App() {
         abierto={cuentaAbierta}
         usuario={usuario}
         onCerrar={() => setCuentaAbierta(false)}
+      />
+      <MembresiaModal
+        abierto={membresiaAbierta}
+        usuario={usuario}
+        onCerrar={() => setMembresiaAbierta(false)}
       />
     </>
   )

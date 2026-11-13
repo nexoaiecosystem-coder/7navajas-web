@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useCatalogo } from '../lib/catalogo'
-import { CICLO_FIDELIDAD } from '../data/negocio'
+import { CICLO_FIDELIDAD, NOMBRES_DIA } from '../data/negocio'
 
 // fecha local (no UTC, que cambia de día a las 21:00 de Uruguay)
 const hoy = () => {
@@ -34,6 +34,7 @@ export default function MisTurnosModal({ abierto, usuario, turnos, onReservar, o
     return b ? b.apodo || b.nombre : id
   }
   const [msg, setMsg] = useState(null)
+  const [membresias, setMembresias] = useState([])
 
   useEffect(() => {
     if (!abierto) return
@@ -49,9 +50,24 @@ export default function MisTurnosModal({ abierto, usuario, turnos, onReservar, o
     }
   }, [abierto, onCerrar])
 
-  if (!abierto) return null
-
   const telefono = usuario?.user_metadata?.telefono || ''
+
+  async function cargarMembresias() {
+    if (!supabase || !telefono) {
+      setMembresias([])
+      return
+    }
+    const { data } = await supabase.rpc('membresias_por_telefono', { p_telefono: telefono })
+    setMembresias(data || [])
+  }
+
+  useEffect(() => {
+    if (!abierto) return
+    cargarMembresias()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abierto, telefono])
+
+  if (!abierto) return null
 
   async function cancelar(t) {
     const seguro = window.confirm(
@@ -73,6 +89,24 @@ export default function MisTurnosModal({ abierto, usuario, turnos, onReservar, o
   function reservar() {
     onCerrar()
     onReservar?.()
+  }
+
+  async function cancelarMembresia(m) {
+    const seguro = window.confirm(
+      `¿Cancelar tu membresía de los ${NOMBRES_DIA[m.dia_semana]} a las ${m.hora.slice(0, 5)}? Se van a liberar los turnos ya reservados de las próximas semanas.`,
+    )
+    if (!seguro) return
+    const { data: cancelada, error } = await supabase.rpc('membresia_cancelar', {
+      p_id: m.id,
+      p_telefono: telefono,
+    })
+    if (error || !cancelada) {
+      setMsg({ tipo: 'error', texto: 'No se pudo cancelar la membresía. Probá de nuevo.' })
+      return
+    }
+    setMembresias((lista) => lista.filter((x) => x.id !== m.id))
+    setMsg({ tipo: 'ok', texto: 'Membresía cancelada. Los horarios quedaron libres.' })
+    onActualizar?.()
   }
 
   // sin cuenta (no debería pasar: el botón que abre esto solo aparece con
@@ -122,6 +156,25 @@ export default function MisTurnosModal({ abierto, usuario, turnos, onReservar, o
         <h2 className="section-title">Mis turnos</h2>
 
         {msg && <p className={`reserva-msg ${msg.tipo}`}>{msg.texto}</p>}
+
+        {membresias.length > 0 && (
+          <div className="membresias-lista">
+            <h3 className="editor-titulo">Tu membresía</h3>
+            {membresias.map((m) => (
+              <div className="turno membresia-fila" key={m.id}>
+                <div className="turno-datos">
+                  <strong>
+                    Todos los {NOMBRES_DIA[m.dia_semana]} a las {m.hora.slice(0, 5)}
+                  </strong>
+                  <span>{nombreServicio(m.servicio)} · con {nombreBarbero(m.barbero)}</span>
+                </div>
+                <button className="turno-cancelar" onClick={() => cancelarMembresia(m)}>
+                  Cancelar membresía
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {cargando ? (
           <p className="paso-nota">Buscando tus turnos…</p>
