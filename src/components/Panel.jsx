@@ -75,6 +75,44 @@ function fechaLinda(fechaStr) {
   })
 }
 
+// Las fotos que suben los barberos desde el celular suelen pesar varios MB
+// (a veces en PNG, que para fotos pesa mucho más que JPEG). Se comprimen acá
+// mismo, en el navegador, antes de subirlas: bajan de resolución y pasan a
+// JPEG, para no gastar de más la cuota de Supabase en cada visita a la web.
+function comprimirImagen(archivo, maxAncho = 1600, calidad = 0.82) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(archivo)
+    const img = new window.Image()
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const escala = Math.min(1, maxAncho / img.width)
+      const w = Math.round(img.width * escala)
+      const h = Math.round(img.height * escala)
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(archivo)
+            return
+          }
+          const nombre = archivo.name.replace(/\.\w+$/, '') + '.jpg'
+          resolve(new File([blob], nombre, { type: 'image/jpeg' }))
+        },
+        'image/jpeg',
+        calidad,
+      )
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      resolve(archivo)
+    }
+    img.src = url
+  })
+}
+
 // teléfonos guardados en formato local (ej. "099123456"): para WhatsApp hay
 // que sacar el 0 inicial y anteponer el código de país de Uruguay
 function whatsappUrl(telefono) {
@@ -686,6 +724,7 @@ export default function Panel({ usuario, onCuenta }) {
     setMsgContenido(null)
     setSubiendo(tabla + id)
     try {
+      archivo = await comprimirImagen(archivo)
       const ext = (archivo.name.split('.').pop() || 'jpg').toLowerCase()
       const ruta = `${tabla}/${id}-${Date.now()}.${ext}`
       const { error: eSubida } = await supabase.storage
@@ -713,6 +752,7 @@ export default function Panel({ usuario, onCuenta }) {
     setMsgContenido(null)
     setSubiendo('galeria-nueva')
     try {
+      archivo = await comprimirImagen(archivo)
       const ext = (archivo.name.split('.').pop() || 'jpg').toLowerCase()
       const ruta = `galeria/corte-${Date.now()}.${ext}`
       const { error: eSubida } = await supabase.storage
@@ -740,6 +780,7 @@ export default function Panel({ usuario, onCuenta }) {
     setMsgContenido(null)
     setSubiendo('galeria' + item.id)
     try {
+      archivo = await comprimirImagen(archivo)
       const ext = (archivo.name.split('.').pop() || 'jpg').toLowerCase()
       const ruta = `galeria/corte-${Date.now()}.${ext}`
       const { error: eSubida } = await supabase.storage
@@ -1926,6 +1967,11 @@ export default function Panel({ usuario, onCuenta }) {
                   </label>
                 </div>
 
+                <p className="editor-nota">
+                  Las fotos se comprimen solas al subirlas, así que no importa si el archivo
+                  original pesa mucho. Si alguna foto se subió hace tiempo y pesa varios MB,
+                  conviene volver a subirla (el mismo archivo sirve) para que quede liviana.
+                </p>
                 <p className="editor-nota">
                   Los cambios se ven al instante en la web. Las fotos ideales: cuadradas o
                   verticales, de menos de 2&nbsp;MB. Eliminar un servicio o barbero no borra los
