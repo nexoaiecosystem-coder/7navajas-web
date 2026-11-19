@@ -75,6 +75,19 @@ function fechaLinda(fechaStr) {
   })
 }
 
+// Cuándo se hizo la reserva (no el turno en sí): sirve para despejar dudas
+// si un cliente dice que reservó hace tal rato y el barbero no la ve
+function reservadoEl(iso) {
+  if (!iso) return null
+  const d = new Date(iso)
+  return d.toLocaleString('es-UY', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 // Las fotos que suben los barberos desde el celular suelen pesar varios MB
 // (a veces en PNG, que para fotos pesa mucho más que JPEG). Se comprimen acá
 // mismo, en el navegador, antes de subirlas: bajan de resolución y pasan a
@@ -1190,6 +1203,7 @@ export default function Panel({ usuario, onCuenta }) {
                       <span>
                         {nombreServicio(t.servicio)} · con {nombreBarbero(t.barbero)}
                       </span>
+                      <span className="turno-reservado">Reservó el {reservadoEl(t.created_at)}</span>
                       <TelefonoContacto telefono={t.cliente_telefono} />
                       {avisoNoAsistio && (
                         <span className="turno-alerta-aviso">
@@ -1239,6 +1253,7 @@ export default function Panel({ usuario, onCuenta }) {
                       {nombreServicio(t.servicio)} · {fechaLinda(t.fecha)}
                       {esAdmin ? ` · con ${nombreBarbero(t.barbero)}` : ''}
                     </span>
+                    <span className="turno-reservado">Reservó el {reservadoEl(t.created_at)}</span>
                     <TelefonoContacto telefono={t.cliente_telefono} />
                   </div>
                   <span className="turno-precio">{plata(t.precio)}</span>
@@ -1275,6 +1290,7 @@ export default function Panel({ usuario, onCuenta }) {
                       {nombreServicio(t.servicio)} · {fechaLinda(t.fecha)}
                       {esAdmin ? ` · con ${nombreBarbero(t.barbero)}` : ''}
                     </span>
+                    <span className="turno-reservado">Reservó el {reservadoEl(t.created_at)}</span>
                     <span
                       className={`turno-estado-badge ${
                         t.estado === 'confirmado'
@@ -1654,6 +1670,7 @@ export default function Panel({ usuario, onCuenta }) {
                               {nombreServicio(t.servicio)}
                               {esAdmin ? ` · ${nombreBarbero(t.barbero)}` : ''}
                             </span>
+                            <span className="turno-reservado">Reservó el {reservadoEl(t.created_at)}</span>
                             {t.no_asistio && <span className="turno-no-asistio-badge">No asistió</span>}
                           </div>
                           <span className="turno-precio">{plata(t.precio)}</span>

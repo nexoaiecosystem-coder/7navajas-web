@@ -3590,6 +3590,11 @@ section {
   font-size: 0.92rem;
 }
 
+.turno-reservado {
+  font-size: 0.8rem !important;
+  opacity: 0.75;
+}
+
 .turno-datos a {
   color: var(--bronce);
   text-decoration: none;
